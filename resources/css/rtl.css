@@ -1,0 +1,384 @@
+
+/* RTL Layout Styles */
+[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+}
+
+/* RTL Font Family */
+[dir="rtl"] body {
+    font-family: 'Segoe UI', 'Tahoma', 'Arial', 'Helvetica Neue', sans-serif;
+}
+
+/* Sidebar RTL */
+[dir="rtl"] .sidebar {
+    left: auto !important;
+    right: 0 !important;
+}
+
+[dir="rtl"] .sidebar.collapsed {
+    right: 0 !important;
+}
+
+/* Sidebar item indicator */
+[dir="rtl"] .sidebar-item::before {
+    left: auto !important;
+    right: 0 !important;
+}
+
+/* Tooltip positioning */
+[dir="rtl"] .sidebar-tooltip {
+    left: auto !important;
+    right: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0.5rem !important;
+}
+
+/* Submenu indentation */
+[dir="rtl"] .submenu-item {
+    padding-left: 0.75rem !important;
+    padding-right: 3rem !important;
+}
+
+[dir="rtl"] .sidebar.collapsed .submenu-item {
+    padding-right: 0.75rem !important;
+}
+
+/* Group divider */
+[dir="rtl"] .group-divider {
+    margin-left: 0 !important;
+    margin-right: 0.75rem !important;
+}
+
+/* Chevron icons */
+[dir="rtl"] .chevron-icon {
+    transform: rotate(180deg);
+}
+
+[dir="rtl"] .sidebar.collapsed .chevron-icon {
+    transform: rotate(0deg);
+}
+
+/* Dropdown arrows */
+[dir="rtl"] .dropdown-arrow,
+[dir="rtl"] [class*="chevron-right"] {
+    transform: rotate(180deg);
+}
+
+/* Mobile sidebar animation */
+@media (max-width: 768px) {
+    [dir="rtl"] .sidebar {
+        transform: translateX(100%);
+    }
+    
+    [dir="rtl"] .sidebar.active {
+        transform: translateX(0);
+    }
+}
+
+/* Main content area */
+[dir="rtl"] .main-wrapper {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Notification badges */
+[dir="rtl"] .notification-badge,
+[dir="rtl"] .badge-absolute {
+    left: 0 !important;
+    right: auto !important;
+}
+
+/* Text alignment utilities */
+[dir="rtl"] .text-left {
+    text-align: right !important;
+}
+
+[dir="rtl"] .text-right {
+    text-align: left !important;
+}
+
+/* Float utilities */
+[dir="rtl"] .float-left {
+    float: right !important;
+}
+
+[dir="rtl"] .float-right {
+    float: left !important;
+}
+
+/* Margin and Padding */
+[dir="rtl"] .ml-1 { margin-left: 0 !important; margin-right: 0.25rem !important; }
+[dir="rtl"] .ml-2 { margin-left: 0 !important; margin-right: 0.5rem !important; }
+[dir="rtl"] .ml-3 { margin-left: 0 !important; margin-right: 0.75rem !important; }
+[dir="rtl"] .ml-4 { margin-left: 0 !important; margin-right: 1rem !important; }
+[dir="rtl"] .ml-5 { margin-left: 0 !important; margin-right: 1.25rem !important; }
+[dir="rtl"] .ml-6 { margin-left: 0 !important; margin-right: 1.5rem !important; }
+[dir="rtl"] .ml-8 { margin-left: 0 !important; margin-right: 2rem !important; }
+
+[dir="rtl"] .mr-1 { margin-right: 0 !important; margin-left: 0.25rem !important; }
+[dir="rtl"] .mr-2 { margin-right: 0 !important; margin-left: 0.5rem !important; }
+[dir="rtl"] .mr-3 { margin-right: 0 !important; margin-left: 0.75rem !important; }
+[dir="rtl"] .mr-4 { margin-right: 0 !important; margin-left: 1rem !important; }
+[dir="rtl"] .mr-5 { margin-right: 0 !important; margin-left: 1.25rem !important; }
+[dir="rtl"] .mr-6 { margin-right: 0 !important; margin-left: 1.5rem !important; }
+[dir="rtl"] .mr-8 { margin-right: 0 !important; margin-left: 2rem !important; }
+
+[dir="rtl"] .pl-1 { padding-left: 0 !important; padding-right: 0.25rem !important; }
+[dir="rtl"] .pl-2 { padding-left: 0 !important; padding-right: 0.5rem !important; }
+[dir="rtl"] .pl-3 { padding-left: 0 !important; padding-right: 0.75rem !important; }
+[dir="rtl"] .pl-4 { padding-left: 0 !important; padding-right: 1rem !important; }
+[dir="rtl"] .pl-5 { padding-left: 0 !important; padding-right: 1.25rem !important; }
+[dir="rtl"] .pl-6 { padding-left: 0 !important; padding-right: 1.5rem !important; }
+[dir="rtl"] .pl-8 { padding-left: 0 !important; padding-right: 2rem !important; }
+
+[dir="rtl"] .pr-1 { padding-right: 0 !important; padding-left: 0.25rem !important; }
+[dir="rtl"] .pr-2 { padding-right: 0 !important; padding-left: 0.5rem !important; }
+[dir="rtl"] .pr-3 { padding-right: 0 !important; padding-left: 0.75rem !important; }
+[dir="rtl"] .pr-4 { padding-right: 0 !important; padding-left: 1rem !important; }
+[dir="rtl"] .pr-5 { padding-right: 0 !important; padding-left: 1.25rem !important; }
+[dir="rtl"] .pr-6 { padding-right: 0 !important; padding-left: 1.5rem !important; }
+[dir="rtl"] .pr-8 { padding-right: 0 !important; padding-left: 2rem !important; }
+
+/* Border radius */
+[dir="rtl"] .rounded-l {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-right-radius: 0.375rem !important;
+    border-bottom-right-radius: 0.375rem !important;
+}
+
+[dir="rtl"] .rounded-r {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-top-left-radius: 0.375rem !important;
+    border-bottom-left-radius: 0.375rem !important;
+}
+
+[dir="rtl"] .rounded-tl {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0.375rem !important;
+}
+
+[dir="rtl"] .rounded-tr {
+    border-top-right-radius: 0 !important;
+    border-top-left-radius: 0.375rem !important;
+}
+
+[dir="rtl"] .rounded-bl {
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0.375rem !important;
+}
+
+[dir="rtl"] .rounded-br {
+    border-bottom-right-radius: 0 !important;
+    border-bottom-left-radius: 0.375rem !important;
+}
+
+/* Border */
+[dir="rtl"] .border-l {
+    border-left: 0 !important;
+    border-right: 1px solid !important;
+}
+
+[dir="rtl"] .border-r {
+    border-right: 0 !important;
+    border-left: 1px solid !important;
+}
+
+/* Forms */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+    text-align: right;
+}
+
+[dir="rtl"] input[type="checkbox"],
+[dir="rtl"] input[type="radio"] {
+    margin-left: 0.5rem;
+    margin-right: 0;
+}
+
+[dir="rtl"] label {
+    text-align: right;
+}
+
+/* Icons in forms */
+[dir="rtl"] .input-icon-left {
+    left: auto !important;
+    right: 0.75rem !important;
+}
+
+[dir="rtl"] .input-icon-right {
+    right: auto !important;
+    left: 0.75rem !important;
+}
+
+/* Dropdown menus */
+[dir="rtl"] .dropdown-menu {
+    left: auto !important;
+    right: 0 !important;
+}
+
+/* Tooltips */
+[dir="rtl"] .tooltip {
+    text-align: right;
+}
+
+/* Modals */
+[dir="rtl"] .modal-header {
+    text-align: right;
+}
+
+[dir="rtl"] .modal-footer {
+    flex-direction: row-reverse;
+}
+
+/* Tables */
+[dir="rtl"] table {
+    text-align: right;
+}
+
+[dir="rtl"] th,
+[dir="rtl"] td {
+    text-align: right;
+}
+
+/* Lists */
+[dir="rtl"] ul,
+[dir="rtl"] ol {
+    padding-right: 1.5rem;
+    padding-left: 0;
+}
+
+[dir="rtl"] li {
+    text-align: right;
+}
+
+/* Breadcrumbs */
+[dir="rtl"] .breadcrumb-item + .breadcrumb-item::before {
+    float: right;
+    padding-right: 0.5rem;
+    padding-left: 0;
+    content: "/" !important;
+    transform: rotate(180deg);
+}
+
+/* Pagination */
+[dir="rtl"] .pagination {
+    flex-direction: row-reverse;
+}
+
+/* Cards */
+[dir="rtl"] .card-header {
+    text-align: right;
+}
+
+[dir="rtl"] .card-body {
+    text-align: right;
+}
+
+/* Alerts */
+[dir="rtl"] .alert {
+    text-align: right;
+}
+
+[dir="rtl"] .alert-dismissible .btn-close {
+    left: 0;
+    right: auto;
+}
+
+/* Progress bars */
+[dir="rtl"] .progress-bar {
+    right: 0;
+    left: auto;
+}
+
+/* Tabs */
+[dir="rtl"] .nav-tabs,
+[dir="rtl"] .nav-pills {
+    flex-direction: row-reverse;
+}
+
+/* Scrollbar */
+[dir="rtl"] ::-webkit-scrollbar {
+    left: 0;
+    right: auto;
+}
+
+/* Custom spacing classes for RTL */
+[dir="rtl"] .space-x-1 > * + * { margin-left: 0 !important; margin-right: 0.25rem !important; }
+[dir="rtl"] .space-x-2 > * + * { margin-left: 0 !important; margin-right: 0.5rem !important; }
+[dir="rtl"] .space-x-3 > * + * { margin-left: 0 !important; margin-right: 0.75rem !important; }
+[dir="rtl"] .space-x-4 > * + * { margin-left: 0 !important; margin-right: 1rem !important; }
+[dir="rtl"] .space-x-5 > * + * { margin-left: 0 !important; margin-right: 1.25rem !important; }
+[dir="rtl"] .space-x-6 > * + * { margin-left: 0 !important; margin-right: 1.5rem !important; }
+
+/* Reverse space-x (for elements using space-x-reverse) */
+[dir="rtl"] .space-x-reverse > * + * {
+    margin-right: 0 !important;
+    margin-left: 0.5rem !important;
+}
+
+/* Flexbox direction */
+[dir="rtl"] .flex-row {
+    flex-direction: row-reverse;
+}
+
+/* Grid gaps - handled automatically but can be overridden if needed */
+
+/* Animations */
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+[dir="rtl"] .animate-slide-in-left {
+    animation: slideInRight 0.3s ease-out;
+}
+
+[dir="rtl"] .animate-slide-in-right {
+    animation: slideInLeft 0.3s ease-out;
+}
+
+/* Specific component adjustments */
+[dir="rtl"] .lang-switcher {
+    flex-direction: row-reverse;
+}
+
+/* Editor and rich text */
+[dir="rtl"] .editor-content,
+[dir="rtl"] .rich-text {
+    text-align: right;
+    direction: rtl;
+}
+
+/* Data tables */
+[dir="rtl"] .datatable th:first-child,
+[dir="rtl"] .datatable td:first-child {
+    text-align: right;
+}
+
+/* Search inputs */
+[dir="rtl"] .search-input {
+    padding-left: 2.5rem;
+    padding-right: 1rem;
+}
+
+[dir="rtl"] .search-icon {
+    left: auto;
+    right: 0.75rem;
+}
