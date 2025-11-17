@@ -530,6 +530,7 @@ class AdvanceController extends Controller
 
     public function storeSettlement(StoreSettlementRequest $request)
     {
+        
         $validated = $request->validated();
 
         // Handle file upload

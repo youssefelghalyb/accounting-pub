@@ -57,5 +57,6 @@
         :formConfig="$formConfig" 
         :action="route('hr.advances.settlements.store')" 
         method="POST"
+
     />
 </x-dashboard>

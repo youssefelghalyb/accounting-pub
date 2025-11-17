@@ -2,34 +2,36 @@
 
 <!-- Main Container -->
 <div class="max-w-7xl mx-auto px-6 py-8">
-    @if(session('success'))
-    <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-        <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <p class="text-green-800 font-medium">{{ session('success') }}</p>
-        </div>
-    </div>
-@endif
-
-@if($errors->any())
-    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-        <div class="flex items-start gap-2">
-            <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <div class="flex-1">
-                <p class="text-red-800 font-medium mb-2">Please fix the following errors:</p>
-                <ul class="list-disc list-inside text-red-700 text-sm space-y-1">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+    @if (session('success'))
+        <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <p class="text-green-800 font-medium">{{ session('success') }}</p>
             </div>
         </div>
-    </div>
-@endif
+    @endif
+
+    @if (session()->has('errors') && session('errors')->any())
+        @dd(session('errors')->all())
+        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex items-start gap-2">
+                <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div class="flex-1">
+                    <p class="text-red-800 font-medium mb-2">Please fix the following errors:</p>
+                    <ul class="list-disc list-inside text-red-700 text-sm space-y-1">
+                        @foreach (session('errors')->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    @endif
     <div class="glass-effect rounded-2xl shadow-xl p-6 lg:p-8">
         <form id="dynamicForm" action="{{ $action }}" method="{{ $method }}" enctype="multipart/form-data"
             class="space-y-6">
@@ -299,7 +301,8 @@
                 this.form = formElement;
                 this.fields = [];
                 this.groups = [];
-                this.errors = @json($errors->toArray());
+                this.errors = @json(session()->has('errors') ? session('errors')->getBag('default')->toArray() : []);
+
             }
 
             // Define form fields (can be flat array or grouped)
@@ -350,7 +353,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
-            {{__('common.save')}}
+            {{ __('common.save') }}
         </span>
     `;
 
@@ -366,7 +369,7 @@
                 resetBtn.type = 'button';
                 resetBtn.className =
                     'px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2';
-                resetBtn.textContent = '{{__('common.cancel')}}';
+                resetBtn.textContent = '{{ __('common.cancel') }}';
                 resetBtn.addEventListener('click', () => this.form.reset());
                 buttonContainer.appendChild(resetBtn);
 
