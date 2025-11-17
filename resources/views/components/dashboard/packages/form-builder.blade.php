@@ -14,7 +14,6 @@
     @endif
 
     @if (session()->has('errors') && session('errors')->any())
-        @dd(session('errors')->all())
         <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <div class="flex items-start gap-2">
                 <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -302,7 +301,7 @@
                 this.fields = [];
                 this.groups = [];
                 this.errors = @json(session()->has('errors') ? session('errors')->getBag('default')->toArray() : []);
-
+                this.oldInput = @json(old());
             }
 
             // Define form fields (can be flat array or grouped)
@@ -548,8 +547,18 @@
                             input.required = true;
                         }
 
-                        if (field.value) {
-                            input.value = field.value;
+                        // Use old input if available, otherwise use field value
+                        const fieldValue = this.oldInput && this.oldInput[field.name] !== undefined
+                            ? this.oldInput[field.name]
+                            : field.value;
+
+                        if (fieldValue) {
+                            input.value = fieldValue;
+                            // Update character counter if present
+                            if (field.maxLength) {
+                                const event = new Event('input');
+                                input.dispatchEvent(event);
+                            }
                         }
 
                         formGroup.appendChild(textareaWrapper);
@@ -713,11 +722,23 @@
                 } else if (field.type === 'select') {
                     input = document.createElement('select');
                     input.className = `${baseClasses} cursor-pointer bg-white`;
+
+                    // Get the value to use (old input or field value)
+                    const selectedValue = this.oldInput && this.oldInput[field.name] !== undefined
+                        ? this.oldInput[field.name]
+                        : field.value;
+
                     if (field.options) {
                         field.options.forEach(option => {
                             const opt = document.createElement('option');
                             opt.value = option.value || option;
                             opt.textContent = option.label || option;
+
+                            // Set selected if this matches the current value
+                            if (selectedValue && opt.value == selectedValue) {
+                                opt.selected = true;
+                            }
+
                             input.appendChild(opt);
                         });
                     }
@@ -729,6 +750,15 @@
                     input = document.createElement('input');
                     input.type = 'checkbox';
                     input.className = 'custom-checkbox mt-0.5';
+
+                    // Check if old input exists and set checked state
+                    const oldValue = this.oldInput && this.oldInput[field.name] !== undefined
+                        ? this.oldInput[field.name]
+                        : field.value;
+
+                    if (oldValue) {
+                        input.checked = true;
+                    }
 
                     if (field.borderColor) {
                         input.style.setProperty('--custom-color', field.borderColor);
@@ -810,6 +840,15 @@
                             radio.className = 'custom-radio';
                             radio.required = field.required;
 
+                            // Check if this radio should be selected based on old input or field value
+                            const selectedValue = this.oldInput && this.oldInput[field.name] !== undefined
+                                ? this.oldInput[field.name]
+                                : field.value;
+
+                            if (selectedValue && radio.value == selectedValue) {
+                                radio.checked = true;
+                            }
+
                             radioInputs.push(radio);
 
                             if (field.borderColor) {
@@ -887,8 +926,13 @@
                         input.required = true;
                     }
 
-                    if (field.value) {
-                        input.value = field.value;
+                    // Use old input if available, otherwise use field value
+                    const fieldValue = this.oldInput && this.oldInput[field.name] !== undefined
+                        ? this.oldInput[field.name]
+                        : field.value;
+
+                    if (fieldValue) {
+                        input.value = fieldValue;
                     }
 
                     formGroup.appendChild(input);
