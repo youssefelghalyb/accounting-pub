@@ -68,6 +68,8 @@ return [
     'gross_salary' => 'Gross Salary',
     'net_salary' => 'Net Salary',
     'total_deductions' => 'Total Deductions',
+    'bonuses' => 'Bonuses',
+    'bonuses_this_month' => 'Bonuses This Month',
     'calculate_salary' => 'Calculate Salary',
     'monthly_breakdown' => 'Monthly Breakdown',
     'average_salary' => 'Average Salary',

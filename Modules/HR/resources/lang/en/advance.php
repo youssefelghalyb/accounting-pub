@@ -72,6 +72,9 @@ return [
     'settlement_updated_successfully' => 'Settlement updated successfully',
     'settlement_deleted_successfully' => 'Settlement deleted successfully',
     'at_least_one_amount' => 'At least one amount (cash returned or amount spent) must be greater than 0',
+    'cash_returned_exceeds_advance' => 'Cash returned cannot exceed the advance amount',
+    'amount_spent_exceeds_advance' => 'Amount spent cannot exceed the advance amount',
+    'total_exceeds_advance' => 'Total settlement amount (cash returned + amount spent) cannot exceed the advance amount of :amount',
 
     // Empty states
     'no_advances' => 'No Advances Found',
@@ -104,6 +107,7 @@ return [
     'no_outstanding_balance' => 'No outstanding balance to convert',
     'already_converted_to_deduction' => 'This advance has already been converted to a deduction',
     'no_overpayment' => 'No overpayment exists for this advance',
+    'overpayment_already_added_to_salary' => 'This overpayment has already been added to salary',
     'deduction_from_advance' => 'Advance recovery from :code',
     'bonus_from_overpayment' => 'Overpayment bonus from :code',
     'converted_to_deduction' => 'Converted to salary deduction',

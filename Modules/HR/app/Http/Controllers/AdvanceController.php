@@ -552,10 +552,34 @@ class AdvanceController extends Controller
             'receipt_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
-        
+
         // Validate that at least one amount is > 0
         if ($validated['cash_returned'] == 0 && $validated['amount_spent'] == 0) {
             return back()->withErrors(['cash_returned' => __('hr::advance.at_least_one_amount')])->withInput();
+        }
+
+        // Validate against advance amount if linked to an advance
+        if ($validated['advance_id']) {
+            $advance = Advance::findOrFail($validated['advance_id']);
+            $outstandingBalance = $advance->outstanding_balance;
+
+            // Check if cash_returned exceeds the advance amount
+            if ($validated['cash_returned'] > $advance->amount) {
+                return back()->withErrors(['cash_returned' => __('hr::advance.cash_returned_exceeds_advance')])->withInput();
+            }
+
+            // Check if amount_spent exceeds the advance amount
+            if ($validated['amount_spent'] > $advance->amount) {
+                return back()->withErrors(['amount_spent' => __('hr::advance.amount_spent_exceeds_advance')])->withInput();
+            }
+
+            // Check if total accounted exceeds the outstanding balance
+            $totalAccounted = $validated['cash_returned'] + $validated['amount_spent'];
+            if ($totalAccounted > $advance->amount) {
+                return back()->withErrors([
+                    'cash_returned' => __('hr::advance.total_exceeds_advance', ['amount' => number_format($advance->amount, 2)])
+                ])->withInput();
+            }
         }
 
         // Handle file upload
@@ -682,6 +706,38 @@ class AdvanceController extends Controller
         // Validate that at least one amount is > 0
         if ($validated['cash_returned'] == 0 && $validated['amount_spent'] == 0) {
             return back()->withErrors(['cash_returned' => __('hr::advance.at_least_one_amount')])->withInput();
+        }
+
+        // Validate against advance amount if linked to an advance
+        if ($validated['advance_id']) {
+            $advance = Advance::findOrFail($validated['advance_id']);
+
+            // Calculate what was previously accounted (excluding current settlement being updated)
+            $previouslyAccounted = $advance->settlements()
+                ->where('id', '!=', $settlement->id)
+                ->get()
+                ->sum(function($s) {
+                    return $s->cash_returned + $s->amount_spent;
+                });
+
+            // Check if cash_returned exceeds the advance amount
+            if ($validated['cash_returned'] > $advance->amount) {
+                return back()->withErrors(['cash_returned' => __('hr::advance.cash_returned_exceeds_advance')])->withInput();
+            }
+
+            // Check if amount_spent exceeds the advance amount
+            if ($validated['amount_spent'] > $advance->amount) {
+                return back()->withErrors(['amount_spent' => __('hr::advance.amount_spent_exceeds_advance')])->withInput();
+            }
+
+            // Check if total accounted (including this settlement) exceeds the advance amount
+            $totalAccounted = $previouslyAccounted + $validated['cash_returned'] + $validated['amount_spent'];
+            if ($totalAccounted > $advance->amount) {
+                $availableAmount = $advance->amount - $previouslyAccounted;
+                return back()->withErrors([
+                    'cash_returned' => __('hr::advance.total_exceeds_advance', ['amount' => number_format($advance->amount, 2)])
+                ])->withInput();
+            }
         }
 
         // Handle file upload

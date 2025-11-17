@@ -68,6 +68,8 @@ return [
     'gross_salary' => 'إجمالي الراتب',
     'net_salary' => 'صافي الراتب',
     'total_deductions' => 'إجمالي الخصومات',
+    'bonuses' => 'المكافآت',
+    'bonuses_this_month' => 'المكافآت هذا الشهر',
     'calculate_salary' => 'احسب الراتب',
     'monthly_breakdown' => 'التفصيل الشهري',
     'average_salary' => 'متوسط الراتب',
