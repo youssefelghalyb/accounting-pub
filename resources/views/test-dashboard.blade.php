@@ -259,20 +259,56 @@ $formConfig = [
             ]
         ],
         [
+            'title' => 'Customization & Settings',
+            'fields' => [
+                [
+                    'type' => 'color',
+                    'name' => 'theme_color',
+                    'label' => 'Primary Theme Color',
+                    'value' => '#6366f1',
+                    'grid' => 6,
+                    'required' => false
+                ],
+                [
+                    'type' => 'color',
+                    'name' => 'accent_color',
+                    'label' => 'Accent Color',
+                    'value' => '#ec4899',
+                    'grid' => 6,
+                    'required' => false
+                ],
+                [
+                    'type' => 'radio',
+                    'name' => 'email_notifications',
+                    'label' => 'Email Notifications',
+                    'layout' => 'row',
+                    'grid' => 12,
+                    'options' => [
+                        ['value' => '1', 'label' => 'Enabled'],
+                        ['value' => '0', 'label' => 'Disabled']
+                    ],
+                    'value' => '1'
+                ]
+            ]
+        ],
+        [
+            'title' => 'Agreements & Consent',
             'fields' => [
                 [
                     'type' => 'checkbox',
                     'name' => 'newsletter',
                     'label' => 'Subscribe to our newsletter for updates and exclusive offers',
                     'borderColor' => '#10b981',
-                    'grid' => 6
+                    'grid' => 6,
+                    'value' => true
                 ],
                 [
                     'type' => 'checkbox',
                     'name' => 'marketing',
                     'label' => 'I agree to receive marketing communications',
                     'borderColor' => '#06b6d4',
-                    'grid' => 6
+                    'grid' => 6,
+                    'value' => false
                 ],
                 [
                     'type' => 'checkbox',

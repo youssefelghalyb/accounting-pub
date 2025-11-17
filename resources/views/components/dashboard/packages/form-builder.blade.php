@@ -716,6 +716,48 @@
                     fileWrapper.appendChild(input);
                     fileWrapper.appendChild(uploadLabel);
                     formGroup.appendChild(fileWrapper);
+
+                    // Show existing file/image preview if value exists (edit mode)
+                    if (field.value) {
+                        const existingPreviewContainer = document.createElement('div');
+                        existingPreviewContainer.className = 'mt-3';
+
+                        const existingLabel = document.createElement('div');
+                        existingLabel.className = 'text-xs font-semibold text-gray-600 mb-2';
+                        existingLabel.textContent = 'Current File:';
+                        existingPreviewContainer.appendChild(existingLabel);
+
+                        if (field.type === 'image') {
+                            // Display existing image preview
+                            const existingImageWrapper = document.createElement('div');
+                            existingImageWrapper.className = 'relative inline-block';
+
+                            const existingImage = document.createElement('img');
+                            existingImage.src = field.value;
+                            existingImage.className = 'max-w-xs max-h-48 rounded-lg border-2 border-gray-200 shadow-sm';
+                            existingImage.alt = 'Current image';
+
+                            existingImageWrapper.appendChild(existingImage);
+                            existingPreviewContainer.appendChild(existingImageWrapper);
+                        } else {
+                            // Display existing file link
+                            const existingFileLink = document.createElement('a');
+                            existingFileLink.href = field.value;
+                            existingFileLink.target = '_blank';
+                            existingFileLink.className =
+                                'inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors';
+                            existingFileLink.innerHTML = `
+                                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span class="text-sm font-medium text-indigo-700">View Current File</span>
+                            `;
+                            existingPreviewContainer.appendChild(existingFileLink);
+                        }
+
+                        formGroup.appendChild(existingPreviewContainer);
+                    }
+
                     formGroup.appendChild(previewContainer);
 
                     return formGroup;
@@ -747,16 +789,25 @@
                     wrapper.className =
                         'flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150';
 
+                    // Add hidden input with value "false" to ensure unchecked checkboxes submit as false
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = field.name;
+                    hiddenInput.value = 'false';
+                    wrapper.appendChild(hiddenInput);
+
                     input = document.createElement('input');
                     input.type = 'checkbox';
                     input.className = 'custom-checkbox mt-0.5';
+                    input.value = 'true'; // Set value to "true" for checked state
 
                     // Check if old input exists and set checked state
                     const oldValue = this.oldInput && this.oldInput[field.name] !== undefined
                         ? this.oldInput[field.name]
                         : field.value;
 
-                    if (oldValue) {
+                    // Handle both boolean and string values
+                    if (oldValue === true || oldValue === 'true' || oldValue === '1' || oldValue === 1) {
                         input.checked = true;
                     }
 
@@ -836,14 +887,30 @@
                             radio.type = 'radio';
                             radio.name = field.name;
                             radio.id = `${field.name}_${idx}`;
-                            radio.value = option.value || option;
+
+                            // Handle boolean conversion: convert "1"/"0" to "true"/"false"
+                            let radioValue = option.value || option;
+                            if (radioValue === '1' || radioValue === 1) {
+                                radioValue = 'true';
+                            } else if (radioValue === '0' || radioValue === 0) {
+                                radioValue = 'false';
+                            }
+                            radio.value = radioValue;
+
                             radio.className = 'custom-radio';
                             radio.required = field.required;
 
                             // Check if this radio should be selected based on old input or field value
-                            const selectedValue = this.oldInput && this.oldInput[field.name] !== undefined
+                            let selectedValue = this.oldInput && this.oldInput[field.name] !== undefined
                                 ? this.oldInput[field.name]
                                 : field.value;
+
+                            // Normalize selected value for comparison
+                            if (selectedValue === '1' || selectedValue === 1 || selectedValue === true) {
+                                selectedValue = 'true';
+                            } else if (selectedValue === '0' || selectedValue === 0 || selectedValue === false) {
+                                selectedValue = 'false';
+                            }
 
                             if (selectedValue && radio.value == selectedValue) {
                                 radio.checked = true;
@@ -891,15 +958,111 @@
                     formGroup.innerHTML = '';
                     formGroup.appendChild(wrapper);
                     return formGroup;
+                } else if (field.type === 'color') {
+                    // Modern color picker
+                    const colorPickerWrapper = document.createElement('div');
+                    colorPickerWrapper.className = 'flex items-center gap-3';
+
+                    // Hidden color input (browser default)
+                    const colorInput = document.createElement('input');
+                    colorInput.type = 'color';
+                    colorInput.id = `${field.name}_picker`;
+                    colorInput.className = 'sr-only';
+
+                    // Get the value to use (old input or field value)
+                    const colorValue = this.oldInput && this.oldInput[field.name] !== undefined
+                        ? this.oldInput[field.name]
+                        : (field.value || '#6366f1');
+
+                    colorInput.value = colorValue;
+
+                    // Visual color display button
+                    const colorDisplay = document.createElement('button');
+                    colorDisplay.type = 'button';
+                    colorDisplay.className =
+                        'w-16 h-16 rounded-xl border-4 border-gray-200 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer relative overflow-hidden';
+                    colorDisplay.style.backgroundColor = colorValue;
+
+                    // Ripple effect on click
+                    colorDisplay.addEventListener('click', () => {
+                        colorInput.click();
+                    });
+
+                    // Text input to show/edit hex value
+                    input = document.createElement('input');
+                    input.type = 'text';
+                    input.className =
+                        'flex-1 px-4 py-2.5 rounded-lg border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm';
+                    input.name = field.name;
+                    input.id = field.name;
+                    input.value = colorValue;
+                    input.placeholder = '#000000';
+                    input.pattern = '^#[0-9A-Fa-f]{6}$';
+
+                    if (field.required) {
+                        input.required = true;
+                    }
+
+                    // Sync color picker with text input
+                    colorInput.addEventListener('input', (e) => {
+                        const newColor = e.target.value;
+                        colorDisplay.style.backgroundColor = newColor;
+                        input.value = newColor;
+                    });
+
+                    // Sync text input with color picker
+                    input.addEventListener('input', (e) => {
+                        const newColor = e.target.value;
+                        if (/^#[0-9A-Fa-f]{6}$/.test(newColor)) {
+                            colorDisplay.style.backgroundColor = newColor;
+                            colorInput.value = newColor;
+                        }
+                    });
+
+                    colorPickerWrapper.appendChild(colorInput);
+                    colorPickerWrapper.appendChild(colorDisplay);
+                    colorPickerWrapper.appendChild(input);
+
+                    formGroup.appendChild(colorPickerWrapper);
+
+                    // Add color preview swatches
+                    const swatchesContainer = document.createElement('div');
+                    swatchesContainer.className = 'mt-3 flex items-center gap-2';
+
+                    const swatchesLabel = document.createElement('span');
+                    swatchesLabel.className = 'text-xs font-medium text-gray-600';
+                    swatchesLabel.textContent = 'Quick colors:';
+                    swatchesContainer.appendChild(swatchesLabel);
+
+                    const defaultColors = ['#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f59e0b', '#10b981',
+                        '#06b6d4', '#3b82f6'
+                    ];
+                    defaultColors.forEach(color => {
+                        const swatch = document.createElement('button');
+                        swatch.type = 'button';
+                        swatch.className =
+                            'w-8 h-8 rounded-lg border-2 border-gray-200 hover:border-gray-400 hover:scale-110 transition-all duration-150 cursor-pointer';
+                        swatch.style.backgroundColor = color;
+                        swatch.addEventListener('click', () => {
+                            colorDisplay.style.backgroundColor = color;
+                            input.value = color;
+                            colorInput.value = color;
+                        });
+                        swatchesContainer.appendChild(swatch);
+                    });
+
+                    formGroup.appendChild(swatchesContainer);
+
+                    return formGroup;
                 } else {
                     input = document.createElement('input');
                     input.type = field.type || 'text';
                     input.className = baseClasses;
                 }
 
-                // Set common attributes (for non-checkbox/radio/file/image fields)
+                // Set common attributes (for non-checkbox/radio/file/image/color fields)
                 if (field.type !== 'checkbox' && field.type !== 'radio' && field.type !== 'file' && field.type !==
-                    'image') {
+                    'image' && field.type !== 'color') {
                     input.name = field.name;
                     input.id = field.name;
 
