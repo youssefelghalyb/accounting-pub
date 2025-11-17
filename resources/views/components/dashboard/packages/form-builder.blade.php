@@ -888,14 +888,8 @@
                             radio.name = field.name;
                             radio.id = `${field.name}_${idx}`;
 
-                            // Handle boolean conversion: convert "1"/"0" to "true"/"false"
-                            let radioValue = option.value || option;
-                            if (radioValue === '1' || radioValue === 1) {
-                                radioValue = 'true';
-                            } else if (radioValue === '0' || radioValue === 0) {
-                                radioValue = 'false';
-                            }
-                            radio.value = radioValue;
+                            // Keep values as-is for proper boolean validation
+                            radio.value = option.value || option;
 
                             radio.className = 'custom-radio';
                             radio.required = field.required;
@@ -905,14 +899,11 @@
                                 ? this.oldInput[field.name]
                                 : field.value;
 
-                            // Normalize selected value for comparison
-                            if (selectedValue === '1' || selectedValue === 1 || selectedValue === true) {
-                                selectedValue = 'true';
-                            } else if (selectedValue === '0' || selectedValue === 0 || selectedValue === false) {
-                                selectedValue = 'false';
-                            }
+                            // Normalize selected value for comparison (handle different formats)
+                            const normalizedRadioValue = String(radio.value);
+                            const normalizedSelectedValue = String(selectedValue);
 
-                            if (selectedValue && radio.value == selectedValue) {
+                            if (normalizedRadioValue === normalizedSelectedValue) {
                                 radio.checked = true;
                             }
 
