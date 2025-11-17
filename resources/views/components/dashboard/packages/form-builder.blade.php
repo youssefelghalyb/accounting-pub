@@ -14,7 +14,6 @@
     @endif
 
     @if (session()->has('errors') && session('errors')->any())
-        @dd(session('errors')->all())
         <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <div class="flex items-start gap-2">
                 <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
