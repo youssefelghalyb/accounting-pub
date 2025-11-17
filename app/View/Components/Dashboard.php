@@ -18,7 +18,7 @@ class Dashboard extends Component
     {
         $this->orgSettings = OrganizationSetting::first() ?? $this->getDefaultSettings();
         $this->pageTitle = $pageTitle;
-        
+
         // Set locale based on organization settings if not already set
         if (!session()->has('locale') && $this->orgSettings->default_language) {
             App::setLocale($this->orgSettings->default_language);
@@ -47,6 +47,8 @@ class Dashboard extends Component
      */
     public function render()
     {
-        return view('layouts.dashboard');
+        return view('layouts.dashboard', [
+            'orgSettings' => $this->orgSettings
+        ]);
     }
 }

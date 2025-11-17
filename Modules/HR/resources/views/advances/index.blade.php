@@ -1,0 +1,19 @@
+<x-dashboard :pageTitle="__('hr::advance.employee_advances')">
+    <x-dashboard.packages.data-table
+        :title="__('hr::advance.employee_advances')"
+        :description="__('hr::advance.manage_advances')"
+        :data="$tableData"
+        :columns="$tableColumns"
+        :actions="$tableActions"
+        :filters="$filters"
+        searchable
+        :searchRoute="route('hr.advances.index')"
+        :searchPlaceholder="__('hr::advance.search_placeholder')"
+        :createRoute="route('hr.advances.create')"
+        :createLabel="__('hr::advance.add_advance')"
+        :emptyStateTitle="__('hr::advance.no_advances')"
+        :emptyStateDescription="__('hr::advance.no_advances_description')"
+        emptyStateIcon="document"
+        :pagination="$advances"
+    />
+</x-dashboard>

@@ -134,4 +134,14 @@ class Employee extends Model
     {
         return $this->hire_date ? now()->diffInYears($this->hire_date) : 0;
     }
+
+    public function advances(): HasMany
+{
+    return $this->hasMany(Advance::class);
+}
+
+public function advanceSettlements(): HasMany
+{
+    return $this->hasMany(AdvanceSettlement::class);
+}
 }

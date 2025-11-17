@@ -61,8 +61,9 @@ class DepartmentController extends Controller
     /**
      * Display the specified department.
      */
-    public function show(Department $department)
+    public function show($id)
     {
+        $department = Department::findOrFail($id);
         $department->load('employees');
         
         $stats = [
@@ -77,17 +78,18 @@ class DepartmentController extends Controller
     /**
      * Show the form for editing the specified department.
      */
-    public function edit(Department $department)
+    public function edit($id)
     {
-        dd($department);
+        $department = Department::findOrFail($id);
         return view('hr::departments.edit', compact('department'));
     }
 
     /**
      * Update the specified department.
      */
-    public function update(Request $request, Department $department)
+    public function update(Request $request, $id)
     {
+        $department = Department::findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:departments,name,' . $department->id,
             'description' => 'nullable|string',

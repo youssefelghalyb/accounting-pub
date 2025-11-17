@@ -14,6 +14,7 @@ class Deduction extends Model
         'amount',
         'deduction_date',
         'leave_id',
+        'advance_id',
         'reason',
         'notes',
     ];
@@ -33,6 +34,11 @@ class Deduction extends Model
     public function leave(): BelongsTo
     {
         return $this->belongsTo(Leave::class);
+    }
+
+    public function advance(): BelongsTo
+    {
+        return $this->belongsTo(Advance::class);
     }
 
     // Auto-calculate amount if deducting by days
@@ -87,10 +93,11 @@ class Deduction extends Model
     public function getTypeNameAttribute(): string
     {
         return match($this->type) {
-            'days' => 'Days Deduction',
-            'amount' => 'Fixed Amount',
-            'unpaid_leave' => 'Unpaid Leave',
-            default => 'Unknown',
+            'days' => __('hr::deduction.types.days'),
+            'amount' => __('hr::deduction.types.amount'),
+            'unpaid_leave' => __('hr::deduction.types.unpaid_leave'),
+            'advance_recovery' => __('hr::deduction.types.advance_recovery'),
+            default => __('hr::deduction.types.unknown'),
         };
     }
 
@@ -98,10 +105,11 @@ class Deduction extends Model
     public function getTypeColorAttribute(): string
     {
         return match($this->type) {
-            'days' => 'warning',
-            'amount' => 'info',
-            'unpaid_leave' => 'danger',
-            default => 'secondary',
+            'days' => 'yellow',
+            'amount' => 'blue',
+            'unpaid_leave' => 'red',
+            'advance_recovery' => 'purple',
+            default => 'gray',
         };
     }
 
@@ -109,5 +117,11 @@ class Deduction extends Model
     public function isFromLeave(): bool
     {
         return !is_null($this->leave_id);
+    }
+
+    // Check if deduction is from advance recovery
+    public function isFromAdvance(): bool
+    {
+        return !is_null($this->advance_id);
     }
 }

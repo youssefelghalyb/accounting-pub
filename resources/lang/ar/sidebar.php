@@ -15,6 +15,13 @@ return [
     'roles' => 'الأدوار',
     'projects' => 'المشاريع',
     
+    // HR Group
+    'departments' => 'الإدارات',
+    'hr' => 'الموارد البشرية',
+    'employees' => 'الموظفون',
+    'leave_types' => 'أنواع الإجازات',
+    'leaves' => 'الإجازات',
+    'deductions' => 'الخصومات',
     // Management Group
     'management' => 'الإدارة',
     'finance' => 'المالية',

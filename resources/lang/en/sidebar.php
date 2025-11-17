@@ -15,6 +15,14 @@ return [
     'roles' => 'Roles',
     'projects' => 'Projects',
     
+    // HR Group
+    'hr' => 'HR',
+    'departments' => 'Departments',
+    'employees' => 'Employees',
+    'leave_types' => 'Leave Types',
+    'leaves' => 'Leaves',
+    'deductions' => 'Deductions',
+    
     // Management Group
     'management' => 'Management',
     'finance' => 'Finance',

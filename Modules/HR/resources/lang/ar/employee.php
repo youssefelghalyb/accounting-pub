@@ -70,6 +70,8 @@ return [
     'total_deductions' => 'إجمالي الخصومات',
     'calculate_salary' => 'احسب الراتب',
     'monthly_breakdown' => 'التفصيل الشهري',
+    'average_salary' => 'متوسط الراتب',
+    'auto_calculated_daily_rate' => 'اتركه فارغاً للحساب التلقائي من الراتب الشهري (الراتب ÷ 30)',
     
     // Status
     'status' => 'الحالة',

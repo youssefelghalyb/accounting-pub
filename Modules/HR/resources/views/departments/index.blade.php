@@ -1,4 +1,87 @@
 <x-dashboard :pageTitle="__('hr::department.department_management')">
+    @php
+        // Prepare data array
+        $tableData = $departments->map(function($dept) {
+            return [
+                'id' => $dept->id,
+                'name' => $dept->name,
+                'description' => $dept->description,
+                'color' => $dept->color,
+                'employees_count' => $dept->employees_count,
+                'model' => $dept
+            ];
+        })->toArray();
+        
+        // Prepare columns array
+        $tableColumns = [
+            [
+                'label' => __('hr::department.name'),
+                'field' => 'name',
+                'render' => function($row) {
+                    $html = '<div class="flex items-center gap-3">';
+                    $html .= '<div class="w-3 h-3 rounded-full" style="background-color: ' . $row['color'] . '"></div>';
+                    $html .= '<span class="font-medium text-gray-900">' . e($row['name']) . '</span>';
+                    $html .= '</div>';
+                    return $html;
+                }
+            ],
+            [
+                'label' => __('hr::department.description'),
+                'field' => 'description',
+                'format' => function($value) {
+                    return '<span class="text-sm text-gray-600">' . (Str::limit($value, 50) ?? '-') . '</span>';
+                }
+            ],
+            [
+                'label' => __('hr::department.employees_count'),
+                'field' => 'employees_count',
+                'align' => 'center',
+                'render' => function($row) {
+                    return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">' . $row['employees_count'] . '</span>';
+                }
+            ],
+            [
+                'label' => __('common.color'),
+                'field' => 'color',
+                'align' => 'center',
+                'render' => function($row) {
+                    $html = '<div class="flex items-center justify-center gap-2">';
+                    $html .= '<div class="w-6 h-6 rounded border border-gray-300" style="background-color: ' . $row['color'] . '"></div>';
+                    $html .= '<span class="text-xs text-gray-600">' . $row['color'] . '</span>';
+                    $html .= '</div>';
+                    return $html;
+                }
+            ]
+        ];
+        
+        // Prepare actions array
+        $tableActions = [
+            [
+                'type' => 'link',
+                'label' => __('common.view'),
+                'route' => fn($row) => route('hr.departments.show', $row['model']),
+                'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>',
+                'color' => 'text-green-600'
+            ],
+            [
+                'type' => 'link',
+                'label' => __('common.edit'),
+                'route' => fn($row) => route('hr.departments.edit', $row['model']),
+                'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>',
+                'color' => 'text-blue-600'
+            ],
+            [
+                'type' => 'form',
+                'label' => __('common.delete'),
+                'route' => fn($row) => route('hr.departments.destroy', $row['model']),
+                'method' => 'DELETE',
+                'confirm' => __('hr::department.confirm_delete'),
+                'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>',
+                'color' => 'text-red-600'
+            ]
+        ];
+    @endphp
+
     <div class="space-y-6">
         <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -48,133 +131,18 @@
             </div>
         </div>
 
-        <!-- Departments Table -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-            <!-- Header -->
-            <div class="p-6 border-b border-gray-200">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-900">{{ __('hr::department.department_list') }}</h2>
-                        <p class="text-sm text-gray-600 mt-1">{{ __('hr::department.total_departments') }}: {{ $departments->count() }}</p>
-                    </div>
-                    <a href="{{ route('hr.departments.create') }}" 
-                       class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        {{ __('hr::department.add_department') }}
-                    </a>
-                </div>
-            </div>
-
-            <!-- Table -->
-            <div class="overflow-x-auto">
-                @if($departments->count() > 0)
-                    <table class="w-full">
-                        <thead class="bg-gray-50 border-b border-gray-200">
-                            <tr>
-                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    {{ __('hr::department.name') }}
-                                </th>
-                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    {{ __('hr::department.description') }}
-                                </th>
-                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    {{ __('hr::department.employees_count') }}
-                                </th>
-                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    {{ __('common.color') }}
-                                </th>
-                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    {{ __('common.actions') }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            @foreach($departments as $department)
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-3 h-3 rounded-full" style="background-color: {{ $department->color }}"></div>
-                                            <span class="font-medium text-gray-900">{{ $department->name }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="text-sm text-gray-600">{{ Str::limit($department->description, 50) ?? '-' }}</span>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            {{ $department->employees_count }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="flex items-center justify-center gap-2">
-                                            <div class="w-6 h-6 rounded border border-gray-300" style="background-color: {{ $department->color }}"></div>
-                                            <span class="text-xs text-gray-600">{{ $department->color }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="flex items-center justify-center gap-2">
-                                            <!-- Edit Button -->
-                                            <a href="{{ route('hr.departments.edit', $department) }}" 
-                                               class="inline-flex items-center justify-center w-8 h-8 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                               title="{{ __('common.edit') }}">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                </svg>
-                                            </a>
-
-                                            <!-- View Button -->
-                                            <a href="{{ route('hr.departments.show', $department) }}" 
-                                               class="inline-flex items-center justify-center w-8 h-8 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                                               title="{{ __('common.view') }}">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                                </svg>
-                                            </a>
-
-                                            <!-- Delete Button -->
-                                            <form action="{{ route('hr.departments.destroy', $department) }}" 
-                                                  method="POST" 
-                                                  class="inline-block"
-                                                  onsubmit="return confirm('{{ __('hr::department.confirm_delete') }}')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" 
-                                                        class="inline-flex items-center justify-center w-8 h-8 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                                        title="{{ __('common.delete') }}">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                    </svg>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                @else
-                    <!-- Empty State -->
-                    <div class="text-center py-12">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                        </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('hr::department.no_departments') }}</h3>
-                        <p class="mt-1 text-sm text-gray-500">{{ __('common.no_data') }}</p>
-                        <div class="mt-6">
-                            <a href="{{ route('hr.departments.create') }}" 
-                               class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                                {{ __('hr::department.add_department') }}
-                            </a>
-                        </div>
-                    </div>
-                @endif
-            </div>
-        </div>
+        <!-- DataTable -->
+        <x-dashboard.packages.data-table
+            :title="__('hr::department.department_list')"
+            :description="__('hr::department.total_departments') . ': ' . $departments->count()"
+            :data="$tableData"
+            :columns="$tableColumns"
+            :actions="$tableActions"
+            :createRoute="route('hr.departments.create')"
+            :createLabel="__('hr::department.add_department')"
+            :emptyStateTitle="__('hr::department.no_departments')"
+            :emptyStateDescription="__('common.no_data')"
+            emptyStateIcon="folder"
+        />
     </div>
 </x-dashboard>

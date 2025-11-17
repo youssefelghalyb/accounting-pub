@@ -13,6 +13,9 @@ class SetLocale
     public function handle(Request $request, Closure $next)
     {
         $orgSettings = OrganizationSetting::first();
+        if (!$orgSettings) {
+            return $next($request);
+        }
         
         // Get locale from session, or use organization default, or fallback to 'en'
         $locale = Session::get('locale', $orgSettings->default_language ?? 'en');

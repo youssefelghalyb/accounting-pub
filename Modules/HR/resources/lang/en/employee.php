@@ -70,6 +70,8 @@ return [
     'total_deductions' => 'Total Deductions',
     'calculate_salary' => 'Calculate Salary',
     'monthly_breakdown' => 'Monthly Breakdown',
+    'average_salary' => 'Average Salary',
+    'auto_calculated_daily_rate' => 'Leave empty to auto-calculate from monthly salary (salary ÷ 30)',
     
     // Status
     'status' => 'Status',
