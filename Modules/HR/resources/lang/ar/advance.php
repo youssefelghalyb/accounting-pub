@@ -72,6 +72,9 @@ return [
     'settlement_updated_successfully' => 'تم تحديث التسوية بنجاح',
     'settlement_deleted_successfully' => 'تم حذف التسوية بنجاح',
     'at_least_one_amount' => 'يجب أن يكون أحد المبالغ (النقد المُرجع أو المبلغ المُنفق) أكبر من 0',
+    'cash_returned_exceeds_advance' => 'لا يمكن أن يتجاوز النقد المُرجع مبلغ السلفة',
+    'amount_spent_exceeds_advance' => 'لا يمكن أن يتجاوز المبلغ المُنفق مبلغ السلفة',
+    'total_exceeds_advance' => 'لا يمكن أن يتجاوز إجمالي التسوية (النقد المُرجع + المبلغ المُنفق) مبلغ السلفة :amount',
 
     // Empty states
     'no_advances' => 'لا توجد سلف',
@@ -102,6 +105,7 @@ return [
     'no_outstanding_balance' => 'لا يوجد رصيد متبقي للتحويل',
     'already_converted_to_deduction' => 'تم تحويل هذه السلفة إلى خصم بالفعل',
     'no_overpayment' => 'لا يوجد دفع زائد لهذه السلفة',
+    'overpayment_already_added_to_salary' => 'تمت إضافة هذا الدفع الزائد إلى الراتب بالفعل',
     'deduction_from_advance' => 'استرداد سلفة من :code',
     'bonus_from_overpayment' => 'مكافأة دفع زائد من :code',
     'converted_to_deduction' => 'تم التحويل إلى خصم من الراتب',
