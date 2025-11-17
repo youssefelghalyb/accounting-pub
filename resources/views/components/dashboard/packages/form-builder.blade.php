@@ -13,7 +13,7 @@
     </div>
 @endif
 
-@if(session('errors'))
+@if($errors->any())
     <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
         <div class="flex items-start gap-2">
             <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -299,6 +299,7 @@
                 this.form = formElement;
                 this.fields = [];
                 this.groups = [];
+                this.errors = @json($errors->toArray());
             }
 
             // Define form fields (can be flat array or grouped)
@@ -897,6 +898,45 @@
                 return formGroup;
             }
 
+            // Display error message for a field
+            showFieldError(fieldName, errorMessage) {
+                const field = this.form.querySelector(`[name="${fieldName}"]`);
+                if (!field) return;
+
+                // Add error styling to the field
+                field.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                field.classList.remove('border-gray-300');
+
+                // Create or update error message element
+                const formGroup = field.closest('.col-span-12, [class*="col-span-"]') || field.parentElement;
+                let errorElement = formGroup.querySelector('.field-error-message');
+
+                if (!errorElement) {
+                    errorElement = document.createElement('div');
+                    errorElement.className = 'field-error-message mt-1 text-sm text-red-600 flex items-center gap-1';
+                    errorElement.innerHTML = `
+                        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>${errorMessage}</span>
+                    `;
+                    formGroup.appendChild(errorElement);
+                } else {
+                    errorElement.querySelector('span').textContent = errorMessage;
+                }
+            }
+
+            // Apply all server-side errors to fields
+            applyServerErrors() {
+                if (!this.errors || Object.keys(this.errors).length === 0) return;
+
+                Object.keys(this.errors).forEach(fieldName => {
+                    const errorMessages = this.errors[fieldName];
+                    if (Array.isArray(errorMessages) && errorMessages.length > 0) {
+                        this.showFieldError(fieldName, errorMessages[0]);
+                    }
+                });
+            }
 
         }
 
@@ -916,6 +956,9 @@
             } else if (formConfig.fields) {
                 formBuilder.defineFields(formConfig.fields).build();
             }
+
+            // Apply server-side errors after form is built
+            formBuilder.applyServerErrors();
         @else
             // Default example form if no config provided
             formBuilder.defineGroups(groupedFormFields).build();

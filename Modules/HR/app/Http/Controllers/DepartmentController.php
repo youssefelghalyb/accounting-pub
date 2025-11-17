@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\HR\Models\Department;
 use Modules\HR\Models\Employee;
+use Modules\HR\Http\Requests\StoreDepartmentRequest;
+use Modules\HR\Http\Requests\UpdateDepartmentRequest;
 
 class DepartmentController extends Controller
 {
@@ -39,17 +41,9 @@ class DepartmentController extends Controller
     /**
      * Store a newly created department.
      */
-    public function store(Request $request)
+    public function store(StoreDepartmentRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:departments,name',
-            'description' => 'nullable|string',
-            'color' => 'required|string|max:7',
-        ], [
-            'name.required' => __('hr::department.name_required'),
-            'name.unique' => __('hr::department.name_unique'),
-            'color.required' => __('hr::department.color_required'),
-        ]);
+        $validated = $request->validated();
 
         Department::create($validated);
 
@@ -87,18 +81,10 @@ class DepartmentController extends Controller
     /**
      * Update the specified department.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateDepartmentRequest $request, $id)
     {
         $department = Department::findOrFail($id);
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:departments,name,' . $department->id,
-            'description' => 'nullable|string',
-            'color' => 'required|string|max:7',
-        ], [
-            'name.required' => __('hr::department.name_required'),
-            'name.unique' => __('hr::department.name_unique'),
-            'color.required' => __('hr::department.color_required'),
-        ]);
+        $validated = $request->validated();
 
         $department->update($validated);
 

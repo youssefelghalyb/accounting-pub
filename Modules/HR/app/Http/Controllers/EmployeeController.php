@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\HR\Models\Employee;
 use Modules\HR\Models\Department;
+use Modules\HR\Http\Requests\StoreEmployeeRequest;
+use Modules\HR\Http\Requests\UpdateEmployeeRequest;
 
 class EmployeeController extends Controller
 {
@@ -61,29 +63,9 @@ class EmployeeController extends Controller
     /**
      * Store a newly created employee.
      */
-    public function store(Request $request)
+    public function store(StoreEmployeeRequest $request)
     {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:employees,email',
-            'phone' => 'nullable|string|max:20',
-            'hire_date' => 'required|date',
-            'salary' => 'required|numeric|min:0',
-            'daily_rate' => 'nullable|numeric|min:0',
-            'position' => 'nullable|string|max:255',
-            'department_id' => 'required|exists:departments,id',
-        ], [
-            'first_name.required' => __('hr::employee.first_name_required'),
-            'last_name.required' => __('hr::employee.last_name_required'),
-            'email.required' => __('hr::employee.email_required'),
-            'email.email' => __('hr::employee.email_invalid'),
-            'email.unique' => __('hr::employee.email_unique'),
-            'hire_date.required' => __('hr::employee.hire_date_required'),
-            'salary.required' => __('hr::employee.salary_required'),
-            'salary.min' => __('hr::employee.salary_positive'),
-            'department_id.required' => __('hr::employee.department_required'),
-        ]);
+        $validated = $request->validated();
 
         // Auto-calculate daily rate if not provided
         if (!$validated['daily_rate']) {
@@ -175,30 +157,10 @@ public function show($id)
     /**
      * Update the specified employee.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateEmployeeRequest $request, $id)
     {
         $employee = Employee::findOrFail($id);
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:employees,email,' . $employee->id,
-            'phone' => 'nullable|string|max:20',
-            'hire_date' => 'required|date',
-            'salary' => 'required|numeric|min:0',
-            'daily_rate' => 'nullable|numeric|min:0',
-            'position' => 'nullable|string|max:255',
-            'department_id' => 'required|exists:departments,id',
-        ], [
-            'first_name.required' => __('hr::employee.first_name_required'),
-            'last_name.required' => __('hr::employee.last_name_required'),
-            'email.required' => __('hr::employee.email_required'),
-            'email.email' => __('hr::employee.email_invalid'),
-            'email.unique' => __('hr::employee.email_unique'),
-            'hire_date.required' => __('hr::employee.hire_date_required'),
-            'salary.required' => __('hr::employee.salary_required'),
-            'salary.min' => __('hr::employee.salary_positive'),
-            'department_id.required' => __('hr::employee.department_required'),
-        ]);
+        $validated = $request->validated();
 
         // Auto-calculate daily rate if not provided
         if (!$validated['daily_rate']) {

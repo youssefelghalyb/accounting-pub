@@ -7,6 +7,8 @@ use Illuminate\Routing\Controller;
 use Modules\HR\Models\Deduction;
 use Modules\HR\Models\Employee;
 use Carbon\Carbon;
+use Modules\HR\Http\Requests\StoreDeductionRequest;
+use Modules\HR\Http\Requests\UpdateDeductionRequest;
 
 class DeductionController extends Controller
 {
@@ -141,35 +143,9 @@ class DeductionController extends Controller
         return view('hr::deductions.create', compact('formConfig'));
     }
 
-    public function store(Request $request)
+    public function store(StoreDeductionRequest $request)
     {
-        $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'type' => 'required|in:days,amount,unpaid_leave',
-            'days' => 'nullable|integer|min:1',
-            'amount' => 'nullable|numeric|min:0',
-            'deduction_date' => 'required|date',
-            'reason' => 'required|string|max:1000',
-            'notes' => 'nullable|string|max:1000',
-        ], [
-            'employee_id.required' => __('hr::deductions.validation.employee_required'),
-            'type.required' => __('hr::deductions.validation.type_required'),
-            'days.min' => __('hr::deductions.validation.days_invalid'),
-            'amount.min' => __('hr::deductions.validation.amount_invalid'),
-            'deduction_date.required' => __('hr::deductions.validation.date_required'),
-            'reason.required' => __('hr::deductions.validation.reason_required'),
-        ]);
-
-        // Validate based on type
-        if (in_array($validated['type'], ['days', 'unpaid_leave']) && empty($validated['days'])) {
-            return back()->withErrors(['days' => __('hr::deductions.validation.days_required_for_type')])
-                        ->withInput();
-        }
-
-        if ($validated['type'] === 'amount' && empty($validated['amount'])) {
-            return back()->withErrors(['amount' => __('hr::deductions.validation.amount_required_for_type')])
-                        ->withInput();
-        }
+        $validated = $request->validated();
 
         Deduction::create($validated);
 
@@ -280,37 +256,11 @@ class DeductionController extends Controller
         return view('hr::deductions.edit', compact('formConfig', 'deduction'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateDeductionRequest $request, $id)
     {
         $deduction = Deduction::findOrFail($id);
 
-        $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'type' => 'required|in:days,amount,unpaid_leave',
-            'days' => 'nullable|integer|min:1',
-            'amount' => 'nullable|numeric|min:0',
-            'deduction_date' => 'required|date',
-            'reason' => 'required|string|max:1000',
-            'notes' => 'nullable|string|max:1000',
-        ], [
-            'employee_id.required' => __('hr::deductions.validation.employee_required'),
-            'type.required' => __('hr::deductions.validation.type_required'),
-            'days.min' => __('hr::deductions.validation.days_invalid'),
-            'amount.min' => __('hr::deductions.validation.amount_invalid'),
-            'deduction_date.required' => __('hr::deductions.validation.date_required'),
-            'reason.required' => __('hr::deductions.validation.reason_required'),
-        ]);
-
-        // Validate based on type
-        if (in_array($validated['type'], ['days', 'unpaid_leave']) && empty($validated['days'])) {
-            return back()->withErrors(['days' => __('hr::deductions.validation.days_required_for_type')])
-                        ->withInput();
-        }
-
-        if ($validated['type'] === 'amount' && empty($validated['amount'])) {
-            return back()->withErrors(['amount' => __('hr::deductions.validation.amount_required_for_type')])
-                        ->withInput();
-        }
+        $validated = $request->validated();
 
         $deduction->update($validated);
 
