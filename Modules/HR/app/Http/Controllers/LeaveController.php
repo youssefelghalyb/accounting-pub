@@ -11,6 +11,9 @@ use Modules\HR\Models\Deduction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Modules\HR\Http\Requests\StoreLeaveRequest;
+use Modules\HR\Http\Requests\UpdateLeaveRequest;
+use Modules\HR\Http\Requests\RejectLeaveRequest;
 
 class LeaveController extends Controller
 {
@@ -132,23 +135,9 @@ class LeaveController extends Controller
         return view('hr::leaves.create', compact('formConfig'));
     }
 
-    public function store(Request $request)
+    public function store(StoreLeaveRequest $request)
     {
-        $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'leave_type_id' => 'required|exists:leave_types,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'reason' => 'required|string|max:1000',
-            'notes' => 'nullable|string|max:1000',
-        ], [
-            'employee_id.required' => __('hr::leaves.validation.employee_required'),
-            'leave_type_id.required' => __('hr::leaves.validation.type_required'),
-            'start_date.required' => __('hr::leaves.validation.start_date_required'),
-            'end_date.required' => __('hr::leaves.validation.end_date_required'),
-            'end_date.after_or_equal' => __('hr::leaves.validation.end_date_after_start'),
-            'reason.required' => __('hr::leaves.validation.reason_required'),
-        ]);
+        $validated = $request->validated();
 
         // Calculate days
         $startDate = Carbon::parse($validated['start_date']);
@@ -265,7 +254,7 @@ class LeaveController extends Controller
         return view('hr::leaves.edit', compact('formConfig', 'leave'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateLeaveRequest $request, $id)
     {
         $leave = Leave::findOrFail($id);
 
@@ -274,21 +263,7 @@ class LeaveController extends Controller
                 ->with('error', __('hr::leaves.cannot_edit_processed'));
         }
 
-        $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'leave_type_id' => 'required|exists:leave_types,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'reason' => 'required|string|max:1000',
-            'notes' => 'nullable|string|max:1000',
-        ], [
-            'employee_id.required' => __('hr::leaves.validation.employee_required'),
-            'leave_type_id.required' => __('hr::leaves.validation.type_required'),
-            'start_date.required' => __('hr::leaves.validation.start_date_required'),
-            'end_date.required' => __('hr::leaves.validation.end_date_required'),
-            'end_date.after_or_equal' => __('hr::leaves.validation.end_date_after_start'),
-            'reason.required' => __('hr::leaves.validation.reason_required'),
-        ]);
+        $validated = $request->validated();
 
         // Calculate days
         $startDate = Carbon::parse($validated['start_date']);
@@ -386,7 +361,7 @@ class LeaveController extends Controller
     /**
      * Reject a leave request
      */
-    public function reject(Request $request, $id)
+    public function reject(RejectLeaveRequest $request, $id)
     {
         $leave = Leave::findOrFail($id);
 
@@ -395,11 +370,7 @@ class LeaveController extends Controller
                 ->with('error', __('hr::leaves.already_processed'));
         }
 
-        $validated = $request->validate([
-            'rejection_reason' => 'required|string|max:500'
-        ], [
-            'rejection_reason.required' => __('hr::leaves.validation.rejection_reason_required')
-        ]);
+        $validated = $request->validated();
 
         // Get current user ID
         $rejectedBy = Auth::id() ?? 1;

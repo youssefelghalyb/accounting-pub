@@ -5,6 +5,8 @@ namespace Modules\HR\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\HR\Models\LeaveType;
+use Modules\HR\Http\Requests\StoreLeaveTypeRequest;
+use Modules\HR\Http\Requests\UpdateLeaveTypeRequest;
 
 class LeaveTypeController extends Controller
 {
@@ -45,15 +47,9 @@ class LeaveTypeController extends Controller
     /**
      * Store a newly created leave type.
      */
-    public function store(Request $request)
+    public function store(StoreLeaveTypeRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:leave_types,name',
-            'description' => 'nullable|string',
-            'max_days_per_year' => 'nullable|integer|min:1',
-            'is_paid' => 'required|boolean',
-            'color' => 'required|string',
-        ]);
+        $validated = $request->validated();
 
         LeaveType::create($validated);
 
@@ -104,15 +100,9 @@ class LeaveTypeController extends Controller
     /**
      * Update the specified leave type.
      */
-    public function update(Request $request, LeaveType $leaveType)
+    public function update(UpdateLeaveTypeRequest $request, LeaveType $leaveType)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:leave_types,name,' . $leaveType->id,
-            'description' => 'nullable|string',
-            'max_days_per_year' => 'nullable|integer|min:1',
-            'is_paid' => 'required|boolean',
-            'color' => 'required|string',
-        ]);
+        $validated = $request->validated();
 
         $leaveType->update($validated);
 
