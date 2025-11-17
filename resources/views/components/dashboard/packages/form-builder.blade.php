@@ -1099,6 +1099,19 @@
                     }
 
                     formGroup.appendChild(input);
+
+                    // Add helper text if provided
+                    if (field.helperText) {
+                        const helperText = document.createElement('p');
+                        helperText.className = 'mt-1.5 text-xs text-gray-500 flex items-start gap-1';
+                        helperText.innerHTML = `
+                            <svg class="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>${field.helperText}</span>
+                        `;
+                        formGroup.appendChild(helperText);
+                    }
                 } else if (field.type === 'checkbox') {
                     // For checkbox, set ID for the input inside wrapper
                     input.name = field.name;
