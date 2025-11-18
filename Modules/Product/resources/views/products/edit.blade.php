@@ -1,3 +1,87 @@
+@php
+$formConfig = [
+    'groups' => [
+        [
+            'title' => __('product::product.product_details'),
+            'fields' => [
+                [
+                    'name' => 'name',
+                    'type' => 'text',
+                    'label' => __('product::product.name'),
+                    'placeholder' => __('product::product.enter_name'),
+                    'required' => true,
+                    'value' => $product->name,
+                    'grid' => 6,
+                    'borderColor' => '#3b82f6'
+                ],
+                [
+                    'name' => 'type',
+                    'type' => 'select',
+                    'label' => __('product::product.type'),
+                    'required' => true,
+                    'value' => $product->type,
+                    'grid' => 6,
+                    'borderColor' => '#3b82f6',
+                    'options' => [
+                        ['value' => '', 'label' => __('product::product.select_type')],
+                        ['value' => 'book', 'label' => __('product::product.book')],
+                        ['value' => 'ebook', 'label' => __('product::product.ebook')],
+                        ['value' => 'journal', 'label' => __('product::product.journal')],
+                        ['value' => 'course', 'label' => __('product::product.course')],
+                        ['value' => 'bundle', 'label' => __('product::product.bundle')],
+                    ]
+                ],
+                [
+                    'name' => 'sku',
+                    'type' => 'text',
+                    'label' => __('product::product.sku'),
+                    'placeholder' => __('product::product.enter_sku'),
+                    'required' => false,
+                    'value' => $product->sku,
+                    'grid' => 6,
+                    'borderColor' => '#3b82f6'
+                ],
+                [
+                    'name' => 'base_price',
+                    'type' => 'number',
+                    'label' => __('product::product.base_price'),
+                    'placeholder' => __('product::product.enter_base_price'),
+                    'required' => true,
+                    'value' => $product->base_price,
+                    'grid' => 6,
+                    'borderColor' => '#3b82f6'
+                ],
+                [
+                    'name' => 'status',
+                    'type' => 'select',
+                    'label' => __('product::product.status'),
+                    'required' => true,
+                    'value' => $product->status,
+                    'grid' => 12,
+                    'borderColor' => '#10b981',
+                    'options' => [
+                        ['value' => '', 'label' => __('product::product.select_status')],
+                        ['value' => 'active', 'label' => __('product::product.active')],
+                        ['value' => 'inactive', 'label' => __('product::product.inactive')],
+                    ]
+                ],
+                [
+                    'name' => 'description',
+                    'type' => 'textarea',
+                    'label' => __('product::product.description'),
+                    'placeholder' => __('product::product.enter_description'),
+                    'required' => false,
+                    'value' => $product->description,
+                    'rows' => 4,
+                    'grid' => 12,
+                    'borderColor' => '#8b5cf6'
+                ]
+            ]
+        ]
+    ]
+];
+@endphp
+
 <x-dashboard :pageTitle="__('product::product.edit_product')">
     <div class="max-w-5xl mx-auto">
         <!-- Breadcrumb -->
@@ -30,87 +114,7 @@
                 <x-dashboard.packages.form-builder
                     :action="route('product.products.update', $product)"
                     method="POST"
-                    :formConfig="[
-                        'groups' => [
-                            [
-                                'title' => __('product::product.product_details'),
-                                'fields' => [
-                                    [
-                                        'name' => 'name',
-                                        'type' => 'text',
-                                        'label' => __('product::product.name'),
-                                        'placeholder' => __('product::product.enter_name'),
-                                        'required' => true,
-                                        'value' => $product->name,
-                                        'grid' => 6,
-                                        'borderColor' => '#3b82f6'
-                                    ],
-                                    [
-                                        'name' => 'type',
-                                        'type' => 'select',
-                                        'label' => __('product::product.type'),
-                                        'required' => true,
-                                        'value' => $product->type,
-                                        'grid' => 6,
-                                        'borderColor' => '#3b82f6',
-                                        'options' => [
-                                            ['value' => '', 'label' => __('product::product.select_type')],
-                                            ['value' => 'book', 'label' => __('product::product.book')],
-                                            ['value' => 'ebook', 'label' => __('product::product.ebook')],
-                                            ['value' => 'journal', 'label' => __('product::product.journal')],
-                                            ['value' => 'course', 'label' => __('product::product.course')],
-                                            ['value' => 'bundle', 'label' => __('product::product.bundle')],
-                                        ]
-                                    ],
-                                    [
-                                        'name' => 'sku',
-                                        'type' => 'text',
-                                        'label' => __('product::product.sku'),
-                                        'placeholder' => __('product::product.enter_sku'),
-                                        'required' => false,
-                                        'value' => $product->sku,
-                                        'grid' => 6,
-                                        'borderColor' => '#3b82f6'
-                                    ],
-                                    [
-                                        'name' => 'base_price',
-                                        'type' => 'number',
-                                        'label' => __('product::product.base_price'),
-                                        'placeholder' => __('product::product.enter_base_price'),
-                                        'required' => true,
-                                        'value' => $product->base_price,
-                                        'grid' => 6,
-                                        'borderColor' => '#3b82f6'
-                                    ],
-                                    [
-                                        'name' => 'status',
-                                        'type' => 'select',
-                                        'label' => __('product::product.status'),
-                                        'required' => true,
-                                        'value' => $product->status,
-                                        'grid' => 12,
-                                        'borderColor' => '#10b981',
-                                        'options' => [
-                                            ['value' => '', 'label' => __('product::product.select_status')],
-                                            ['value' => 'active', 'label' => __('product::product.active')],
-                                            ['value' => 'inactive', 'label' => __('product::product.inactive')],
-                                        ]
-                                    ],
-                                    [
-                                        'name' => 'description',
-                                        'type' => 'textarea',
-                                        'label' => __('product::product.description'),
-                                        'placeholder' => __('product::product.enter_description'),
-                                        'required' => false,
-                                        'value' => $product->description,
-                                        'rows' => 4,
-                                        'grid' => 12,
-                                        'borderColor' => '#8b5cf6'
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]"
+                    :formConfig="$formConfig"
                 />
             </div>
         </div>

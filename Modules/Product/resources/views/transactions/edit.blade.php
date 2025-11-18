@@ -1,3 +1,76 @@
+@php
+$formConfig = [
+    'groups' => [
+        [
+            'title' => __('product::transaction.transaction_details'),
+            'fields' => [
+                [
+                    'name' => 'contract_id',
+                    'type' => 'select',
+                    'label' => __('product::transaction.contract'),
+                    'required' => true,
+                    'value' => $transaction->contract_id,
+                    'grid' => 12,
+                    'borderColor' => '#3b82f6',
+                    'options' => collect($contracts)->map(function($contract) use ($transaction) {
+                        $remaining = $contract->id === $transaction->contract_id
+                            ? $contract->outstanding_balance + $transaction->amount
+                            : $contract->outstanding_balance;
+                        return [
+                            'value' => $contract->id,
+                            'label' => $contract->author->full_name . ' - ' . $contract->book->product->name . ' ('. number_format($remaining, 2) . ' ' . __('product::transaction.remaining') . ')'
+                        ];
+                    })->prepend(['value' => '', 'label' => __('product::transaction.select_contract')])->toArray()
+                ],
+                [
+                    'name' => 'amount',
+                    'type' => 'number',
+                    'label' => __('product::transaction.amount'),
+                    'placeholder' => __('product::transaction.enter_amount'),
+                    'required' => true,
+                    'value' => $transaction->amount,
+                    'grid' => 6,
+                    'borderColor' => '#10b981'
+                ],
+                [
+                    'name' => 'payment_date',
+                    'type' => 'date',
+                    'label' => __('product::transaction.payment_date'),
+                    'required' => true,
+                    'value' => $transaction->payment_date ? $transaction->payment_date->format('Y-m-d') : null,
+                    'grid' => 6,
+                    'borderColor' => '#10b981'
+                ],
+                [
+                    'name' => 'notes',
+                    'type' => 'textarea',
+                    'label' => __('product::transaction.notes'),
+                    'placeholder' => __('product::transaction.enter_notes'),
+                    'required' => false,
+                    'value' => $transaction->notes,
+                    'rows' => 3,
+                    'grid' => 12,
+                    'borderColor' => '#8b5cf6'
+                ],
+                [
+                    'name' => 'receipt_file',
+                    'type' => 'file',
+                    'label' => __('product::transaction.receipt_file'),
+                    'required' => false,
+                    'value' => $transaction->receipt_file,
+                    'grid' => 12,
+                    'borderColor' => '#8b5cf6',
+                    'accept' => '.pdf,.jpg,.jpeg,.png',
+                    'helperText' => $transaction->receipt_file
+                        ? __('product::transaction.upload_receipt') . ' (' . __('common.current') . ': ' . basename($transaction->receipt_file) . ')'
+                        : __('product::transaction.upload_receipt')
+                ]
+            ]
+        ]
+    ]
+];
+@endphp
+
 <x-dashboard :pageTitle="__('product::transaction.edit_transaction')">
     <div class="max-w-5xl mx-auto">
         <!-- Breadcrumb -->
@@ -30,76 +103,7 @@
                 <x-dashboard.packages.form-builder
                     :action="route('product.transactions.update', $transaction)"
                     method="POST"
-                    :formConfig="[
-                        'groups' => [
-                            [
-                                'title' => __('product::transaction.transaction_details'),
-                                'fields' => [
-                                    [
-                                        'name' => 'contract_id',
-                                        'type' => 'select',
-                                        'label' => __('product::transaction.contract'),
-                                        'required' => true,
-                                        'value' => \$transaction->contract_id,
-                                        'grid' => 12,
-                                        'borderColor' => '#3b82f6',
-                                        'options' => collect(\$contracts)->map(function(\$contract) use (\$transaction) {
-                                            \$remaining = \$contract->id === \$transaction->contract_id
-                                                ? \$contract->outstanding_balance + \$transaction->amount
-                                                : \$contract->outstanding_balance;
-                                            return [
-                                                'value' => \$contract->id,
-                                                'label' => \$contract->author->full_name . ' - ' . \$contract->book->product->name . ' ('. number_format(\$remaining, 2) . ' ' . __('product::transaction.remaining') . ')'
-                                            ];
-                                        })->prepend(['value' => '', 'label' => __('product::transaction.select_contract')])->toArray()
-                                    ],
-                                    [
-                                        'name' => 'amount',
-                                        'type' => 'number',
-                                        'label' => __('product::transaction.amount'),
-                                        'placeholder' => __('product::transaction.enter_amount'),
-                                        'required' => true,
-                                        'value' => \$transaction->amount,
-                                        'grid' => 6,
-                                        'borderColor' => '#10b981'
-                                    ],
-                                    [
-                                        'name' => 'payment_date',
-                                        'type' => 'date',
-                                        'label' => __('product::transaction.payment_date'),
-                                        'required' => true,
-                                        'value' => \$transaction->payment_date ? \$transaction->payment_date->format('Y-m-d') : null,
-                                        'grid' => 6,
-                                        'borderColor' => '#10b981'
-                                    ],
-                                    [
-                                        'name' => 'notes',
-                                        'type' => 'textarea',
-                                        'label' => __('product::transaction.notes'),
-                                        'placeholder' => __('product::transaction.enter_notes'),
-                                        'required' => false,
-                                        'value' => \$transaction->notes,
-                                        'rows' => 3,
-                                        'grid' => 12,
-                                        'borderColor' => '#8b5cf6'
-                                    ],
-                                    [
-                                        'name' => 'receipt_file',
-                                        'type' => 'file',
-                                        'label' => __('product::transaction.receipt_file'),
-                                        'required' => false,
-                                        'value' => \$transaction->receipt_file,
-                                        'grid' => 12,
-                                        'borderColor' => '#8b5cf6',
-                                        'accept' => '.pdf,.jpg,.jpeg,.png',
-                                        'helperText' => \$transaction->receipt_file
-                                            ? __('product::transaction.upload_receipt') . ' (' . __('common.current') . ': ' . basename(\$transaction->receipt_file) . ')'
-                                            : __('product::transaction.upload_receipt')
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]"
+                    :formConfig="$formConfig"
                 />
             </div>
         </div>

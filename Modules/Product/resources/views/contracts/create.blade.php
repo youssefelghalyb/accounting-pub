@@ -1,3 +1,73 @@
+@php
+$formConfig = [
+    'groups' => [
+        [
+            'title' => __('product::contract.contract_details'),
+            'fields' => [
+                [
+                    'name' => 'author_id',
+                    'type' => 'select',
+                    'label' => __('product::contract.author'),
+                    'required' => true,
+                    'grid' => 6,
+                    'borderColor' => '#3b82f6',
+                    'options' => collect($authors)->map(function($author) {
+                        return ['value' => $author->id, 'label' => $author->full_name];
+                    })->prepend(['value' => '', 'label' => __('product::contract.select_author')])->toArray()
+                ],
+                [
+                    'name' => 'book_id',
+                    'type' => 'select',
+                    'label' => __('product::contract.book'),
+                    'required' => true,
+                    'grid' => 6,
+                    'borderColor' => '#3b82f6',
+                    'options' => collect($books)->map(function($book) {
+                        return ['value' => $book->id, 'label' => $book->product->name];
+                    })->prepend(['value' => '', 'label' => __('product::contract.select_book')])->toArray()
+                ],
+                [
+                    'name' => 'contract_date',
+                    'type' => 'date',
+                    'label' => __('product::contract.contract_date'),
+                    'required' => true,
+                    'grid' => 6,
+                    'borderColor' => '#3b82f6'
+                ],
+                [
+                    'name' => 'contract_price',
+                    'type' => 'number',
+                    'label' => __('product::contract.contract_price'),
+                    'placeholder' => __('product::contract.enter_contract_price'),
+                    'required' => true,
+                    'grid' => 6,
+                    'borderColor' => '#3b82f6'
+                ],
+                [
+                    'name' => 'percentage_from_book_profit',
+                    'type' => 'number',
+                    'label' => __('product::contract.percentage_from_book_profit'),
+                    'placeholder' => __('product::contract.enter_percentage'),
+                    'required' => true,
+                    'grid' => 12,
+                    'borderColor' => '#10b981'
+                ],
+                [
+                    'name' => 'contract_file',
+                    'type' => 'file',
+                    'label' => __('product::contract.contract_file'),
+                    'required' => false,
+                    'grid' => 12,
+                    'borderColor' => '#8b5cf6',
+                    'accept' => '.pdf,.doc,.docx',
+                    'helperText' => __('product::contract.upload_contract_file')
+                ]
+            ]
+        ]
+    ]
+];
+@endphp
+
 <x-dashboard :pageTitle="__('product::contract.add_contract')">
     <div class="max-w-5xl mx-auto">
         <!-- Breadcrumb -->
@@ -30,73 +100,7 @@
                 <x-dashboard.packages.form-builder
                     :action="route('product.contracts.store')"
                     method="POST"
-                    :formConfig="[
-                        'groups' => [
-                            [
-                                'title' => __('product::contract.contract_details'),
-                                'fields' => [
-                                    [
-                                        'name' => 'author_id',
-                                        'type' => 'select',
-                                        'label' => __('product::contract.author'),
-                                        'required' => true,
-                                        'grid' => 6,
-                                        'borderColor' => '#3b82f6',
-                                        'options' => collect(\$authors)->map(function(\$author) {
-                                            return ['value' => \$author->id, 'label' => \$author->full_name];
-                                        })->prepend(['value' => '', 'label' => __('product::contract.select_author')])->toArray()
-                                    ],
-                                    [
-                                        'name' => 'book_id',
-                                        'type' => 'select',
-                                        'label' => __('product::contract.book'),
-                                        'required' => true,
-                                        'grid' => 6,
-                                        'borderColor' => '#3b82f6',
-                                        'options' => collect(\$books)->map(function(\$book) {
-                                            return ['value' => \$book->id, 'label' => \$book->product->name];
-                                        })->prepend(['value' => '', 'label' => __('product::contract.select_book')])->toArray()
-                                    ],
-                                    [
-                                        'name' => 'contract_date',
-                                        'type' => 'date',
-                                        'label' => __('product::contract.contract_date'),
-                                        'required' => true,
-                                        'grid' => 6,
-                                        'borderColor' => '#3b82f6'
-                                    ],
-                                    [
-                                        'name' => 'contract_price',
-                                        'type' => 'number',
-                                        'label' => __('product::contract.contract_price'),
-                                        'placeholder' => __('product::contract.enter_contract_price'),
-                                        'required' => true,
-                                        'grid' => 6,
-                                        'borderColor' => '#3b82f6'
-                                    ],
-                                    [
-                                        'name' => 'percentage_from_book_profit',
-                                        'type' => 'number',
-                                        'label' => __('product::contract.percentage_from_book_profit'),
-                                        'placeholder' => __('product::contract.enter_percentage'),
-                                        'required' => true,
-                                        'grid' => 12,
-                                        'borderColor' => '#10b981'
-                                    ],
-                                    [
-                                        'name' => 'contract_file',
-                                        'type' => 'file',
-                                        'label' => __('product::contract.contract_file'),
-                                        'required' => false,
-                                        'grid' => 12,
-                                        'borderColor' => '#8b5cf6',
-                                        'accept' => '.pdf,.doc,.docx',
-                                        'helperText' => __('product::contract.upload_contract_file')
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]"
+                    :formConfig="$formConfig"
                 />
             </div>
         </div>

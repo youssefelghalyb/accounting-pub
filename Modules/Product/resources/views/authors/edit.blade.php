@@ -1,3 +1,117 @@
+@php
+$formConfig = [
+    'groups' => [
+        [
+            'title' => __('product::author.personal_info'),
+            'fields' => [
+                [
+                    'name' => 'full_name',
+                    'type' => 'text',
+                    'label' => __('product::author.full_name'),
+                    'placeholder' => __('product::author.enter_full_name'),
+                    'required' => true,
+                    'value' => $author->full_name,
+                    'grid' => 6,
+                    'borderColor' => '#3b82f6'
+                ],
+                [
+                    'name' => 'nationality',
+                    'type' => 'text',
+                    'label' => __('product::author.nationality'),
+                    'placeholder' => __('product::author.enter_nationality'),
+                    'required' => false,
+                    'value' => $author->nationality,
+                    'grid' => 6,
+                    'borderColor' => '#3b82f6'
+                ],
+                [
+                    'name' => 'country_of_residence',
+                    'type' => 'text',
+                    'label' => __('product::author.country_of_residence'),
+                    'placeholder' => __('product::author.enter_country'),
+                    'required' => false,
+                    'value' => $author->country_of_residence,
+                    'grid' => 6,
+                    'borderColor' => '#3b82f6'
+                ],
+                [
+                    'name' => 'occupation',
+                    'type' => 'text',
+                    'label' => __('product::author.occupation'),
+                    'placeholder' => __('product::author.enter_occupation'),
+                    'required' => false,
+                    'value' => $author->occupation,
+                    'grid' => 6,
+                    'borderColor' => '#3b82f6'
+                ],
+                [
+                    'name' => 'bio',
+                    'type' => 'textarea',
+                    'label' => __('product::author.bio'),
+                    'placeholder' => __('product::author.enter_bio'),
+                    'required' => false,
+                    'value' => $author->bio,
+                    'rows' => 4,
+                    'grid' => 12,
+                    'borderColor' => '#3b82f6'
+                ]
+            ]
+        ],
+        [
+            'title' => __('product::author.contact_info'),
+            'fields' => [
+                [
+                    'name' => 'email',
+                    'type' => 'email',
+                    'label' => __('product::author.email'),
+                    'placeholder' => __('product::author.enter_email'),
+                    'required' => false,
+                    'value' => $author->email,
+                    'grid' => 6,
+                    'borderColor' => '#10b981'
+                ],
+                [
+                    'name' => 'phone_number',
+                    'type' => 'text',
+                    'label' => __('product::author.phone_number'),
+                    'placeholder' => __('product::author.enter_phone'),
+                    'required' => false,
+                    'value' => $author->phone_number,
+                    'grid' => 6,
+                    'borderColor' => '#10b981'
+                ],
+                [
+                    'name' => 'whatsapp_number',
+                    'type' => 'text',
+                    'label' => __('product::author.whatsapp_number'),
+                    'placeholder' => __('product::author.enter_whatsapp'),
+                    'required' => false,
+                    'value' => $author->whatsapp_number,
+                    'grid' => 12,
+                    'borderColor' => '#10b981'
+                ]
+            ]
+        ],
+        [
+            'title' => __('product::author.additional_info'),
+            'fields' => [
+                [
+                    'name' => 'id_image',
+                    'type' => 'file',
+                    'label' => __('product::author.id_image'),
+                    'accept' => 'image/*',
+                    'helperText' => __('product::author.upload_id_image'),
+                    'required' => false,
+                    'value' => $author->id_image ? asset('storage/' . $author->id_image) : null,
+                    'grid' => 12,
+                    'borderColor' => '#8b5cf6'
+                ]
+            ]
+        ]
+    ]
+];
+@endphp
+
 <x-dashboard :pageTitle="__('product::author.edit_author')">
     <div class="max-w-5xl mx-auto">
         <!-- Breadcrumb -->
@@ -30,117 +144,7 @@
                 <x-dashboard.packages.form-builder
                     :action="route('product.authors.update', $author)"
                     method="POST"
-                    :formConfig="[
-                        'groups' => [
-                            [
-                                'title' => __('product::author.personal_info'),
-                                'fields' => [
-                                    [
-                                        'name' => 'full_name',
-                                        'type' => 'text',
-                                        'label' => __('product::author.full_name'),
-                                        'placeholder' => __('product::author.enter_full_name'),
-                                        'required' => true,
-                                        'value' => $author->full_name,
-                                        'grid' => 6,
-                                        'borderColor' => '#3b82f6'
-                                    ],
-                                    [
-                                        'name' => 'nationality',
-                                        'type' => 'text',
-                                        'label' => __('product::author.nationality'),
-                                        'placeholder' => __('product::author.enter_nationality'),
-                                        'required' => false,
-                                        'value' => $author->nationality,
-                                        'grid' => 6,
-                                        'borderColor' => '#3b82f6'
-                                    ],
-                                    [
-                                        'name' => 'country_of_residence',
-                                        'type' => 'text',
-                                        'label' => __('product::author.country_of_residence'),
-                                        'placeholder' => __('product::author.enter_country'),
-                                        'required' => false,
-                                        'value' => $author->country_of_residence,
-                                        'grid' => 6,
-                                        'borderColor' => '#3b82f6'
-                                    ],
-                                    [
-                                        'name' => 'occupation',
-                                        'type' => 'text',
-                                        'label' => __('product::author.occupation'),
-                                        'placeholder' => __('product::author.enter_occupation'),
-                                        'required' => false,
-                                        'value' => $author->occupation,
-                                        'grid' => 6,
-                                        'borderColor' => '#3b82f6'
-                                    ],
-                                    [
-                                        'name' => 'bio',
-                                        'type' => 'textarea',
-                                        'label' => __('product::author.bio'),
-                                        'placeholder' => __('product::author.enter_bio'),
-                                        'required' => false,
-                                        'value' => $author->bio,
-                                        'rows' => 4,
-                                        'grid' => 12,
-                                        'borderColor' => '#3b82f6'
-                                    ]
-                                ]
-                            ],
-                            [
-                                'title' => __('product::author.contact_info'),
-                                'fields' => [
-                                    [
-                                        'name' => 'email',
-                                        'type' => 'email',
-                                        'label' => __('product::author.email'),
-                                        'placeholder' => __('product::author.enter_email'),
-                                        'required' => false,
-                                        'value' => $author->email,
-                                        'grid' => 6,
-                                        'borderColor' => '#10b981'
-                                    ],
-                                    [
-                                        'name' => 'phone_number',
-                                        'type' => 'text',
-                                        'label' => __('product::author.phone_number'),
-                                        'placeholder' => __('product::author.enter_phone'),
-                                        'required' => false,
-                                        'value' => $author->phone_number,
-                                        'grid' => 6,
-                                        'borderColor' => '#10b981'
-                                    ],
-                                    [
-                                        'name' => 'whatsapp_number',
-                                        'type' => 'text',
-                                        'label' => __('product::author.whatsapp_number'),
-                                        'placeholder' => __('product::author.enter_whatsapp'),
-                                        'required' => false,
-                                        'value' => $author->whatsapp_number,
-                                        'grid' => 12,
-                                        'borderColor' => '#10b981'
-                                    ]
-                                ]
-                            ],
-                            [
-                                'title' => __('product::author.additional_info'),
-                                'fields' => [
-                                    [
-                                        'name' => 'id_image',
-                                        'type' => 'file',
-                                        'label' => __('product::author.id_image'),
-                                        'accept' => 'image/*',
-                                        'helperText' => __('product::author.upload_id_image'),
-                                        'required' => false,
-                                        'value' => $author->id_image ? asset('storage/' . $author->id_image) : null,
-                                        'grid' => 12,
-                                        'borderColor' => '#8b5cf6'
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]"
+                    :formConfig="$formConfig"
                 />
             </div>
         </div>
