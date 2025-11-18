@@ -4,6 +4,7 @@ namespace Modules\Product\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use Modules\Product\Models\Book;
 use Modules\Product\Models\Product;
 use Modules\Product\Models\Author;
@@ -85,7 +86,7 @@ class BookController extends Controller
             'description' => $validated['description'] ?? null,
             'base_price' => $validated['base_price'],
             'status' => $validated['status'],
-            'created_by' => auth()->id(),
+            'created_by' => Auth::id(),
         ]);
 
         // Create book with product_id
@@ -103,7 +104,7 @@ class BookController extends Controller
             'translated_from' => $validated['translated_from'] ?? null,
             'translated_to' => $validated['translated_to'] ?? null,
             'translator_name' => $validated['translator_name'] ?? null,
-            'created_by' => auth()->id(),
+            'created_by' => Auth::id(),
         ]);
 
         return redirect()
@@ -158,7 +159,7 @@ class BookController extends Controller
             'description' => $validated['description'] ?? null,
             'base_price' => $validated['base_price'],
             'status' => $validated['status'],
-            'edited_by' => auth()->id(),
+            'edited_by' => Auth::id(),
         ]);
 
         // Update book
@@ -175,7 +176,7 @@ class BookController extends Controller
             'translated_from' => $validated['translated_from'] ?? null,
             'translated_to' => $validated['translated_to'] ?? null,
             'translator_name' => $validated['translator_name'] ?? null,
-            'edited_by' => auth()->id(),
+            'edited_by' => Auth::id(),
         ]);
 
         return redirect()

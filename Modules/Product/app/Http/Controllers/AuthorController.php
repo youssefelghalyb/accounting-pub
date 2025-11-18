@@ -4,6 +4,7 @@ namespace Modules\Product\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Modules\Product\Models\Author;
 use Modules\Product\Http\Requests\StoreAuthorRequest;
@@ -55,7 +56,7 @@ class AuthorController extends Controller
     public function store(StoreAuthorRequest $request)
     {
         $validated = $request->validated();
-        $validated['created_by'] = auth()->id();
+        $validated['created_by'] = Auth::id();
 
         // Handle file upload
         if ($request->hasFile('id_image')) {
@@ -108,7 +109,7 @@ class AuthorController extends Controller
     {
         $author = Author::findOrFail($id);
         $validated = $request->validated();
-        $validated['edited_by'] = auth()->id();
+        $validated['edited_by'] = Auth::id();
 
         // Handle file upload
         if ($request->hasFile('id_image')) {

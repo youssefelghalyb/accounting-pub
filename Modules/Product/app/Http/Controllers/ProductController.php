@@ -4,6 +4,7 @@ namespace Modules\Product\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use Modules\Product\Models\Product;
 use Modules\Product\Http\Requests\StoreProductRequest;
 use Modules\Product\Http\Requests\UpdateProductRequest;
@@ -63,7 +64,7 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         $validated = $request->validated();
-        $validated['created_by'] = auth()->id();
+        $validated['created_by'] = Auth::id();
 
         Product::create($validated);
 
@@ -99,7 +100,7 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
         $validated = $request->validated();
-        $validated['edited_by'] = auth()->id();
+        $validated['edited_by'] = Auth::id();
 
         $product->update($validated);
 

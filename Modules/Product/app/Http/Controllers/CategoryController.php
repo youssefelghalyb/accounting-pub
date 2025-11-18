@@ -4,6 +4,7 @@ namespace Modules\Product\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use Modules\Product\Models\BookCategory;
 use Modules\Product\Http\Requests\StoreCategoryRequest;
 use Modules\Product\Http\Requests\UpdateCategoryRequest;
@@ -60,7 +61,7 @@ class CategoryController extends Controller
     public function store(StoreCategoryRequest $request)
     {
         $validated = $request->validated();
-        $validated['created_by'] = auth()->id();
+        $validated['created_by'] = Auth::id();
 
         BookCategory::create($validated);
 
@@ -99,7 +100,7 @@ class CategoryController extends Controller
     {
         $category = BookCategory::findOrFail($id);
         $validated = $request->validated();
-        $validated['edited_by'] = auth()->id();
+        $validated['edited_by'] = Auth::id();
 
         $category->update($validated);
 

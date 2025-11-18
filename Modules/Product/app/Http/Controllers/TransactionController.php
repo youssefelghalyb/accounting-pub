@@ -4,6 +4,7 @@ namespace Modules\Product\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Modules\Product\Models\ContractTransaction;
 use Modules\Product\Models\Contract;
@@ -88,7 +89,7 @@ class TransactionController extends Controller
     public function store(StoreTransactionRequest $request)
     {
         $validated = $request->validated();
-        $validated['created_by'] = auth()->id();
+        $validated['created_by'] = Auth::id();
 
         // Handle file upload
         if ($request->hasFile('receipt_file')) {
@@ -131,7 +132,7 @@ class TransactionController extends Controller
     {
         $transaction = ContractTransaction::findOrFail($id);
         $validated = $request->validated();
-        $validated['edited_by'] = auth()->id();
+        $validated['edited_by'] = Auth::id();
 
         // Handle file upload
         if ($request->hasFile('receipt_file')) {
