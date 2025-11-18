@@ -21,7 +21,8 @@ class StoreContractRequest extends FormRequest
     {
         return [
             'author_id' => 'required|exists:authors,id',
-            'book_id' => 'required|exists:books,id',
+            'book_name' => 'required|string|max:255',
+            'book_id' => 'nullable|exists:books,id',
             'contract_date' => 'required|date',
             'contract_price' => 'required|numeric|min:0',
             'percentage_from_book_profit' => 'required|numeric|min:0|max:100',

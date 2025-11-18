@@ -13,12 +13,15 @@ $formConfig = [
                     'grid' => 12,
                     'borderColor' => '#3b82f6',
                     'options' => collect($contracts)->map(function($contract) use ($transaction) {
+                                                 $bookName = $contract->book?->product?->name ?? $contract->book_name;
                         $remaining = $contract->id === $transaction->contract_id
                             ? $contract->outstanding_balance + $transaction->amount
                             : $contract->outstanding_balance;
                         return [
                             'value' => $contract->id,
-                            'label' => $contract->author->full_name . ' - ' . $contract->book->product->name . ' ('. number_format($remaining, 2) . ' ' . __('product::transaction.remaining') . ')'
+                            'label' => $contract->author->full_name . ' - ' . 
+                              $bookName
+                            . ' ('. number_format($remaining, 2) . ' ' . __('product::transaction.remaining') . ')'
                         ];
                     })->prepend(['value' => '', 'label' => __('product::transaction.select_contract')])->toArray()
                 ],

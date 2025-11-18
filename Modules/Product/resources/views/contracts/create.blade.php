@@ -9,7 +9,7 @@ $formConfig = [
                     'type' => 'select',
                     'label' => __('product::contract.author'),
                     'required' => true,
-                    'grid' => 6,
+                    'grid' =>4,
                     'borderColor' => '#3b82f6',
                     'options' => collect($authors)->map(function($author) {
                         return ['value' => $author->id, 'label' => $author->full_name];
@@ -20,11 +20,19 @@ $formConfig = [
                     'type' => 'select',
                     'label' => __('product::contract.book'),
                     'required' => false,
-                    'grid' => 6,
+                    'grid' =>4,
                     'borderColor' => '#3b82f6',
                     'options' => collect($books)->map(function($book) {
                         return ['value' => $book->id, 'label' => $book->product->name];
-                    })->prepend(['value' => '', 'label' => __('product::contract.select_book')])->toArray()
+                    })->prepend(['value' => ' ', 'label' => __('product::contract.select_book')])->toArray()
+                ],
+                                [
+                    'name' => 'book name', 
+                    'type' => 'text',
+                    'label' => __('product::contract.book_name'),
+                    'required' => false,
+                    'grid' => 4,
+                    'borderColor' => '#3b82f6',
                 ],
                 [
                     'name' => 'contract_date',

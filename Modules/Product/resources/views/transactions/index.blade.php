@@ -5,7 +5,7 @@
             return [
                 'id' => $transaction->id,
                 'contract_author' => $transaction->contract->author->full_name,
-                'contract_book' => $transaction->contract->book->product->name,
+                'contract_book' => isset($transaction->contract->book) ?  $transaction->contract->book->product->name : $transaction->contract->book_name,
                 'amount' => $transaction->amount,
                 'payment_date' => $transaction->payment_date->format('Y-m-d'),
                 'notes' => $transaction->notes,
@@ -87,9 +87,10 @@
                 'name' => 'contract_id',
                 'label' => __('product::transaction.all_contracts'),
                 'options' => $contracts->map(function($contract) {
+                    $bookName = $contract->book?->product?->name ?? $contract->book_name;   
                     return [
                         'value' => $contract->id,
-                        'label' => $contract->author->full_name . ' - ' . $contract->book->product->name
+                        'label' => $contract->author->full_name . ' - ' . $bookName 
                     ];
                 })->toArray()
             ],
@@ -144,7 +145,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">{{ __('product::transaction.this_month_amount') }}</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($stats['this_month'], 2) }}</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($stats['this_month_amount'], 2) }}</p>
                     </div>
                     <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,7 +160,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">{{ __('product::transaction.this_year_amount') }}</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($stats['this_year'], 2) }}</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($stats['this_year_amount'], 2) }}</p>
                     </div>
                     <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

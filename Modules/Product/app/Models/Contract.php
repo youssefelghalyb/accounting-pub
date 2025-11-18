@@ -19,6 +19,7 @@ class Contract extends Model
         'contract_file',
         'created_by',
         'edited_by',
+        'book_name',
     ];
 
     protected $casts = [

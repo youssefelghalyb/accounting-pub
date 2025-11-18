@@ -9,6 +9,7 @@ return [
     'view_contract' => 'View Contract',
     'contract_details' => 'Contract Details',
     'create_contract' => 'Create New Contract',
+    'book_name' => 'Book Name',
 
     // Form Labels
     'author' => 'Author',

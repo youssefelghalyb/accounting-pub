@@ -32,6 +32,7 @@ return [
     'date_from' => 'Date From',
     'date_to' => 'Date To',
     'download_receipt' => 'Download Receipt',
+    'add_payment' => 'Add Payment',
 
     // Contract Info
     'contract_info' => 'Contract Information',

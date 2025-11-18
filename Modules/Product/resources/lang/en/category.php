@@ -20,6 +20,7 @@ return [
     'parent_categories' => 'Parent Categories',
     'sub_categories' => 'Sub Categories',
     'total_books' => 'Total Books',
+    'outstanding_balance' => 'Outstanding Balance',
 
     // Actions
     'search' => 'Search categories...',
@@ -43,4 +44,8 @@ return [
     // Placeholders
     'enter_name' => 'Enter category name',
     'select_parent' => 'Select parent category (optional)',
+
+    // contract payments
+    'no_payments' => 'No payments found for this contract',
+    'no_payments_description' => 'There are currently no payments associated with this contract. To add a payment, click the "Add Payment" button above.',
 ];

@@ -90,7 +90,7 @@ $formConfig = [
                     'borderColor' => '#10b981',
                     'options' => collect($authors)->map(function($author) {
                         return ['value' => $author->id, 'label' => $author->full_name];
-                    })->prepend(['value' => '', 'label' => __('product::book.select_author')])->toArray()
+                    })->prepend(['value' => ' ', 'label' => __('product::book.select_author')])->toArray()
                 ],
                 [
                     'name' => 'category_id',
@@ -101,7 +101,7 @@ $formConfig = [
                     'borderColor' => '#10b981',
                     'options' => collect($categories)->map(function($cat) {
                         return ['value' => $cat->id, 'label' => $cat->name];
-                    })->prepend(['value' => '', 'label' => __('product::book.select_category')])->toArray()
+                    })->prepend(['value' => ' ', 'label' => __('product::book.select_category')])->toArray()
                 ],
                 [
                     'name' => 'sub_category_id',
@@ -112,7 +112,7 @@ $formConfig = [
                     'borderColor' => '#10b981',
                     'options' => collect($subCategories)->map(function($cat) {
                         return ['value' => $cat->id, 'label' => $cat->name];
-                    })->prepend(['value' => '', 'label' => __('product::book.select_sub_category')])->toArray()
+                    })->prepend(['value' => ' ', 'label' => __('product::book.select_sub_category')])->toArray()
                 ],
                 [
                     'name' => 'num_of_pages',
@@ -160,8 +160,12 @@ $formConfig = [
             'fields' => [
                 [
                     'name' => 'is_translated',
-                    'type' => 'checkbox',
+                    'type' => 'radio',
                     'label' => __('product::book.is_translated'),
+                    'options' => [
+                        ['value' => '1', 'label' => __('common.yes')],
+                        ['value' => '0', 'label' => __('common.no')],
+                    ],
                     'grid' => 12,
                     'borderColor' => '#8b5cf6'
                 ],

@@ -5,7 +5,7 @@
             return [
                 'id' => $contract->id,
                 'author_name' => $contract->author->full_name,
-                'book_name' => $contract->book->product->name,
+                'book_name' => isset($contract->book) ?  $contract->book->product->name : $contract->book_name,
                 'contract_date' => $contract->contract_date->format('Y-m-d'),
                 'contract_price' => $contract->contract_price,
                 'total_paid' => $contract->total_paid,

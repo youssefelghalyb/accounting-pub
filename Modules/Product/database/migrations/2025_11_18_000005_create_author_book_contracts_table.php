@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('author_book_contracts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('author_id')->constrained('authors')->onDelete('cascade');
-            $table->foreignId('book_id')->constrained('books')->onDelete('cascade');
+            $table->foreignId('book_id')->nullable()->constrained('books')->onDelete('cascade');
+            $table->string('book_name')->nullable();
             $table->date('contract_date');
             $table->decimal('contract_price', 12, 2)->default(0);
             $table->decimal('percentage_from_book_profit', 5, 2)->default(0);

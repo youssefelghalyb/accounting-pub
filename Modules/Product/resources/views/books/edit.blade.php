@@ -1,219 +1,232 @@
 @php
-$formConfig = [
-    'groups' => [
-        [
-            'title' => __('product::book.product_info'),
-            'fields' => [
-                [
-                    'name' => 'name',
-                    'type' => 'text',
-                    'label' => __('product::product.name'),
-                    'placeholder' => __('product::product.enter_name'),
-                    'required' => true,
-                    'value' => $book->product->name,
-                    'grid' => 6,
-                    'borderColor' => '#3b82f6'
+    $formConfig = [
+        'groups' => [
+            [
+                'title' => __('product::book.product_info'),
+                'fields' => [
+                    [
+                        'name' => 'name',
+                        'type' => 'text',
+                        'label' => __('product::product.name'),
+                        'placeholder' => __('product::product.enter_name'),
+                        'required' => true,
+                        'value' => $book->product->name,
+                        'grid' => 6,
+                        'borderColor' => '#3b82f6',
+                    ],
+                    [
+                        'name' => 'type',
+                        'type' => 'select',
+                        'label' => __('product::product.type'),
+                        'required' => true,
+                        'value' => $book->product->type,
+                        'grid' => 6,
+                        'borderColor' => '#3b82f6',
+                        'options' => [
+                            ['value' => '', 'label' => __('product::product.select_type')],
+                            ['value' => 'book', 'label' => __('product::product.book')],
+                            ['value' => 'ebook', 'label' => __('product::product.ebook')],
+                        ],
+                    ],
+                    [
+                        'name' => 'sku',
+                        'type' => 'text',
+                        'label' => __('product::product.sku'),
+                        'placeholder' => __('product::product.enter_sku'),
+                        'required' => false,
+                        'value' => $book->product->sku,
+                        'grid' => 6,
+                        'borderColor' => '#3b82f6',
+                    ],
+                    [
+                        'name' => 'base_price',
+                        'type' => 'number',
+                        'label' => __('product::product.base_price'),
+                        'placeholder' => __('product::product.enter_base_price'),
+                        'required' => true,
+                        'value' => $book->product->base_price,
+                        'grid' => 6,
+                        'borderColor' => '#3b82f6',
+                    ],
+                    [
+                        'name' => 'status',
+                        'type' => 'select',
+                        'label' => __('product::product.status'),
+                        'required' => true,
+                        'value' => $book->product->status,
+                        'grid' => 12,
+                        'borderColor' => '#3b82f6',
+                        'options' => [
+                            ['value' => '', 'label' => __('product::product.select_status')],
+                            ['value' => 'active', 'label' => __('product::product.active')],
+                            ['value' => 'inactive', 'label' => __('product::product.inactive')],
+                        ],
+                    ],
+                    [
+                        'name' => 'description',
+                        'type' => 'textarea',
+                        'label' => __('product::product.description'),
+                        'placeholder' => __('product::product.enter_description'),
+                        'required' => false,
+                        'value' => $book->product->description,
+                        'rows' => 3,
+                        'grid' => 12,
+                        'borderColor' => '#3b82f6',
+                    ],
                 ],
-                [
-                    'name' => 'type',
-                    'type' => 'select',
-                    'label' => __('product::product.type'),
-                    'required' => true,
-                    'value' => $book->product->type,
-                    'grid' => 6,
-                    'borderColor' => '#3b82f6',
-                    'options' => [
-                        ['value' => '', 'label' => __('product::product.select_type')],
-                        ['value' => 'book', 'label' => __('product::product.book')],
-                        ['value' => 'ebook', 'label' => __('product::product.ebook')],
-                    ]
+            ],
+            [
+                'title' => __('product::book.book_info'),
+                'fields' => [
+                    [
+                        'name' => 'isbn',
+                        'type' => 'text',
+                        'label' => __('product::book.isbn'),
+                        'placeholder' => __('product::book.enter_isbn'),
+                        'required' => true,
+                        'value' => $book->isbn,
+                        'grid' => 6,
+                        'borderColor' => '#10b981',
+                    ],
+                    [
+                        'name' => 'author_id',
+                        'type' => 'select',
+                        'label' => __('product::book.author'),
+                        'required' => false,
+                        'value' => $book->author_id,
+                        'grid' => 6,
+                        'borderColor' => '#10b981',
+                        'options' => collect($authors)
+                            ->map(function ($author) {
+                                return ['value' => $author->id, 'label' => $author->full_name];
+                            })
+                            ->prepend(['value' => ' ', 'label' => __('product::book.select_author')])
+                            ->toArray(),
+                    ],
+                    [
+                        'name' => 'category_id',
+                        'type' => 'select',
+                        'label' => __('product::book.category'),
+                        'required' => false,
+                        'value' => $book->category_id,
+                        'grid' => 6,
+                        'borderColor' => '#10b981',
+                        'options' => collect($categories)
+                            ->map(function ($cat) {
+                                return ['value' => $cat->id, 'label' => $cat->name];
+                            })
+                            ->prepend(['value' => ' ', 'label' => __('product::book.select_category')])
+                            ->toArray(),
+                    ],
+                    [
+                        'name' => 'sub_category_id',
+                        'type' => 'select',
+                        'label' => __('product::book.sub_category'),
+                        'required' => false,
+                        'value' => $book->sub_category_id,
+                        'grid' => 6,
+                        'borderColor' => '#10b981',
+                        'options' => collect($subCategories)
+                            ->map(function ($cat) {
+                                return ['value' => $cat->id, 'label' => $cat->name];
+                            })
+                            ->prepend(['value' => ' ', 'label' => __('product::book.select_sub_category')])
+                            ->toArray(),
+                    ],
+                    [
+                        'name' => 'num_of_pages',
+                        'type' => 'number',
+                        'label' => __('product::book.num_of_pages'),
+                        'placeholder' => __('product::book.enter_pages'),
+                        'required' => false,
+                        'value' => $book->num_of_pages,
+                        'grid' => 6,
+                        'borderColor' => '#10b981',
+                    ],
+                    [
+                        'name' => 'cover_type',
+                        'type' => 'select',
+                        'label' => __('product::book.cover_type'),
+                        'required' => true,
+                        'value' => $book->cover_type,
+                        'grid' => 6,
+                        'borderColor' => '#10b981',
+                        'options' => [
+                            ['value' => '', 'label' => __('product::book.select_cover_type')],
+                            ['value' => 'hard', 'label' => __('product::book.hard')],
+                            ['value' => 'soft', 'label' => __('product::book.soft')],
+                        ],
+                    ],
+                    [
+                        'name' => 'published_at',
+                        'type' => 'date',
+                        'label' => __('product::book.published_at'),
+                        'required' => false,
+                        'value' => $book->published_at ? $book->published_at->format('Y-m-d') : null,
+                        'grid' => 6,
+                        'borderColor' => '#10b981',
+                    ],
+                    [
+                        'name' => 'language',
+                        'type' => 'text',
+                        'label' => __('product::book.language'),
+                        'placeholder' => __('product::book.enter_language'),
+                        'required' => false,
+                        'value' => $book->language,
+                        'grid' => 6,
+                        'borderColor' => '#10b981',
+                    ],
                 ],
-                [
-                    'name' => 'sku',
-                    'type' => 'text',
-                    'label' => __('product::product.sku'),
-                    'placeholder' => __('product::product.enter_sku'),
-                    'required' => false,
-                    'value' => $book->product->sku,
-                    'grid' => 6,
-                    'borderColor' => '#3b82f6'
+            ],
+            [
+                'title' => __('product::book.translation_info'),
+                'fields' => [
+                    [
+                        'name' => 'is_translated',
+                        'type' => 'radio',
+                        'label' => __('product::book.is_translated'),
+                        'value' => $book->is_translated,
+                        'options' => [
+                            ['value' => 1, 'label' => __('common.yes')],
+                            ['value' => 0, 'label' => __('common.no')],
+                        ],
+                        'grid' => 12,
+                        'borderColor' => '#8b5cf6',
+                    ],
+                    [
+                        'name' => 'translated_from',
+                        'type' => 'text',
+                        'label' => __('product::book.translated_from'),
+                        'placeholder' => __('product::book.enter_translated_from'),
+                        'required' => false,
+                        'value' => $book->translated_from,
+                        'grid' => 4,
+                        'borderColor' => '#8b5cf6',
+                    ],
+                    [
+                        'name' => 'translated_to',
+                        'type' => 'text',
+                        'label' => __('product::book.translated_to'),
+                        'placeholder' => __('product::book.enter_translated_to'),
+                        'required' => false,
+                        'value' => $book->translated_to,
+                        'grid' => 4,
+                        'borderColor' => '#8b5cf6',
+                    ],
+                    [
+                        'name' => 'translator_name',
+                        'type' => 'text',
+                        'label' => __('product::book.translator_name'),
+                        'placeholder' => __('product::book.enter_translator_name'),
+                        'required' => false,
+                        'value' => $book->translator_name,
+                        'grid' => 4,
+                        'borderColor' => '#8b5cf6',
+                    ],
                 ],
-                [
-                    'name' => 'base_price',
-                    'type' => 'number',
-                    'label' => __('product::product.base_price'),
-                    'placeholder' => __('product::product.enter_base_price'),
-                    'required' => true,
-                    'value' => $book->product->base_price,
-                    'grid' => 6,
-                    'borderColor' => '#3b82f6'
-                ],
-                [
-                    'name' => 'status',
-                    'type' => 'select',
-                    'label' => __('product::product.status'),
-                    'required' => true,
-                    'value' => $book->product->status,
-                    'grid' => 12,
-                    'borderColor' => '#3b82f6',
-                    'options' => [
-                        ['value' => '', 'label' => __('product::product.select_status')],
-                        ['value' => 'active', 'label' => __('product::product.active')],
-                        ['value' => 'inactive', 'label' => __('product::product.inactive')],
-                    ]
-                ],
-                [
-                    'name' => 'description',
-                    'type' => 'textarea',
-                    'label' => __('product::product.description'),
-                    'placeholder' => __('product::product.enter_description'),
-                    'required' => false,
-                    'value' => $book->product->description,
-                    'rows' => 3,
-                    'grid' => 12,
-                    'borderColor' => '#3b82f6'
-                ]
-            ]
+            ],
         ],
-        [
-            'title' => __('product::book.book_info'),
-            'fields' => [
-                [
-                    'name' => 'isbn',
-                    'type' => 'text',
-                    'label' => __('product::book.isbn'),
-                    'placeholder' => __('product::book.enter_isbn'),
-                    'required' => true,
-                    'value' => $book->isbn,
-                    'grid' => 6,
-                    'borderColor' => '#10b981'
-                ],
-                [
-                    'name' => 'author_id',
-                    'type' => 'select',
-                    'label' => __('product::book.author'),
-                    'required' => false,
-                    'value' => $book->author_id,
-                    'grid' => 6,
-                    'borderColor' => '#10b981',
-                    'options' => collect($authors)->map(function($author) {
-                        return ['value' => $author->id, 'label' => $author->full_name];
-                    })->prepend(['value' => '', 'label' => __('product::book.select_author')])->toArray()
-                ],
-                [
-                    'name' => 'category_id',
-                    'type' => 'select',
-                    'label' => __('product::book.category'),
-                    'required' => false,
-                    'value' => $book->category_id,
-                    'grid' => 6,
-                    'borderColor' => '#10b981',
-                    'options' => collect($categories)->map(function($cat) {
-                        return ['value' => $cat->id, 'label' => $cat->name];
-                    })->prepend(['value' => '', 'label' => __('product::book.select_category')])->toArray()
-                ],
-                [
-                    'name' => 'sub_category_id',
-                    'type' => 'select',
-                    'label' => __('product::book.sub_category'),
-                    'required' => false,
-                    'value' => $book->sub_category_id,
-                    'grid' => 6,
-                    'borderColor' => '#10b981',
-                    'options' => collect($subCategories)->map(function($cat) {
-                        return ['value' => $cat->id, 'label' => $cat->name];
-                    })->prepend(['value' => '', 'label' => __('product::book.select_sub_category')])->toArray()
-                ],
-                [
-                    'name' => 'num_of_pages',
-                    'type' => 'number',
-                    'label' => __('product::book.num_of_pages'),
-                    'placeholder' => __('product::book.enter_pages'),
-                    'required' => false,
-                    'value' => $book->num_of_pages,
-                    'grid' => 6,
-                    'borderColor' => '#10b981'
-                ],
-                [
-                    'name' => 'cover_type',
-                    'type' => 'select',
-                    'label' => __('product::book.cover_type'),
-                    'required' => true,
-                    'value' => $book->cover_type,
-                    'grid' => 6,
-                    'borderColor' => '#10b981',
-                    'options' => [
-                        ['value' => '', 'label' => __('product::book.select_cover_type')],
-                        ['value' => 'hard', 'label' => __('product::book.hard')],
-                        ['value' => 'soft', 'label' => __('product::book.soft')],
-                    ]
-                ],
-                [
-                    'name' => 'published_at',
-                    'type' => 'date',
-                    'label' => __('product::book.published_at'),
-                    'required' => false,
-                    'value' => $book->published_at ? $book->published_at->format('Y-m-d') : null,
-                    'grid' => 6,
-                    'borderColor' => '#10b981'
-                ],
-                [
-                    'name' => 'language',
-                    'type' => 'text',
-                    'label' => __('product::book.language'),
-                    'placeholder' => __('product::book.enter_language'),
-                    'required' => false,
-                    'value' => $book->language,
-                    'grid' => 6,
-                    'borderColor' => '#10b981'
-                ]
-            ]
-        ],
-        [
-            'title' => __('product::book.translation_info'),
-            'fields' => [
-                [
-                    'name' => 'is_translated',
-                    'type' => 'checkbox',
-                    'label' => __('product::book.is_translated'),
-                    'value' => $book->is_translated,
-                    'grid' => 12,
-                    'borderColor' => '#8b5cf6'
-                ],
-                [
-                    'name' => 'translated_from',
-                    'type' => 'text',
-                    'label' => __('product::book.translated_from'),
-                    'placeholder' => __('product::book.enter_translated_from'),
-                    'required' => false,
-                    'value' => $book->translated_from,
-                    'grid' => 4,
-                    'borderColor' => '#8b5cf6'
-                ],
-                [
-                    'name' => 'translated_to',
-                    'type' => 'text',
-                    'label' => __('product::book.translated_to'),
-                    'placeholder' => __('product::book.enter_translated_to'),
-                    'required' => false,
-                    'value' => $book->translated_to,
-                    'grid' => 4,
-                    'borderColor' => '#8b5cf6'
-                ],
-                [
-                    'name' => 'translator_name',
-                    'type' => 'text',
-                    'label' => __('product::book.translator_name'),
-                    'placeholder' => __('product::book.enter_translator_name'),
-                    'required' => false,
-                    'value' => $book->translator_name,
-                    'grid' => 4,
-                    'borderColor' => '#8b5cf6'
-                ]
-            ]
-        ]
-    ]
-];
+    ];
 @endphp
 
 <x-dashboard :pageTitle="__('product::book.edit_book')">
@@ -227,8 +240,11 @@ $formConfig = [
                     </a>
                 </li>
                 <li>
-                    <svg class="w-5 h-5 text-gray-400 {{ app()->getLocale() == 'ar' ? 'rotate-180' : '' }}" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                    <svg class="w-5 h-5 text-gray-400 {{ app()->getLocale() == 'ar' ? 'rotate-180' : '' }}"
+                        fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                            clip-rule="evenodd"></path>
                     </svg>
                 </li>
                 <li>
@@ -240,33 +256,30 @@ $formConfig = [
         <!-- Form Card -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">
             <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-gray-900">{{ __('product::book.edit_book') }}: {{ $book->product->name }}</h2>
+                <h2 class="text-xl font-bold text-gray-900">{{ __('product::book.edit_book') }}:
+                    {{ $book->product->name }}</h2>
                 <p class="text-sm text-gray-600 mt-1">{{ __('common.required_fields') }}</p>
             </div>
 
             <div class="p-6">
-                <x-dashboard.packages.form-builder
-                    :action="route('product.books.update', $book)"
-                    method="POST"
-                    :formConfig="$formConfig"
-                />
+                <x-dashboard.packages.form-builder :action="route('product.books.update', $book)" method="POST" :formConfig="$formConfig" />
             </div>
         </div>
     </div>
 
     @push('scripts')
-    <script>
-        // Add hidden method field for PUT request
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('dynamicForm');
-            if (form) {
-                const methodField = document.createElement('input');
-                methodField.type = 'hidden';
-                methodField.name = '_method';
-                methodField.value = 'PUT';
-                form.insertBefore(methodField, form.firstChild);
-            }
-        });
-    </script>
+        <script>
+            // Add hidden method field for PUT request
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.getElementById('dynamicForm');
+                if (form) {
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'PUT';
+                    form.insertBefore(methodField, form.firstChild);
+                }
+            });
+        </script>
     @endpush
 </x-dashboard>

@@ -32,6 +32,7 @@ return [
     'date_from' => 'من تاريخ',
     'date_to' => 'إلى تاريخ',
     'download_receipt' => 'تحميل الإيصال',
+    'add_payment' => 'إضافة دفعة',
 
     // Contract Info
     'contract_info' => 'معلومات العقد',

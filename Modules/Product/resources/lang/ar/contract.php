@@ -9,6 +9,7 @@ return [
     'view_contract' => 'عرض العقد',
     'contract_details' => 'تفاصيل العقد',
     'create_contract' => 'إنشاء عقد جديد',
+    'book_name' => 'اسم الكتاب',
 
     // Form Labels
     'author' => 'المؤلف',
@@ -30,6 +31,7 @@ return [
     'total_paid' => 'إجمالي المدفوع',
     'outstanding' => 'الرصيد المستحق',
     'payment_percentage' => 'نسبة تقدم الدفع',
+    'outstanding_balance' => 'الرصيد المستحق',
 
     // Actions
     'search' => 'البحث في العقود...',
@@ -71,4 +73,8 @@ return [
     'enter_contract_price' => 'أدخل قيمة العقد',
     'enter_percentage' => 'أدخل النسبة (0-100)',
     'upload_contract_file' => 'رفع ملف العقد (PDF/DOC)',
+
+    // contract payments
+    'no_payments' => 'لم يتم العثور على دفعات لهذا العقد',
+    'no_payments_description' => 'لا توجد حالياً دفعات مرتبطة بهذا العقد. لإضافة دفعة، انقر فوق زر "إضافة دفعة" أعلاه.',
 ];

@@ -12,9 +12,13 @@ $formConfig = [
                     'grid' => 12,
                     'borderColor' => '#3b82f6',
                     'options' => collect($contracts)->map(function($contract) {
+                            $bookName = $contract->book?->product?->name ?? $contract->book_name;
+
                         return [
                             'value' => $contract->id,
-                            'label' => $contract->author->full_name . ' - ' . $contract->book->product->name . ' ('. number_format($contract->outstanding_balance, 2) . ' ' . __('product::transaction.remaining') . ')'
+                            'label' => $contract->author->full_name . ' - ' .  
+                            $bookName .
+                             ' ('. number_format($contract->outstanding_balance, 2) . ' ' . __('product::transaction.remaining') . ')'
                         ];
                     })->prepend(['value' => '', 'label' => __('product::transaction.select_contract')])->toArray()
                 ],

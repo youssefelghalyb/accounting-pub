@@ -26,14 +26,14 @@ $formConfig = [
                     'borderColor' => '#3b82f6',
                     'options' => collect($books)->map(function($book) {
                         return ['value' => $book->id, 'label' => $book->product->name];
-                    })->prepend(['value' => '', 'label' => __('product::contract.select_book')])->toArray()
+                    })->prepend(['value' => ' ', 'label' => __('product::contract.select_book')])->toArray()
                 ],
                 [
                     'name' => 'book name', 
                     'type' => 'text',
                     'label' => __('product::contract.book_name'),
                     'required' => false,
-                    'value' => $contract->book->product->name,
+                    'value' => $contract->book_name  ,
                     'grid' => 4,
                     'borderColor' => '#3b82f6',
                 ],
@@ -109,7 +109,8 @@ $formConfig = [
         <!-- Form Card -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">
             <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-gray-900">{{ __('product::contract.edit_contract') }}: {{ $contract->author->full_name }} - {{ $contract->book->product->name }}</h2>
+                <h2 class="text-xl font-bold text-gray-900">{{ __('product::contract.edit_contract') }}: {{ $contract->author->full_name }} - 
+                    {{ isset($contract->book) ? $contract->book->product->name : $contract->book_name }}</h2>
                 <p class="text-sm text-gray-600 mt-1">{{ __('common.required_fields') }}</p>
             </div>
 
