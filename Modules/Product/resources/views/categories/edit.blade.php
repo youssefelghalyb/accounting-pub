@@ -1,3 +1,38 @@
+@php
+$formConfig = [
+    'fields' => [
+        [
+            'name' => 'name',
+            'type' => 'text',
+            'label' => __('product::category.name'),
+            'placeholder' => __('product::category.enter_name'),
+            'required' => true,
+            'value' => $category->name,
+            'grid' => 12,
+            'borderColor' => '#3b82f6'
+        ],
+        [
+            'name' => 'parent_id',
+            'type' => 'select',
+            'label' => __('product::category.parent_category'),
+            'required' => false,
+            'value' => $category->parent_id,
+            'grid' => 12,
+            'borderColor' => '#10b981',
+            'options' => collect($parentCategories)->map(function($cat) {
+                return [
+                    'value' => $cat->id,
+                    'label' => $cat->name
+                ];
+            })->prepend([
+                'value' => '',
+                'label' => __('product::category.none')
+            ])->toArray()
+        ]
+    ]
+];
+@endphp
+
 <x-dashboard :pageTitle="__('product::category.edit_category')">
     <div class="max-w-5xl mx-auto">
         <!-- Breadcrumb -->
@@ -30,38 +65,7 @@
                 <x-dashboard.packages.form-builder
                     :action="route('product.categories.update', $category)"
                     method="POST"
-                    :formConfig="[
-                        'fields' => [
-                            [
-                                'name' => 'name',
-                                'type' => 'text',
-                                'label' => __('product::category.name'),
-                                'placeholder' => __('product::category.enter_name'),
-                                'required' => true,
-                                'value' => $category->name,
-                                'grid' => 12,
-                                'borderColor' => '#3b82f6'
-                            ],
-                            [
-                                'name' => 'parent_id',
-                                'type' => 'select',
-                                'label' => __('product::category.parent_category'),
-                                'required' => false,
-                                'value' => $category->parent_id,
-                                'grid' => 12,
-                                'borderColor' => '#10b981',
-                                'options' => collect($parentCategories)->map(function($cat) {
-                                    return [
-                                        'value' => $cat->id,
-                                        'label' => $cat->name
-                                    ];
-                                })->prepend([
-                                    'value' => '',
-                                    'label' => __('product::category.none')
-                                ])->toArray()
-                            ]
-                        ]
-                    ]"
+                    :formConfig="$formConfig"
                 />
             </div>
         </div>

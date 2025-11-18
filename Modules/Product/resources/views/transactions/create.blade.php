@@ -1,3 +1,66 @@
+@php
+$formConfig = [
+    'groups' => [
+        [
+            'title' => __('product::transaction.transaction_details'),
+            'fields' => [
+                [
+                    'name' => 'contract_id',
+                    'type' => 'select',
+                    'label' => __('product::transaction.contract'),
+                    'required' => true,
+                    'grid' => 12,
+                    'borderColor' => '#3b82f6',
+                    'options' => collect($contracts)->map(function($contract) {
+                        return [
+                            'value' => $contract->id,
+                            'label' => $contract->author->full_name . ' - ' . $contract->book->product->name . ' ('. number_format($contract->outstanding_balance, 2) . ' ' . __('product::transaction.remaining') . ')'
+                        ];
+                    })->prepend(['value' => '', 'label' => __('product::transaction.select_contract')])->toArray()
+                ],
+                [
+                    'name' => 'amount',
+                    'type' => 'number',
+                    'label' => __('product::transaction.amount'),
+                    'placeholder' => __('product::transaction.enter_amount'),
+                    'required' => true,
+                    'grid' => 6,
+                    'borderColor' => '#10b981'
+                ],
+                [
+                    'name' => 'payment_date',
+                    'type' => 'date',
+                    'label' => __('product::transaction.payment_date'),
+                    'required' => true,
+                    'grid' => 6,
+                    'borderColor' => '#10b981'
+                ],
+                [
+                    'name' => 'notes',
+                    'type' => 'textarea',
+                    'label' => __('product::transaction.notes'),
+                    'placeholder' => __('product::transaction.enter_notes'),
+                    'required' => false,
+                    'rows' => 3,
+                    'grid' => 12,
+                    'borderColor' => '#8b5cf6'
+                ],
+                [
+                    'name' => 'receipt_file',
+                    'type' => 'file',
+                    'label' => __('product::transaction.receipt_file'),
+                    'required' => false,
+                    'grid' => 12,
+                    'borderColor' => '#8b5cf6',
+                    'accept' => '.pdf,.jpg,.jpeg,.png',
+                    'helperText' => __('product::transaction.upload_receipt')
+                ]
+            ]
+        ]
+    ]
+];
+@endphp
+
 <x-dashboard :pageTitle="__('product::transaction.add_transaction')">
     <div class="max-w-5xl mx-auto">
         <!-- Breadcrumb -->
@@ -30,66 +93,7 @@
                 <x-dashboard.packages.form-builder
                     :action="route('product.transactions.store')"
                     method="POST"
-                    :formConfig="[
-                        'groups' => [
-                            [
-                                'title' => __('product::transaction.transaction_details'),
-                                'fields' => [
-                                    [
-                                        'name' => 'contract_id',
-                                        'type' => 'select',
-                                        'label' => __('product::transaction.contract'),
-                                        'required' => true,
-                                        'grid' => 12,
-                                        'borderColor' => '#3b82f6',
-                                        'options' => collect(\$contracts)->map(function(\$contract) {
-                                            return [
-                                                'value' => \$contract->id,
-                                                'label' => \$contract->author->full_name . ' - ' . \$contract->book->product->name . ' ('. number_format(\$contract->outstanding_balance, 2) . ' ' . __('product::transaction.remaining') . ')'
-                                            ];
-                                        })->prepend(['value' => '', 'label' => __('product::transaction.select_contract')])->toArray()
-                                    ],
-                                    [
-                                        'name' => 'amount',
-                                        'type' => 'number',
-                                        'label' => __('product::transaction.amount'),
-                                        'placeholder' => __('product::transaction.enter_amount'),
-                                        'required' => true,
-                                        'grid' => 6,
-                                        'borderColor' => '#10b981'
-                                    ],
-                                    [
-                                        'name' => 'payment_date',
-                                        'type' => 'date',
-                                        'label' => __('product::transaction.payment_date'),
-                                        'required' => true,
-                                        'grid' => 6,
-                                        'borderColor' => '#10b981'
-                                    ],
-                                    [
-                                        'name' => 'notes',
-                                        'type' => 'textarea',
-                                        'label' => __('product::transaction.notes'),
-                                        'placeholder' => __('product::transaction.enter_notes'),
-                                        'required' => false,
-                                        'rows' => 3,
-                                        'grid' => 12,
-                                        'borderColor' => '#8b5cf6'
-                                    ],
-                                    [
-                                        'name' => 'receipt_file',
-                                        'type' => 'file',
-                                        'label' => __('product::transaction.receipt_file'),
-                                        'required' => false,
-                                        'grid' => 12,
-                                        'borderColor' => '#8b5cf6',
-                                        'accept' => '.pdf,.jpg,.jpeg,.png',
-                                        'helperText' => __('product::transaction.upload_receipt')
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]"
+                    :formConfig="$formConfig"
                 />
             </div>
         </div>
