@@ -3,6 +3,7 @@
 return [
     // Page Titles
     'transactions' => 'المعاملات',
+    'transaction' => 'المعاملة',
     'transaction_list' => 'قائمة المعاملات',
     'add_transaction' => 'إضافة معاملة',
     'edit_transaction' => 'تعديل معاملة',
@@ -36,10 +37,16 @@ return [
 
     // Contract Info
     'contract_info' => 'معلومات العقد',
+    'contract_information' => 'معلومات العقد',
     'contract_price' => 'قيمة العقد',
     'total_paid' => 'إجمالي المدفوع',
     'outstanding_balance' => 'الرصيد المستحق',
     'remaining' => 'المتبقي',
+    'payment_amount' => 'مبلغ الدفعة',
+    'paid_on' => 'تاريخ الدفع',
+    'paid' => 'مدفوع',
+    'view_receipt' => 'عرض الإيصال',
+    'payment_progress' => 'تقدم الدفع',
 
     // Messages
     'transaction_added' => 'تم إضافة المعاملة بنجاح',

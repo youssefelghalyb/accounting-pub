@@ -24,6 +24,9 @@ return [
     'personal_info' => 'المعلومات الشخصية',
     'contact_info' => 'معلومات الاتصال',
     'additional_info' => 'معلومات إضافية',
+    'books' => 'الكتب',
+    'contracts' => 'العقود',
+    'transactions' => 'المعاملات',
 
     // Statistics
     'total_authors' => 'إجمالي المؤلفين',
@@ -32,6 +35,7 @@ return [
     'total_contract_value' => 'إجمالي قيمة العقود',
     'total_paid' => 'إجمالي المدفوع',
     'outstanding_balance' => 'الرصيد المستحق',
+    'remaining_payments' => 'المدفوعات المتبقية',
 
     // Actions
     'search' => 'البحث في المؤلفين...',
@@ -44,6 +48,9 @@ return [
     'author_updated' => 'تم تحديث المؤلف بنجاح',
     'author_deleted' => 'تم حذف المؤلف بنجاح',
     'no_authors' => 'لم يتم العثور على مؤلفين',
+    'no_books' => 'لم يتم العثور على كتب',
+    'no_contracts' => 'لم يتم العثور على عقود',
+    'no_transactions' => 'لم يتم العثور على معاملات',
     'cannot_delete_has_books' => 'لا يمكن حذف مؤلف لديه كتب',
 
     // Validation

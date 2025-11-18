@@ -3,6 +3,7 @@
 return [
     // Page Titles
     'transactions' => 'Contract Transactions',
+    'transaction' => 'Transaction',
     'transaction_list' => 'Transaction List',
     'add_transaction' => 'Add Transaction',
     'edit_transaction' => 'Edit Transaction',
@@ -36,10 +37,16 @@ return [
 
     // Contract Info
     'contract_info' => 'Contract Information',
+    'contract_information' => 'Contract Information',
     'contract_price' => 'Contract Price',
     'total_paid' => 'Total Paid',
     'outstanding_balance' => 'Outstanding Balance',
     'remaining' => 'Remaining',
+    'payment_amount' => 'Payment Amount',
+    'paid_on' => 'Paid On',
+    'paid' => 'Paid',
+    'view_receipt' => 'View Receipt',
+    'payment_progress' => 'Payment Progress',
 
     // Messages
     'transaction_added' => 'Transaction added successfully',

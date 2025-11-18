@@ -24,6 +24,9 @@ return [
     'personal_info' => 'Personal Information',
     'contact_info' => 'Contact Information',
     'additional_info' => 'Additional Information',
+    'books' => 'Books',
+    'contracts' => 'Contracts',
+    'transactions' => 'Transactions',
 
     // Statistics
     'total_authors' => 'Total Authors',
@@ -32,6 +35,7 @@ return [
     'total_contract_value' => 'Total Contract Value',
     'total_paid' => 'Total Paid',
     'outstanding_balance' => 'Outstanding Balance',
+    'remaining_payments' => 'Remaining Payments',
 
     // Actions
     'search' => 'Search authors...',
@@ -44,6 +48,9 @@ return [
     'author_updated' => 'Author updated successfully',
     'author_deleted' => 'Author deleted successfully',
     'no_authors' => 'No authors found',
+    'no_books' => 'No books found',
+    'no_contracts' => 'No contracts found',
+    'no_transactions' => 'No transactions found',
     'cannot_delete_has_books' => 'Cannot delete author with books',
 
     // Validation
