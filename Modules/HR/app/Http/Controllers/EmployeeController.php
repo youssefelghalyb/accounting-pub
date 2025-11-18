@@ -2,6 +2,7 @@
 
 namespace Modules\HR\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\HR\Models\Employee;
@@ -85,6 +86,8 @@ class EmployeeController extends Controller
      */
 public function show($id)
 {
+        // Carbon::setTestNow('2025-12-10 12:00:00'); // Fake date
+
     $employee = Employee::findOrFail($id);
     $employee->load(['department', 'leaves.leaveType', 'deductions', 'advances']);
     

@@ -26,6 +26,7 @@ return [
     'type_days' => 'خصم أيام',
     'type_amount' => 'مبلغ ثابت',
     'type_unpaid_leave' => 'إجازة بدون أجر',
+    'type_advance_deduction' => 'خصم سلفة',
 
     // Messages
     'deduction_created' => 'تم إنشاء الخصم بنجاح',

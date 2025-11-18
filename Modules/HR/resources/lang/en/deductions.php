@@ -26,6 +26,7 @@ return [
     'type_days' => 'Days Deduction',
     'type_amount' => 'Fixed Amount',
     'type_unpaid_leave' => 'Unpaid Leave',
+    'type_advance_deduction' => 'Advance Deduction',
 
     // Messages
     'deduction_created' => 'Deduction created successfully',

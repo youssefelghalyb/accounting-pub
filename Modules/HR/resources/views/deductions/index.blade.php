@@ -13,6 +13,7 @@
                 'days' => $deduction->days,
                 'amount' => $deduction->amount,
                 'deduction_date' => $deduction->deduction_date->format('Y-m-d'),
+                'advance_id' => $deduction->advance_id,
                 'is_from_leave' => $deduction->isFromLeave(),
                 'model' => $deduction
             ];
@@ -45,7 +46,9 @@
                         return '<span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">' . __('hr::deductions.type_days') . '</span>';
                     } elseif ($row['type'] === 'amount') {
                         return '<span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">' . __('hr::deductions.type_amount') . '</span>';
-                    } else {
+                    } elseif ($row['advance_id']) {
+                        return '<span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">' . __('hr::deductions.type_advance_deduction') . '</span>';
+                    }else{
                         return '<span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">' . __('hr::deductions.type_unpaid_leave') . '</span>';
                     }
                 }
