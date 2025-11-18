@@ -23,7 +23,7 @@ $formConfig = [
                     'label' => $cat->name
                 ];
             })->prepend([
-                'value' => '',
+                'value' => ' ',
                 'label' => __('product::category.none')
             ])->toArray()
         ]
