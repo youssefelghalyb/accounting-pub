@@ -623,6 +623,18 @@
                                 <span class="sidebar-text font-medium">{{ __('sidebar.deductions') }}</span>
                                 <span class="sidebar-tooltip">{{ __('sidebar.deductions') }}</span>
                             </a>
+
+                            <a href="{{ route('hr.advances.index') }}"
+                                class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
+                                <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                <span class="sidebar-text font-medium">{{ __('sidebar.advances') }}</span>
+                                <span class="sidebar-tooltip">{{ __('sidebar.advances') }}</span>
+                            </a>
                         </div>
 
 
@@ -765,6 +777,35 @@
 
             <!-- Page Content -->
             <main class="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6 lg:p-8 custom-scrollbar">
+                @if (session('success'))
+                    <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <p class="text-green-800 font-medium">{{ session('success') }}</p>
+                        </div>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="flex-1">
+                                <ul class="list-disc list-inside text-red-700 text-sm space-y-1">
+                                    <li>{{ session('error') }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                @endif
                 {{ $slot }}
             </main>
         </div>

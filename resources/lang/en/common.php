@@ -26,6 +26,7 @@ return [
     'continue' => 'Continue',
     'confirm' => 'Confirm',
     'apply' => 'Apply',
+    'unlimited' => 'Unlimited',
     'update' => 'Update',
     'create' => 'Create',
     'remove' => 'Remove',

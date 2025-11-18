@@ -8,7 +8,7 @@ use Modules\HR\Http\Controllers\EmployeeController;
 use Modules\HR\Http\Controllers\LeaveController;
 use Modules\HR\Http\Controllers\LeaveTypeController;
 
-Route::prefix('hr')->name('hr.')->group(function () {
+Route::middleware(['web'])->prefix('hr')->name('hr.')->group(function () {
 
     Route::prefix('departments')->name('departments.')->group(function () {
         Route::get('/', [DepartmentController::class, 'index'])->name('index');

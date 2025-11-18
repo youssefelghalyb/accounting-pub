@@ -14,6 +14,7 @@ return [
     'add_user' => 'إضافة مستخدم',
     'roles' => 'الأدوار',
     'projects' => 'المشاريع',
+    'advances' => 'السلف و العهدات',
     
     // HR Group
     'departments' => 'الإدارات',

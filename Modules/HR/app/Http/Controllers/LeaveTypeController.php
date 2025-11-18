@@ -15,6 +15,7 @@ class LeaveTypeController extends Controller
      */
     public function index(Request $request)
     {
+
         $query = LeaveType::query();
 
         // Search functionality
@@ -55,7 +56,7 @@ class LeaveTypeController extends Controller
 
         return redirect()
             ->route('hr.leave-types.index')
-            ->with('success', __('hr::leave.leave_type_added'));
+            ->with('success', __('hr::leaveTypes.leave_type_added'));
     }
 
     /**
@@ -100,33 +101,33 @@ class LeaveTypeController extends Controller
     /**
      * Update the specified leave type.
      */
-    public function update(UpdateLeaveTypeRequest $request, LeaveType $leaveType)
+    public function update(UpdateLeaveTypeRequest $request,$id)
     {
+        $leaveType = LeaveType::findOrFail($id);
         $validated = $request->validated();
-
         $leaveType->update($validated);
-
         return redirect()
             ->route('hr.leave-types.index')
-            ->with('success', __('hr::leave.leave_type_updated'));
+            ->with('success', __('hr::leaveTypes.leave_type_updated'));
     }
 
     /**
      * Remove the specified leave type.
      */
-    public function destroy(LeaveType $leaveType)
+    public function destroy($id)
     {
+        $leaveType = LeaveType::findOrFail($id);
         // Check if leave type has associated leaves
         if ($leaveType->leaves()->count() > 0) {
             return redirect()
                 ->route('hr.leave-types.index')
-                ->with('error', __('hr::leave.cannot_delete_type_with_leaves'));
+                ->with('error', __('hr::leaveTypes.cannot_delete_type_with_leaves'));
         }
 
         $leaveType->delete();
 
         return redirect()
             ->route('hr.leave-types.index')
-            ->with('success', __('hr::leave.leave_type_deleted'));
+            ->with('success', __('hr::leaveTypes.leave_type_deleted'));
     }
 }

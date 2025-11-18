@@ -19,12 +19,8 @@ class UpdateLeaveTypeRequest extends FormRequest
      */
     public function rules(): array
     {
-        $leaveTypeId = $this->route('leaveType')
-            ? $this->route('leaveType')->id
-            : $this->route('id');
-
         return [
-            'name' => 'required|string|max:255|unique:leave_types,name,' . $leaveTypeId,
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'max_days_per_year' => 'nullable|integer|min:1',
             'is_paid' => 'required|boolean',

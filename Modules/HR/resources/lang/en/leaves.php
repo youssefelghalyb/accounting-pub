@@ -9,6 +9,7 @@ return [
     'edit_leave' => 'Edit Leave Request',
     'leave_details' => 'Leave Details',
     'manage_leaves' => 'Manage and track employee leave requests',
+    'request_leave' => 'Request Leave',
 
     // Form Labels
     'employee' => 'Employee',
@@ -31,6 +32,7 @@ return [
     // Actions
     'approve' => 'Approve',
     'reject' => 'Reject',
+    'reject_reason' => 'Rejection Reason',
     'approve_leave' => 'Approve',
     'reject_leave' => 'Reject Leave',
     'cancel_leave' => 'Cancel',

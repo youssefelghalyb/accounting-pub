@@ -14,6 +14,7 @@ return [
     'add_user' => 'Add User',
     'roles' => 'Roles',
     'projects' => 'Projects',
+    'advances' => 'Advances & Loans',
     
     // HR Group
     'hr' => 'HR',

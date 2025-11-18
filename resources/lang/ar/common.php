@@ -107,6 +107,7 @@ return [
     'profile' => 'الملف الشخصي',
     'account' => 'الحساب',
     'language' => 'اللغة',
+    'unlimited' => 'غير محدود',
     'currency' => 'العملة',
     'timezone' => 'المنطقة الزمنية',
     'image' => 'الصورة',

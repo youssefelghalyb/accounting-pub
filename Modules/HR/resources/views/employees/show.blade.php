@@ -135,10 +135,10 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-200">
                 <div class="p-6 border-b border-gray-200">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-bold text-gray-900">{{ __('hr::leave.leave_statistics') }}</h2>
+                        <h2 class="text-lg font-bold text-gray-900">{{ __('hr::leaves.leave_statistics') }}</h2>
                         <a href="{{ route('hr.leaves.create') }}?employee={{ $employee->id }}" 
                            class="text-sm text-blue-600 hover:text-blue-800">
-                            {{ __('hr::leave.request_leave') }}
+                            {{ __('hr::leaves.request_leave') }}
                         </a>
                     </div>
                 </div>
@@ -146,19 +146,19 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div class="text-center p-4 bg-gray-50 rounded-lg">
                             <p class="text-2xl font-bold text-gray-900">{{ $leaveStats['total_leaves'] }}</p>
-                            <p class="text-xs text-gray-600 mt-1">{{ __('hr::leave.total_leaves') }}</p>
+                            <p class="text-xs text-gray-600 mt-1">{{ __('hr::leaves.total_leaves') }}</p>
                         </div>
                         <div class="text-center p-4 bg-yellow-50 rounded-lg">
                             <p class="text-2xl font-bold text-yellow-900">{{ $leaveStats['pending_leaves'] }}</p>
-                            <p class="text-xs text-yellow-700 mt-1">{{ __('hr::leave.pending') }}</p>
+                            <p class="text-xs text-yellow-700 mt-1">{{ __('hr::leaves.pending') }}</p>
                         </div>
                         <div class="text-center p-4 bg-green-50 rounded-lg">
                             <p class="text-2xl font-bold text-green-900">{{ $leaveStats['approved_leaves'] }}</p>
-                            <p class="text-xs text-green-700 mt-1">{{ __('hr::leave.approved') }}</p>
+                            <p class="text-xs text-green-700 mt-1">{{ __('hr::leaves.approved') }}</p>
                         </div>
                         <div class="text-center p-4 bg-red-50 rounded-lg">
                             <p class="text-2xl font-bold text-red-900">{{ $leaveStats['rejected_leaves'] }}</p>
-                            <p class="text-xs text-red-700 mt-1">{{ __('hr::leave.rejected') }}</p>
+                            <p class="text-xs text-red-700 mt-1">{{ __('hr::leaves.rejected') }}</p>
                         </div>
                     </div>
                 </div>
@@ -179,8 +179,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="font-medium text-gray-900">{{ __('hr::leave.request_leave') }}</p>
-                                <p class="text-xs text-gray-600">{{ __('hr::leave.my_leaves') }}</p>
+                                <p class="font-medium text-gray-900">{{ __('hr::leaves.request_leave') }}</p>
+                                <p class="text-xs text-gray-600">{{ __('hr::leaves.my_leaves') }}</p>
                             </div>
                         </a>
 
@@ -192,8 +192,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="font-medium text-gray-900">{{ __('hr::deduction.add_deduction') }}</p>
-                                <p class="text-xs text-gray-600">{{ __('hr::deduction.employee_deductions') }}</p>
+                                <p class="font-medium text-gray-900">{{ __('hr::deductions.add_deduction') }}</p>
+                                <p class="text-xs text-gray-600">{{ __('hr::deductions.employee_deductions') }}</p>
                             </div>
                         </a>
                     </div>
@@ -204,17 +204,17 @@
         <!-- Recent Leaves -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">
             <div class="p-6 border-b border-gray-200">
-                <h2 class="text-lg font-bold text-gray-900">{{ __('hr::leave.leave_history') }}</h2>
+                <h2 class="text-lg font-bold text-gray-900">{{ __('hr::leaves.leave_history') }}</h2>
             </div>
             <div class="overflow-x-auto">
                 @if($recentLeaves->count() > 0)
                     <table class="w-full">
                         <thead class="bg-gray-50 border-b border-gray-200">
                             <tr>
-                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase">{{ __('hr::leave.leave_type') }}</th>
-                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase">{{ __('hr::leave.start_date') }}</th>
-                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase">{{ __('hr::leave.end_date') }}</th>
-                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">{{ __('hr::leave.total_days') }}</th>
+                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase">{{ __('hr::leaves.leave_type') }}</th>
+                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase">{{ __('hr::leaves.start_date') }}</th>
+                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase">{{ __('hr::leaves.end_date') }}</th>
+                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">{{ __('hr::leaves.total_days') }}</th>
                                 <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">{{ __('common.status') }}</th>
                             </tr>
                         </thead>
@@ -232,15 +232,15 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
                                         @if($leave->status === 'pending')
                                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                                {{ __('hr::leave.pending') }}
+                                                {{ __('hr::leaves.pending') }}
                                             </span>
                                         @elseif($leave->status === 'approved')
                                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                                {{ __('hr::leave.approved') }}
+                                                {{ __('hr::leaves.approved') }}
                                             </span>
                                         @else
                                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                                {{ __('hr::leave.rejected') }}
+                                                {{ __('hr::leaves.rejected') }}
                                             </span>
                                         @endif
                                     </td>
@@ -250,7 +250,7 @@
                     </table>
                 @else
                     <div class="text-center py-8">
-                        <p class="text-gray-500">{{ __('hr::leave.no_leaves') }}</p>
+                        <p class="text-gray-500">{{ __('hr::leaves.no_leaves') }}</p>
                     </div>
                 @endif
             </div>
@@ -259,17 +259,17 @@
         <!-- Recent Deductions -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">
             <div class="p-6 border-b border-gray-200">
-                <h2 class="text-lg font-bold text-gray-900">{{ __('hr::deduction.deduction_summary') }}</h2>
+                <h2 class="text-lg font-bold text-gray-900">{{ __('hr::deductions.deduction_summary') }}</h2>
             </div>
             <div class="overflow-x-auto">
                 @if($recentDeductions->count() > 0)
                     <table class="w-full">
                         <thead class="bg-gray-50 border-b border-gray-200">
                             <tr>
-                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase">{{ __('hr::deduction.type') }}</th>
-                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase">{{ __('hr::deduction.reason') }}</th>
-                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">{{ __('hr::deduction.days') }}</th>
-                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase">{{ __('hr::deduction.amount') }}</th>
+                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase">{{ __('hr::deductions.type') }}</th>
+                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase">{{ __('hr::deductions.reason') }}</th>
+                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">{{ __('hr::deductions.days') }}</th>
+                                <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase">{{ __('hr::deductions.amount') }}</th>
                                 <th class="px-6 py-3 text-{{ app()->getLocale() == 'ar' ? 'right' : 'left' }} text-xs font-semibold text-gray-600 uppercase">{{ __('common.date') }}</th>
                             </tr>
                         </thead>
@@ -294,7 +294,7 @@
                     </table>
                 @else
                     <div class="text-center py-8">
-                        <p class="text-gray-500">{{ __('hr::deduction.no_deductions') }}</p>
+                        <p class="text-gray-500">{{ __('hr::deductions.no_deductions') }}</p>
                     </div>
                 @endif
             </div>
