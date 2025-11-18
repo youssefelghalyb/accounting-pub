@@ -206,4 +206,67 @@ class SubWarehouseController extends Controller
             ->route('warehouse.sub_warehouses.show', $subWarehouse)
             ->with('success', __('warehouse::sub_warehouse.stock_added'));
     }
+
+    /**
+     * Show the form for editing stock quantity.
+     */
+    public function editStock($subWarehouseId, $warehouseProductId)
+    {
+        $subWarehouse = SubWarehouse::with('warehouse')->findOrFail($subWarehouseId);
+        $warehouseProduct = SubWarehouseProduct::with([
+            'product.book.author',
+            'product.book.category'
+        ])->where('sub_warehouse_id', $subWarehouseId)
+          ->findOrFail($warehouseProductId);
+
+        return view('warehouse::sub_warehouses.edit_stock', compact('subWarehouse', 'warehouseProduct'));
+    }
+
+    /**
+     * Update stock quantity.
+     */
+    public function updateStock(Request $request, $subWarehouseId, $warehouseProductId)
+    {
+        $subWarehouse = SubWarehouse::findOrFail($subWarehouseId);
+        $warehouseProduct = SubWarehouseProduct::where('sub_warehouse_id', $subWarehouseId)
+            ->findOrFail($warehouseProductId);
+
+        $request->validate([
+            'quantity' => 'required|integer|min:0',
+        ]);
+
+        $oldQuantity = $warehouseProduct->quantity;
+        $newQuantity = $request->quantity;
+        $difference = $newQuantity - $oldQuantity;
+
+        // Update the quantity
+        $warehouseProduct->quantity = $newQuantity;
+        $warehouseProduct->edited_by = Auth::id();
+        $warehouseProduct->save();
+
+        // Create a stock movement record to track the change
+        if ($difference != 0) {
+            $movementType = $difference > 0 ? 'inbound' : 'outbound';
+            $movementData = [
+                'product_id' => $warehouseProduct->product_id,
+                'quantity' => abs($difference),
+                'movement_type' => $movementType,
+                'reason' => 'Stock Adjustment',
+                'user_id' => Auth::id(),
+                'created_by' => Auth::id(),
+            ];
+
+            if ($movementType === 'inbound') {
+                $movementData['to_sub_warehouse_id'] = $subWarehouse->id;
+            } else {
+                $movementData['from_sub_warehouse_id'] = $subWarehouse->id;
+            }
+
+            \Modules\Warehouse\Models\StockMovement::create($movementData);
+        }
+
+        return redirect()
+            ->route('warehouse.sub_warehouses.show', $subWarehouse)
+            ->with('success', __('warehouse::sub_warehouse.stock_updated'));
+    }
 }
