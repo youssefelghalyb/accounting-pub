@@ -1,9 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Warehouse\Http\Controllers\WarehouseController;
-use Modules\Warehouse\Http\Controllers\SubWarehouseController;
 use Modules\Warehouse\Http\Controllers\StockMovementController;
+use Modules\Warehouse\Http\Controllers\SubWarehouseController;
+use Modules\Warehouse\Http\Controllers\WarehouseController;
 
 Route::middleware(['web'])
     ->prefix('warehouse')
