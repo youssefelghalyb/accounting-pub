@@ -11,6 +11,7 @@ return [
     'sub_warehouse_details' => 'Sub-Warehouse Details',
     'stock_details' => 'Stock Details',
     'add_stock' => 'Add Stock',
+    'edit_stock' => 'Edit Stock',
 
     // Form Labels
     'warehouse' => 'Parent Warehouse',
@@ -21,6 +22,8 @@ return [
     'notes' => 'Notes',
     'product' => 'Product',
     'quantity' => 'Quantity',
+    'current_quantity' => 'Current Quantity',
+    'new_quantity' => 'New Quantity',
 
     // Type Values
     'main' => 'Main',
@@ -49,6 +52,8 @@ return [
     'sub_warehouse_updated' => 'Sub-warehouse updated successfully',
     'sub_warehouse_deleted' => 'Sub-warehouse deleted successfully',
     'stock_added' => 'Stock added successfully',
+    'stock_updated' => 'Stock updated successfully',
+    'edit_stock_notice' => 'You can update the quantity for this product. The system will create a stock movement record to track this change.',
     'cannot_delete_has_products' => 'Cannot delete sub-warehouse that has products',
     'no_sub_warehouses' => 'No sub-warehouses found',
     'no_products' => 'No products in stock',

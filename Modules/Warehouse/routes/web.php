@@ -38,6 +38,8 @@ Route::middleware(['web'])
                 // Stock management routes
                 Route::get('/{id}/add-stock', [SubWarehouseController::class, 'addStock'])->name('add_stock');
                 Route::post('/{id}/add-stock', [SubWarehouseController::class, 'storeStock'])->name('store_stock');
+                Route::get('/{id}/stock/{warehouseProductId}/edit', [SubWarehouseController::class, 'editStock'])->name('edit-stock');
+                Route::put('/{id}/stock/{warehouseProductId}', [SubWarehouseController::class, 'updateStock'])->name('update-stock');
             });
 
         // Stock Movement routes

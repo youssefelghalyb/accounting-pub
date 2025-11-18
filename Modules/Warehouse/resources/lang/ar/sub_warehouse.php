@@ -11,6 +11,7 @@ return [
     'sub_warehouse_details' => 'تفاصيل المخزن الفرعي',
     'stock_details' => 'تفاصيل المخزون',
     'add_stock' => 'إضافة مخزون',
+    'edit_stock' => 'تعديل المخزون',
 
     // Form Labels
     'warehouse' => 'المخزن الرئيسي',
@@ -21,6 +22,8 @@ return [
     'notes' => 'ملاحظات',
     'product' => 'المنتج',
     'quantity' => 'الكمية',
+    'current_quantity' => 'الكمية الحالية',
+    'new_quantity' => 'الكمية الجديدة',
 
     // Type Values
     'main' => 'رئيسي',
@@ -49,6 +52,8 @@ return [
     'sub_warehouse_updated' => 'تم تحديث المخزن الفرعي بنجاح',
     'sub_warehouse_deleted' => 'تم حذف المخزن الفرعي بنجاح',
     'stock_added' => 'تمت إضافة المخزون بنجاح',
+    'stock_updated' => 'تم تحديث المخزون بنجاح',
+    'edit_stock_notice' => 'يمكنك تحديث الكمية لهذا المنتج. سيقوم النظام بإنشاء سجل حركة مخزون لتتبع هذا التغيير.',
     'cannot_delete_has_products' => 'لا يمكن حذف مخزن فرعي يحتوي على منتجات',
     'no_sub_warehouses' => 'لم يتم العثور على مخازن فرعية',
     'no_products' => 'لا توجد منتجات في المخزون',

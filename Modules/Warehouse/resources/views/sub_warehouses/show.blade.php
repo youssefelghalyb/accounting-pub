@@ -109,6 +109,9 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         {{ __('warehouse::sub_warehouse.quantity') }}
                                     </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        {{ __('common.actions') }}
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -142,12 +145,22 @@
                                                 {{ number_format($warehouseProduct->quantity) }}
                                             </span>
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <a href="{{ route('warehouse.sub_warehouses.edit-stock', [$subWarehouse, $warehouseProduct]) }}"
+                                               class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700">
+                                                <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                                {{ __('common.edit') }}
+                                            </a>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                             <tfoot class="bg-gray-50">
                                 <tr>
-                                    <td colspan="2" class="px-6 py-4 text-right text-sm font-bold text-gray-900">
+                                    <td colspan="3" class="px-6 py-4 text-right text-sm font-bold text-gray-900">
                                         {{ __('warehouse::sub_warehouse.total_quantity') }}:
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
