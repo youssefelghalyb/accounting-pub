@@ -1,5 +1,6 @@
 {
     "Settings": true,
     "HR": true,
-    "Product": true
+    "Product": true,
+    "Warehouse": true
 }
