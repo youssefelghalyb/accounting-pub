@@ -3,6 +3,8 @@
 namespace Modules\Product\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Modules\Product\Models\Contract;
+use Modules\Product\Models\ContractTransaction;
 
 class UpdateTransactionRequest extends FormRequest
 {
@@ -26,6 +28,20 @@ class UpdateTransactionRequest extends FormRequest
             'notes' => 'nullable|string',
             'receipt_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $transactions = ContractTransaction::where('contract_id', $this->input('contract_id'))->sum('amount');
+            $contract = Contract::find($this->input('contract_id'));
+            if ($transactions == $contract->contract_price) {
+                $validator->errors()->add('amount', __('product::transaction.contract_fully_paid'));
+            }
+            if ($contract && ($transactions + $this->input('amount')) > $contract->contract_price) {
+                $validator->errors()->add('amount', __('product::transaction.amount_exceeds_contract_price'));
+            }
+        });
     }
 
     /**

@@ -22,6 +22,17 @@ class Author extends Model
         'edited_by',
     ];
 
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    protected $appends = [
+        'total_contract_value',
+        'total_paid',
+        'outstanding_balance',
+    ];
+
     // Relationships
     public function books(): HasMany
     {

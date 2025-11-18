@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Modules\Product\Models\Author;
 use Modules\Product\Http\Requests\StoreAuthorRequest;
 use Modules\Product\Http\Requests\UpdateAuthorRequest;
+use Modules\Product\Models\ContractTransaction;
 
 class AuthorController extends Controller
 {
@@ -22,11 +23,11 @@ class AuthorController extends Controller
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('full_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('nationality', 'like', "%{$search}%")
-                  ->orWhere('occupation', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('nationality', 'like', "%{$search}%")
+                    ->orWhere('occupation', 'like', "%{$search}%");
             });
         }
 
@@ -80,6 +81,10 @@ class AuthorController extends Controller
         // Get payment history
         $paymentHistory = $author->getAllTransactions();
 
+        $transactions = ContractTransaction::whereHas('contract', function ($query) use ($author) {
+            $query->where('author_id', $author->id);
+        })->with('contract.book.product')->latest('payment_date')->get();
+
         // Calculate stats
         $stats = [
             'total_books' => $author->books()->count(),
@@ -89,7 +94,7 @@ class AuthorController extends Controller
             'outstanding_balance' => $author->outstanding_balance,
         ];
 
-        return view('product::authors.show', compact('author', 'paymentHistory', 'stats'));
+        return view('product::authors.show', compact('author', 'paymentHistory', 'stats' , 'transactions'));
     }
 
     /**

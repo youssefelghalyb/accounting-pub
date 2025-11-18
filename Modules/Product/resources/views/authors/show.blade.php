@@ -107,7 +107,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">{{ __('product::author.remaining_payments') }}</p>
-                        <p class="text-3xl font-bold text-orange-600 mt-2">{{ number_format($author->contracts()->sum('outstanding_balance'), 2) }}</p>
+                        <p class="text-3xl font-bold text-orange-600 mt-2">{{ number_format($author->outstanding_balance, 2) }}</p>
                     </div>
                     <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -338,11 +338,7 @@
                 <h2 class="text-lg font-bold text-gray-900">{{ __('product::author.transactions') }}</h2>
             </div>
             <div class="p-6">
-                @php
-                    $transactions = \Modules\Product\Models\Transaction::whereHas('contract', function($query) use ($author) {
-                        $query->where('author_id', $author->id);
-                    })->with('contract.book.product')->latest('payment_date')->get();
-                @endphp
+
                 @if($transactions->count() > 0)
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">

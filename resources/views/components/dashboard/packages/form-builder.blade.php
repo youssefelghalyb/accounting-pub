@@ -21,7 +21,7 @@
                         d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <div class="flex-1">
-                    <p class="text-red-800 font-medium mb-2">Please fix the following errors:</p>
+                    <p class="text-red-800 font-medium mb-2">{{__("common.please_fix_issues_below")}}</p>
                     <ul class="list-disc list-inside text-red-700 text-sm space-y-1">
                         @foreach (session('errors')->all() as $error)
                             <li>{{ $error }}</li>

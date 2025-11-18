@@ -240,6 +240,7 @@ return [
     'must_be_selected' => 'يرجى اختيار خيار',
     'file_too_large' => 'الملف كبير جداً',
     'invalid_file_type' => 'نوع ملف غير صالح',
+    'please_fix_issues_below' => 'يرجى تصحيح المشكلات أدناه',
     
     // Time Periods
     'today' => 'اليوم',

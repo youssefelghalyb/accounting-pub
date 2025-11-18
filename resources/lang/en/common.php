@@ -171,7 +171,7 @@ return [
     'page' => 'Page',
     'go_to_page' => 'Go to page',
     'showing_from_to' => 'Showing :from to :to of :total entries',
-    
+    'please_fix_issues_below' => 'Please fix the issues below',
     // Messages
     'success' => 'Success!',
     'error' => 'Error!',

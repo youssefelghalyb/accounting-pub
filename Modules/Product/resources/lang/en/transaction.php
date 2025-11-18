@@ -62,6 +62,8 @@ return [
     'payment_date_required' => 'Payment date is required',
     'receipt_file_invalid' => 'Receipt file must be PDF or image format',
     'receipt_file_max_size' => 'Receipt file must not exceed 5MB',
+    'amount_exceeds_contract_price' => 'The entered amount exceeds the contract price',
+    'contract_fully_paid' => 'The contract has been fully paid',
 
     // Placeholders
     'select_contract' => 'Select contract',

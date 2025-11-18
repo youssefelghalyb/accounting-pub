@@ -62,6 +62,8 @@ return [
     'payment_date_required' => 'تاريخ الدفع مطلوب',
     'receipt_file_invalid' => 'يجب أن يكون ملف الإيصال بصيغة PDF أو صورة',
     'receipt_file_max_size' => 'يجب ألا يتجاوز حجم ملف الإيصال 5 ميجابايت',
+    'amount_exceeds_contract_price' => 'المبلغ المدخل يتجاوز قيمة العقد',
+    'contract_fully_paid' => 'تم سداد قيمة العقد بالكامل',
 
     // Placeholders
     'select_contract' => 'اختر العقد',
