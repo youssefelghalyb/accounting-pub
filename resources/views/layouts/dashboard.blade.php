@@ -530,43 +530,7 @@
 
                         <div class="space-y-1">
                             <!-- Another Dropdown -->
-                            {{-- <div class="dropdown-item">
-                                <button class="sidebar-item w-full flex items-center justify-between rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100" onclick="toggleSubmenu(this)">
-                                    <div class="flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }}">
-                                        <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        <span class="sidebar-text font-medium">{{ __('sidebar.finance') }}</span>
-                                    </div>
-                                    <svg class="h-4 w-4 transition-transform sidebar-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                    </svg>
-                                    <span class="sidebar-tooltip">{{ __('sidebar.finance') }}</span>
-                                </button>
-                                <div class="submenu">
-                                    <a href="#" class="submenu-item sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100">
-                                        <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
-                                        <span class="sidebar-text">{{ __('sidebar.invoices') }}</span>
-                                        <span class="sidebar-tooltip">{{ __('sidebar.invoices') }}</span>
-                                    </a>
-                                    <a href="#" class="submenu-item sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100">
-                                        <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
-                                        <span class="sidebar-text">{{ __('sidebar.payments') }}</span>
-                                        <span class="sidebar-tooltip">{{ __('sidebar.payments') }}</span>
-                                    </a>
-                                    <a href="#" class="submenu-item sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100">
-                                        <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
-                                        <span class="sidebar-text">{{ __('sidebar.reports') }}</span>
-                                        <span class="sidebar-tooltip">{{ __('sidebar.reports') }}</span>
-                                    </a>
-                                </div>
-                            </div> --}}
+
 
                             <a href="{{ route('hr.departments.index') }}"
                                 class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
@@ -637,6 +601,82 @@
                             </a>
                         </div>
 
+                        <!-- Products & inventory group -->
+                        <div class="group-header">
+                            <svg class="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                                </path>
+                            </svg>
+                            <span
+                                class="group-title text-xs font-semibold text-gray-500 uppercase tracking-wider {{ app()->getLocale() == 'ar' ? 'mr-3' : 'ml-3' }}">
+                                {{ __('sidebar.books_inventory') }}</span>
+                            <div class="group-divider"></div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <!-- Another Dropdown -->
+
+                            <a href="{{ route('product.categories.index') }}"
+                                class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
+                                <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                <span class="sidebar-text font-medium">{{ __('sidebar.categories') }}</span>
+                                <span class="sidebar-tooltip">{{ __('sidebar.categories') }}</span>
+                            </a>
+                            <a href="{{ route('product.books.index') }}"
+                                class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
+                                <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                <span class="sidebar-text font-medium">{{ __('sidebar.books') }}</span>
+                                <span class="sidebar-tooltip">{{ __('sidebar.books') }}</span>
+                            </a>
+
+                            <a href="{{ route('warehouse.warehouses.index') }}"
+                                class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
+                                <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                <span class="sidebar-text font-medium">{{ __('sidebar.inventory') }}</span>
+                                <span class="sidebar-tooltip">{{ __('sidebar.inventory') }}</span>
+                            </a>
+                            <a href="{{ route('warehouse.sub_warehouses.index') }}"
+                                class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
+                                <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                <span class="sidebar-text font-medium">{{ __('sidebar.sub_inventory') }}</span>
+                                <span class="sidebar-tooltip">{{ __('sidebar.sub_inventory') }}</span>
+                            </a>
+                            <a href="{{ route('warehouse.stock_movements.index') }}"
+                                class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
+                                <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                <span class="sidebar-text font-medium">{{ __('sidebar.stock_movements') }}</span>
+                                <span class="sidebar-tooltip">{{ __('sidebar.stock_movements') }}</span>
+                            </a>
+                        </div>
+
+
 
 
                         <!-- Support Group -->
@@ -653,7 +693,7 @@
                         </div>
 
                         <div class="space-y-1">
-                            <a href="#"
+                            <a href="{{ route('settings.organization') }}"
                                 class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
                                 <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -661,8 +701,8 @@
                                         d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
                                     </path>
                                 </svg>
-                                <span class="sidebar-text font-medium">{{ __('sidebar.help_support') }}</span>
-                                <span class="sidebar-tooltip">{{ __('sidebar.help_support') }}</span>
+                                <span class="sidebar-text font-medium">{{ __('sidebar.settings') }}</span>
+                                <span class="sidebar-tooltip">{{ __('sidebar.settings') }}</span>
                             </a>
 
                             <a href="#"

@@ -134,7 +134,7 @@
             <div class="p-6">
                 <x-dashboard.packages.form-builder
                     :action="route('warehouse.sub_warehouses.update-stock', [$subWarehouse, $warehouseProduct])"
-                    method="PUT"
+                    :method="'PUT'"
                     :formConfig="$formConfig"
                 />
             </div>

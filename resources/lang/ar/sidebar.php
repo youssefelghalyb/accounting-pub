@@ -23,6 +23,17 @@ return [
     'leave_types' => 'أنواع الإجازات',
     'leaves' => 'الإجازات',
     'deductions' => 'الخصومات',
+
+    // Products & Inventory Group
+    'books_inventory' => 'الكتب والمخزون',
+    'categories' => 'الفئات',
+    'books' => 'الكتب',
+    'inventory' => 'المخازن',
+    'sub_inventory' => 'المخازن الفرعية',
+    'stock_movements' => 'حركات المخزون',
+
+
+
     // Management Group
     'management' => 'الإدارة',
     'finance' => 'المالية',
