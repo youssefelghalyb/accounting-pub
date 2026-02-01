@@ -94,7 +94,7 @@ class AuthorController extends Controller
             'outstanding_balance' => $author->outstanding_balance,
         ];
 
-        return view('product::authors.show', compact('author', 'paymentHistory', 'stats' , 'transactions'));
+        return view('product::authors.show', compact('author', 'paymentHistory', 'stats', 'transactions'));
     }
 
     /**
@@ -156,5 +156,63 @@ class AuthorController extends Controller
         return redirect()
             ->route('product.authors.index')
             ->with('success', __('product::author.author_deleted'));
+    }
+
+    /**
+     * Search authors for Select2
+     */
+    public function search(Request $request)
+    {
+        $query = Author::query();
+
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('full_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('nationality', 'like', "%{$search}%");
+            });
+        }
+
+        $authors = $query->orderBy('full_name')
+            ->paginate(10);
+
+        return response()->json([
+            'results' => $authors->map(function ($author) {
+                return [
+                    'id' => $author->id,
+                    'text' => $author->full_name . ($author->nationality ? ' - ' . $author->nationality : '')
+                ];
+            }),
+            'pagination' => [
+                'more' => $authors->hasMorePages()
+            ]
+        ]);
+    }
+
+    /**
+     * Quick store author for inline creation
+     */
+    public function quickStore(Request $request)
+    {
+        $validated = $request->validate([
+            'full_name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:50',
+            'nationality' => 'nullable|string|max:100',
+        ]);
+
+        $validated['created_by'] = Auth::id();
+
+        $author = Author::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('product::author.author_added'),
+            'author' => [
+                'id' => $author->id,
+                'text' => $author->full_name . ($author->nationality ? ' - ' . $author->nationality : '')
+            ]
+        ]);
     }
 }

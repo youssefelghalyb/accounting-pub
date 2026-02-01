@@ -1,0 +1,11 @@
+{
+    "name": "SearchDrawer",
+    "alias": "searchdrawer",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\SearchDrawer\\Providers\\SearchDrawerServiceProvider"
+    ],
+    "files": []
+}

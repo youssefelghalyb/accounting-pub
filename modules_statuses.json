@@ -5,5 +5,7 @@
     "Warehouse": true,
     "Clients": true,
     "Customers": true,
-    "Customer": true
+    "Customer": true,
+    "Finance": true,
+    "SearchDrawer": true
 }

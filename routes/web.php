@@ -26,4 +26,9 @@ Route::get('test-d' , function() {
     return view('test-dashboard');
 })->name('test-form');
 
+
+Route::get('eljanah' , function() {
+    return view('eljanah2');
+});
+
 require __DIR__.'/auth.php';

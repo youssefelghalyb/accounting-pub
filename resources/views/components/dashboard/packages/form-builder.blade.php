@@ -21,7 +21,7 @@
                         d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <div class="flex-1">
-                    <p class="text-red-800 font-medium mb-2">{{__("common.please_fix_issues_below")}}</p>
+                    <p class="text-red-800 font-medium mb-2">{{ __('common.please_fix_issues_below') }}</p>
                     <ul class="list-disc list-inside text-red-700 text-sm space-y-1">
                         @foreach (session('errors')->all() as $error)
                             <li>{{ $error }}</li>
@@ -548,9 +548,9 @@
                         }
 
                         // Use old input if available, otherwise use field value
-                        const fieldValue = this.oldInput && this.oldInput[field.name] !== undefined
-                            ? this.oldInput[field.name]
-                            : field.value;
+                        const fieldValue = this.oldInput && this.oldInput[field.name] !== undefined ?
+                            this.oldInput[field.name] :
+                            field.value;
 
                         if (fieldValue) {
                             input.value = fieldValue;
@@ -766,9 +766,9 @@
                     input.className = `${baseClasses} cursor-pointer bg-white`;
 
                     // Get the value to use (old input or field value)
-                    const selectedValue = this.oldInput && this.oldInput[field.name] !== undefined
-                        ? this.oldInput[field.name]
-                        : field.value;
+                    const selectedValue = this.oldInput && this.oldInput[field.name] !== undefined ?
+                        this.oldInput[field.name] :
+                        field.value;
 
                     if (field.options) {
                         field.options.forEach(option => {
@@ -784,6 +784,136 @@
                             input.appendChild(opt);
                         });
                     }
+                } else if (field.type === 'searchable_select') {
+                    // Searchable Select with Quick Add
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'relative';
+
+                    // Label with Quick Add link
+                    if (field.label) {
+                        const labelContainer = document.createElement('div');
+                        labelContainer.className = 'flex items-center justify-between mb-2';
+
+                        const label = document.createElement('label');
+                        label.htmlFor = field.name;
+                        label.className = 'block text-sm font-semibold text-gray-700';
+                        label.textContent = field.label;
+                        if (field.required) {
+                            const required = document.createElement('span');
+                            required.className = 'text-red-500 ml-1';
+                            required.textContent = '*';
+                            label.appendChild(required);
+                        }
+                        labelContainer.appendChild(label);
+
+                        // Add Quick Add link if quickAddModal is specified
+                        if (field.quickAddModal) {
+                            const quickAddLink = document.createElement('button');
+                            quickAddLink.type = 'button';
+                            quickAddLink.className =
+                                'text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 underline';
+                            quickAddLink.innerHTML = `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                ${field.quickAddLabel || 'Quick Add'}
+            `;
+                            quickAddLink.onclick = () => {
+                                if (typeof window[field.quickAddModal] === 'function') {
+                                    window[field.quickAddModal]();
+                                }
+                            };
+                            labelContainer.appendChild(quickAddLink);
+                        }
+
+                        formGroup.appendChild(labelContainer);
+                    }
+
+                    // Create select element
+                    input = document.createElement('select');
+                    input.className = baseClasses;
+                    input.name = field.name;
+                    input.id = field.name;
+
+                    if (field.required) {
+                        input.required = true;
+                    }
+
+                    // Add placeholder option
+                    if (field.placeholder) {
+                        const placeholderOption = document.createElement('option');
+                        placeholderOption.value = '';
+                        placeholderOption.textContent = field.placeholder;
+                        input.appendChild(placeholderOption);
+                    }
+
+                    // Add initial options if provided
+                    if (field.options) {
+                        field.options.forEach(option => {
+                            const opt = document.createElement('option');
+                            opt.value = option.value || option;
+                            opt.textContent = option.label || option;
+
+                            // Set selected if this matches the current value
+                            const selectedValue = this.oldInput && this.oldInput[field.name] !== undefined ?
+                                this.oldInput[field.name] :
+                                field.value;
+
+                            if (selectedValue && opt.value == selectedValue) {
+                                opt.selected = true;
+                            }
+
+                            input.appendChild(opt);
+                        });
+                    }
+
+                    formGroup.appendChild(input);
+
+                    // Initialize Select2 after element is added to DOM
+                    setTimeout(() => {
+                        const $select = $(`#${field.name}`);
+
+                        const select2Config = {
+                            placeholder: field.placeholder || 'Select an option',
+                            allowClear: true,
+                            width: '100%',
+                            dir: '{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}'
+                        };
+
+                        // Add AJAX configuration if searchRoute is provided
+                        if (field.searchRoute) {
+                            select2Config.ajax = {
+                                url: field.searchRoute,
+                                dataType: 'json',
+                                delay: 250,
+                                data: function(params) {
+                                    return {
+                                        q: params.term,
+                                        page: params.page || 1
+                                    };
+                                },
+                                processResults: function(data) {
+                                    return {
+                                        results: data.results,
+                                        pagination: data.pagination
+                                    };
+                                },
+                                cache: true
+                            };
+                            select2Config.minimumInputLength = 0;
+                        }
+
+                        $select.select2(select2Config);
+
+                        // Apply custom border color if specified
+                        if (field.borderColor) {
+                            $select.next('.select2-container').find('.select2-selection').css({
+                                'border-color': field.borderColor
+                            });
+                        }
+                    }, 100);
+
+                    return formGroup;
                 } else if (field.type === 'checkbox') {
                     const wrapper = document.createElement('div');
                     wrapper.className =
@@ -802,9 +932,9 @@
                     input.value = 'true'; // Set value to "true" for checked state
 
                     // Check if old input exists and set checked state
-                    const oldValue = this.oldInput && this.oldInput[field.name] !== undefined
-                        ? this.oldInput[field.name]
-                        : field.value;
+                    const oldValue = this.oldInput && this.oldInput[field.name] !== undefined ?
+                        this.oldInput[field.name] :
+                        field.value;
 
                     // Handle both boolean and string values
                     if (oldValue === true || oldValue === 'true' || oldValue === '1' || oldValue === 1) {
@@ -895,9 +1025,9 @@
                             radio.required = field.required;
 
                             // Check if this radio should be selected based on old input or field value
-                            let selectedValue = this.oldInput && this.oldInput[field.name] !== undefined
-                                ? this.oldInput[field.name]
-                                : field.value;
+                            let selectedValue = this.oldInput && this.oldInput[field.name] !== undefined ?
+                                this.oldInput[field.name] :
+                                field.value;
 
                             // Normalize selected value for comparison (handle different formats)
                             const normalizedRadioValue = String(radio.value);
@@ -961,9 +1091,9 @@
                     colorInput.className = 'sr-only';
 
                     // Get the value to use (old input or field value)
-                    const colorValue = this.oldInput && this.oldInput[field.name] !== undefined
-                        ? this.oldInput[field.name]
-                        : (field.value || '#6366f1');
+                    const colorValue = this.oldInput && this.oldInput[field.name] !== undefined ?
+                        this.oldInput[field.name] :
+                        (field.value || '#6366f1');
 
                     colorInput.value = colorValue;
 
@@ -1081,9 +1211,9 @@
                     }
 
                     // Use old input if available, otherwise use field value
-                    const fieldValue = this.oldInput && this.oldInput[field.name] !== undefined
-                        ? this.oldInput[field.name]
-                        : field.value;
+                    const fieldValue = this.oldInput && this.oldInput[field.name] !== undefined ?
+                        this.oldInput[field.name] :
+                        field.value;
 
                     if (fieldValue) {
                         input.value = fieldValue;

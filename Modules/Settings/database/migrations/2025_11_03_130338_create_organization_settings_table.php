@@ -26,6 +26,7 @@ return new class extends Migration
             $table->json('available_languages')->nullable();
             $table->string('currency')->default('USD');
             $table->string('currency_symbol')->default('$');
+
             $table->boolean('enable_notifications')->default(true);
             $table->boolean('enable_audit_logs')->default(true);
             $table->string('primary_color')->default('#3490dc');

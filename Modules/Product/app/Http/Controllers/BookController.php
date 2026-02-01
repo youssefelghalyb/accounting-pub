@@ -45,7 +45,7 @@ class BookController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        $books = $query->orderBy('created_at', 'desc')->get();
+        $books = $query->orderBy('created_at', 'desc')->paginate(15);
         $authors = Author::all();
         $categories = BookCategory::whereNull('parent_id')->get();
 

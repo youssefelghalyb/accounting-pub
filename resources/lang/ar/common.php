@@ -49,7 +49,8 @@ return [
     'settings' => 'الإعدادات',
     'more' => 'المزيد',
     'less' => 'أقل',
-    
+    'all_status' => 'جميع الحالات',
+
     // Common Labels
     'actions' => 'الإجراءات',
     'status' => 'الحالة',
@@ -135,7 +136,7 @@ return [
     'rank' => 'الرتبة',
     'level' => 'المستوى',
     'version' => 'الإصدار',
-    
+
     // Status Options
     'yes' => 'نعم',
     'no' => 'لا',
@@ -160,7 +161,7 @@ return [
     'unknown' => 'غير معروف',
     'not_available' => 'غير متاح',
     'not_applicable' => 'غير قابل للتطبيق',
-    
+
     // Pagination
     'showing' => 'عرض',
     'of' => 'من',
@@ -172,7 +173,7 @@ return [
     'page' => 'الصفحة',
     'go_to_page' => 'الانتقال إلى الصفحة',
     'showing_from_to' => 'عرض :from إلى :to من أصل :total إدخال',
-    
+
     // Messages
     'success' => 'نجح!',
     'error' => 'خطأ!',
@@ -206,7 +207,7 @@ return [
     'server_error' => 'خطأ في الخادم',
     'maintenance_mode' => 'وضع الصيانة',
     'coming_soon' => 'قريباً',
-    
+
     // Confirmation Messages
     'confirm_delete' => 'هل أنت متأكد من حذف هذا؟',
     'confirm_delete_selected' => 'هل أنت متأكد من حذف العناصر المحددة؟',
@@ -215,7 +216,7 @@ return [
     'unsaved_changes' => 'لديك تغييرات غير محفوظة. هل أنت متأكد من المغادرة؟',
     'cannot_be_undone' => 'لا يمكن التراجع عن هذا الإجراء.',
     'will_be_permanently_deleted' => 'سيتم حذف هذا نهائياً.',
-    
+
     // Validation
     'required' => 'هذا الحقل مطلوب',
     'required_field' => 'حقل مطلوب',
@@ -244,7 +245,7 @@ return [
     'file_too_large' => 'الملف كبير جداً',
     'invalid_file_type' => 'نوع ملف غير صالح',
     'please_fix_issues_below' => 'يرجى تصحيح المشكلات أدناه',
-    
+
     // Time Periods
     'today' => 'اليوم',
     'yesterday' => 'أمس',
@@ -260,7 +261,7 @@ return [
     'next_year' => 'العام القادم',
     'custom_range' => 'نطاق مخصص',
     'date_range' => 'نطاق التاريخ',
-    
+
     // Days of Week
     'monday' => 'الإثنين',
     'tuesday' => 'الثلاثاء',
@@ -276,7 +277,7 @@ return [
     'fri' => 'جمعة',
     'sat' => 'سبت',
     'sun' => 'أحد',
-    
+
     // Months
     'january' => 'يناير',
     'february' => 'فبراير',
@@ -302,7 +303,7 @@ return [
     'oct' => 'أكتوبر',
     'nov' => 'نوفمبر',
     'dec' => 'ديسمبر',
-    
+
     // Time Units
     'second' => 'ثانية',
     'seconds' => 'ثواني',
@@ -321,7 +322,7 @@ return [
     'ago' => 'منذ',
     'from_now' => 'من الآن',
     'just_now' => 'الآن',
-    
+
     // File Management
     'upload_file' => 'رفع ملف',
     'choose_file' => 'اختر ملف',
@@ -333,7 +334,7 @@ return [
     'download_file' => 'تحميل الملف',
     'view_file' => 'عرض الملف',
     'delete_file' => 'حذف الملف',
-    
+
     // Search & Filter
     'search_placeholder' => 'البحث...',
     'advanced_search' => 'بحث متقدم',
@@ -345,7 +346,7 @@ return [
     'apply_filters' => 'تطبيق التصفية',
     'show_filters' => 'إظهار التصفية',
     'hide_filters' => 'إخفاء التصفية',
-    
+
     // Bulk Actions
     'bulk_actions' => 'الإجراءات المجمعة',
     'select_action' => 'اختر إجراء',
@@ -355,7 +356,7 @@ return [
     'bulk_delete' => 'حذف مجمع',
     'bulk_export' => 'تصدير مجمع',
     'bulk_update' => 'تحديث مجمع',
-    
+
     // Reports & Export
     'report' => 'تقرير',
     'reports' => 'التقارير',
@@ -365,7 +366,7 @@ return [
     'export_to_csv' => 'تصدير إلى CSV',
     'print_report' => 'طباعة التقرير',
     'report_generated' => 'تم إنشاء التقرير بنجاح',
-    
+
     // Help & Support
     'help' => 'مساعدة',
     'documentation' => 'التوثيق',
@@ -375,7 +376,7 @@ return [
     'terms_of_service' => 'شروط الخدمة',
     'privacy_policy' => 'سياسة الخصوصية',
     'about' => 'حول',
-    
+
     // Dashboard
     'dashboard' => 'لوحة التحكم',
     'home' => 'الرئيسية',
@@ -386,7 +387,7 @@ return [
     'recent_activity' => 'النشاط الأخير',
     'notifications' => 'الإشعارات',
     'no_notifications' => 'لا توجد إشعارات',
-    
+
     // Forms
     'form' => 'نموذج',
     'fill_form' => 'ملء النموذج',
@@ -398,4 +399,12 @@ return [
     'select_time' => 'اختر الوقت',
     'character_count' => ':current / :max حرف',
     'words_count' => ':count كلمة',
+    'print_in_ar' => 'طباعة باللغة العربية',
+    'print_in_en' => 'Print in English',
+    'date_from' => 'تاريخ من',
+    'date_to' => 'تاريخ إلى',
+    'type_to_search' => 'نوع البحث',
+    'searching' => 'جارٍ البحث...',
+    'loading_more' => 'جارٍ تحميل المزيد من النتائج...',
+
 ];

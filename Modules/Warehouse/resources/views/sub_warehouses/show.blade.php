@@ -47,13 +47,13 @@
                         @endif
                     </div>
                     <div class="flex items-center gap-3">
-                        <a href="{{ route('warehouse.sub_warehouses.add-stock', $subWarehouse) }}"
+                        {{-- <a href="{{ route('warehouse.sub_warehouses.add-stock', $subWarehouse) }}"
                            class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
                             {{ __('warehouse::sub_warehouse.add_stock') }}
-                        </a>
+                        </a> --}}
 
                         <a href="{{ route('warehouse.sub_warehouses.edit', $subWarehouse) }}"
                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
@@ -115,10 +115,26 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
+
+                                @php
+                                      function limitWords(string $text, int $maxWords = 3, string $end = '...'): string
+        {
+            $text = trim($text);
+
+            if ($text === '') {
+                return '';
+            }
+
+            $words = preg_split('/\s+/', $text);
+            $limited = implode(' ', array_slice($words, 0, $maxWords));
+
+            return count($words) > $maxWords ? $limited . $end : $limited;
+        }
+                                @endphp
                                 @foreach($subWarehouse->products as $warehouseProduct)
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-gray-900">{{ $warehouseProduct->product->name }}</div>
+                                            <div class="text-sm font-medium text-gray-900">{{ limitWords($warehouseProduct->product->name , 5) }}</div>
                                             @if($warehouseProduct->product->sku)
                                                 <div class="text-xs text-gray-500">SKU: {{ $warehouseProduct->product->sku }}</div>
                                             @endif
@@ -145,7 +161,7 @@
                                                 {{ number_format($warehouseProduct->quantity) }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        {{-- <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             <a href="{{ route('warehouse.sub_warehouses.edit-stock', [$subWarehouse, $warehouseProduct]) }}"
                                                class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700">
                                                 <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -154,7 +170,7 @@
                                                 </svg>
                                                 {{ __('common.edit') }}
                                             </a>
-                                        </td>
+                                        </td> --}}
                                     </tr>
                                 @endforeach
                             </tbody>

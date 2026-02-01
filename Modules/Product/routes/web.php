@@ -41,6 +41,8 @@ Route::middleware(['web'])->prefix('product')->name('product.')->group(function 
         Route::get('/{id}/edit', [AuthorController::class, 'edit'])->name('edit');
         Route::put('/{id}', [AuthorController::class, 'update'])->name('update');
         Route::delete('/{id}', [AuthorController::class, 'destroy'])->name('destroy');
+        Route::get('/q/search', [AuthorController::class, 'search'])->name('search');
+        Route::post('/s/quick-store', [AuthorController::class, 'quickStore'])->name('quick-store');
     });
 
     // Book Routes

@@ -30,18 +30,18 @@ class StockMovementController extends Controller
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->whereHas('product', function($pq) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('product', function ($pq) use ($search) {
                     $pq->where('name', 'like', "%{$search}%")
-                       ->orWhere('sku', 'like', "%{$search}%");
+                        ->orWhere('sku', 'like', "%{$search}%");
                 })
-                ->orWhereHas('fromSubWarehouse', function($sq) use ($search) {
-                    $sq->where('name', 'like', "%{$search}%");
-                })
-                ->orWhereHas('toSubWarehouse', function($sq) use ($search) {
-                    $sq->where('name', 'like', "%{$search}%");
-                })
-                ->orWhere('reason', 'like', "%{$search}%");
+                    ->orWhereHas('fromSubWarehouse', function ($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('toSubWarehouse', function ($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhere('reason', 'like', "%{$search}%");
             });
         }
 
@@ -52,9 +52,9 @@ class StockMovementController extends Controller
 
         // Filter by sub-warehouse
         if ($request->filled('sub_warehouse_id')) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('from_sub_warehouse_id', $request->sub_warehouse_id)
-                  ->orWhere('to_sub_warehouse_id', $request->sub_warehouse_id);
+                    ->orWhere('to_sub_warehouse_id', $request->sub_warehouse_id);
             });
         }
 
@@ -87,6 +87,55 @@ class StockMovementController extends Controller
         $products = Product::with('book')->orderBy('name')->get();
 
         return view('warehouse::stock_movements.create', compact('subWarehouses', 'products'));
+    }
+
+    /**
+     * Search products for Select2 dropdown (AJAX endpoint).
+     */
+    public function searchProducts(Request $request)
+    {
+        $search = $request->get('q', '');
+        $page = $request->get('page', 1);
+        $perPage = 20;
+
+        $query = Product::with(['book.author', 'book.category'])
+            ->when($search, function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%");
+            })
+            ->orderBy('name');
+
+        $products = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $results = $products->map(function ($product) {
+            $text = $product->name;
+            if ($product->sku) {
+                $text .= ' (SKU: ' . $product->sku . ')';
+            }
+
+            return [
+                'id' => $product->id,
+                'text' => $text,
+                'type' => $product->type,
+                'book' => $product->type === 'book' && $product->book ? [
+                    'isbn' => $product->book->isbn,
+                    'author' => $product->book->author ? [
+                        'full_name' => $product->book->author->full_name
+                    ] : null,
+                    'category' => $product->book->category ? [
+                        'name' => $product->book->category->name
+                    ] : null,
+                    'pages' => $product->book->pages,
+                ] : null,
+            ];
+        });
+
+        return response()->json([
+            'results' => $results,
+            'pagination' => [
+                'more' => $products->hasMorePages()
+            ]
+        ]);
     }
 
     /**

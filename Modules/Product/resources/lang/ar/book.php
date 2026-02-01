@@ -9,12 +9,12 @@ return [
     'view_book' => 'عرض الكتاب',
     'book_details' => 'تفاصيل الكتاب',
     'register_book' => 'تسجيل كتاب جديد',
-
+  
     // Form Labels
     'author' => 'المؤلف',
     'category' => 'الفئة',
     'sub_category' => 'الفئة الفرعية',
-    'isbn' => 'الرقم الدولي',
+    'isbn' => 'الترقيم الدولي',
     'num_of_pages' => 'عدد الصفحات',
     'cover_type' => 'نوع الغلاف',
     'published_at' => 'تاريخ النشر',
@@ -25,7 +25,7 @@ return [
     'translator_name' => 'اسم المترجم',
 
     // Cover Types
-    'hard' => 'غلاف صلب',
+    'hard' => 'غلاف كرتوني',
     'soft' => 'غلاف ورقي',
 
     // Sections
@@ -55,8 +55,8 @@ return [
 
     // Validation
     'name_required' => 'اسم الكتاب مطلوب',
-    'isbn_required' => 'الرقم الدولي مطلوب',
-    'isbn_unique' => 'الرقم الدولي مستخدم بالفعل',
+    'isbn_required' => 'الترقيم الدولي مطلوب',
+    'isbn_unique' => 'الترقيم الدولي مستخدم بالفعل',
     'author_invalid' => 'المؤلف غير صحيح',
     'category_invalid' => 'الفئة غير صحيحة',
     'sub_category_invalid' => 'الفئة الفرعية غير صحيحة',
@@ -68,7 +68,7 @@ return [
     'select_author' => 'اختر المؤلف (اختياري)',
     'select_category' => 'اختر الفئة (اختياري)',
     'select_sub_category' => 'اختر الفئة الفرعية (اختياري)',
-    'enter_isbn' => 'أدخل الرقم الدولي',
+    'enter_isbn' => 'أدخل الترقيم الدولي',
     'enter_pages' => 'أدخل عدد الصفحات',
     'select_cover_type' => 'اختر نوع الغلاف',
     'select_published_date' => 'اختر تاريخ النشر',

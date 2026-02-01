@@ -37,12 +37,17 @@ return [
     // Management Group
     'management' => 'الإدارة',
     'finance' => 'المالية',
-    'invoices' => 'الفواتير',
+    'sales_invoices' => 'فواتير المبيعات',
+    'purchases_invoices' => 'فواتير المشتريات',
     'payments' => 'المدفوعات',
     'reports' => 'التقارير',
     'documents' => 'المستندات',
     'settings' => 'الإعدادات',
-    
+    'accounts' => 'الحسابات',
+    'parties' => 'الأطراف',
+    'receipt_vouchers' => 'سندات القبض',
+    'payments_vouchers' => 'سندات الصرف',
+
     // Support Group
     'support' => 'الدعم',
     'help_support' => 'المساعدة والدعم',
@@ -50,4 +55,6 @@ return [
     
     // User
     'logout' => 'تسجيل الخروج',
+    'authors' => 'المؤلفون',
+
 ];

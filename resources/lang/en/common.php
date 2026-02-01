@@ -50,7 +50,8 @@ return [
     'settings' => 'Settings',
     'more' => 'More',
     'less' => 'Less',
-    
+    'all_status' => 'All Statuses',
+
     // Common Labels
     'actions' => 'Actions',
     'status' => 'Status',
@@ -397,4 +398,13 @@ return [
     'select_time' => 'Select time',
     'character_count' => ':current / :max characters',
     'words_count' => ':count words',
+
+
+    'print_in_ar' => 'طباعة باللغة العربية',
+    'print_in_en' => 'Print in English',
+    'date_from' => 'Date From',
+    'date_to' => 'Date To',
+        'type_to_search' => 'Type to search',
+    'searching' => 'Searching',
+    'loading_more' => 'Loading more results',
 ];

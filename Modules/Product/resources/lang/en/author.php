@@ -69,4 +69,6 @@ return [
     'enter_whatsapp' => 'Enter WhatsApp number',
     'enter_email' => 'Enter email address',
     'upload_id_image' => 'Upload ID image',
+    'quick_add' => 'Quick Add',
+    'quick_add_author' => 'Quick Add Author',
 ];

@@ -27,12 +27,17 @@ return [
     // Management Group
     'management' => 'Management',
     'finance' => 'Finance',
-    'invoices' => 'Invoices',
+    'sales_invoices' => 'Sales Invoices',
+    'purchases_invoices' => 'Purchases Invoices',
     'payments' => 'Payments',
     'reports' => 'Reports',
     'documents' => 'Documents',
     'settings' => 'Settings',
-    
+    'receipt_vouchers' => 'Receipt Vouchers',
+    'payments_vouchers' => 'Payments Vouchers',
+    'parties' => 'Parties',
+    'accounts' => 'Accounts',
+
     // Support Group
     'support' => 'Support',
     'help_support' => 'Help & Support',
@@ -40,4 +45,5 @@ return [
     
     // User
     'logout' => 'Logout',
+    'authors' => 'Authors'
 ];

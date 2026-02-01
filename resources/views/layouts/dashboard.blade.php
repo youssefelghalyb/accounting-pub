@@ -5,9 +5,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $pageTitle }} - {{ config('app.name', __('sidebar.organization_name')) }}</title>
+    <title>{{ $orgSettings->organization_name . ' - ' . $pageTitle }} -
+        {{ config('app.name', __('sidebar.organization_name')) }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 
     @if (App\Helpers\LocaleHelper::isRtl())
         <link rel="stylesheet" href="{{ asset('css/rtl.css') }}">
@@ -378,6 +385,8 @@
             background-color: #e5e7eb;
             border-color: #d1d5db;
         }
+
+        /* search select  */
     </style>
     {{ $styles ?? '' }}
     @stack('styles')
@@ -629,6 +638,17 @@
                                 <span class="sidebar-text font-medium">{{ __('sidebar.categories') }}</span>
                                 <span class="sidebar-tooltip">{{ __('sidebar.categories') }}</span>
                             </a>
+                            <a href="{{ route('product.authors.index') }}"
+                                class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
+                                <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                <span class="sidebar-text font-medium">{{ __('sidebar.authors') }}</span>
+                                <span class="sidebar-tooltip">{{ __('sidebar.authors') }}</span>
+                            </a>
                             <a href="{{ route('product.books.index') }}"
                                 class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
                                 <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
@@ -677,7 +697,93 @@
                         </div>
 
 
+                        <!-- Support Group -->
+                        <div class="group-header">
+                            <svg class="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z">
+                                </path>
+                            </svg>
+                            <span
+                                class="group-title text-xs font-semibold text-gray-500 uppercase tracking-wider {{ app()->getLocale() == 'ar' ? 'mr-3' : 'ml-3' }}">{{ __('sidebar.finance') }}</span>
+                            <div class="group-divider"></div>
+                        </div>
 
+                        <a href="{{ route('finance.accounts.index') }}"
+                            class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
+                            <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                            <span class="sidebar-text font-medium">{{ __('sidebar.accounts') }}</span>
+                            <span class="sidebar-tooltip">{{ __('sidebar.accounts') }}</span>
+                        </a>
+
+                        <a href="{{ route('finance.parties.index') }}"
+                            class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
+                            <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                            <span class="sidebar-text font-medium">{{ __('sidebar.parties') }}</span>
+                            <span class="sidebar-tooltip">{{ __('sidebar.parties') }}</span>
+                        </a>
+
+                        <a href="{{ route('finance.sales-invoices.index') }}"
+                            class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
+                            <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                            <span class="sidebar-text font-medium">{{ __('sidebar.sales_invoices') }}</span>
+                            <span class="sidebar-tooltip">{{ __('sidebar.sales_invoices') }}</span>
+                        </a>
+
+
+                        <a href="{{ route('finance.receipt-vouchers.index') }}"
+                            class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
+                            <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                            <span class="sidebar-text font-medium">{{ __('sidebar.receipt_vouchers') }}</span>
+                            <span class="sidebar-tooltip">{{ __('sidebar.receipt_vouchers') }}</span>
+                        </a>
+
+
+                        <a href="{{ route('finance.purchase-invoices.index') }}"
+                            class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
+                            <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                            <span class="sidebar-text font-medium">{{ __('sidebar.purchases_invoices') }}</span>
+                            <span class="sidebar-tooltip">{{ __('sidebar.purchases_invoices') }}</span>
+                        </a>
+
+
+                        <a href="{{ route('finance.payment-vouchers.index') }}"
+                            class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
+                            <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                            <span class="sidebar-text font-medium">{{ __('sidebar.payments_vouchers') }}</span>
+                            <span class="sidebar-tooltip">{{ __('sidebar.payments_vouchers') }}</span>
+                        </a>
 
                         <!-- Support Group -->
                         <div class="group-header">
@@ -830,17 +936,46 @@
                     </div>
                 @endif
 
+                {{-- ✅ Validation Errors --}}
+                @if ($errors->any())
+                    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 0 0118 0z"></path>
+                            </svg>
+
+                            <div class="flex-1">
+                                <ul class="list-disc list-inside text-red-700 text-sm space-y-1">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- ✅ Session Error (string OR array) --}}
                 @if (session('error'))
                     <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                         <div class="flex items-start gap-2">
                             <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 0 0118 0z"></path>
                             </svg>
+
                             <div class="flex-1">
                                 <ul class="list-disc list-inside text-red-700 text-sm space-y-1">
-                                    <li>{{ session('error') }}</li>
+                                    @if (is_array(session('error')))
+                                        @foreach (session('error') as $err)
+                                            <li>{{ $err }}</li>
+                                        @endforeach
+                                    @else
+                                        <li>{{ session('error') }}</li>
+                                    @endif
                                 </ul>
                             </div>
                         </div>

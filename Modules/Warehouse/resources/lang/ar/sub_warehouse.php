@@ -78,7 +78,7 @@ return [
 
     // Book Details
     'book_details' => 'تفاصيل الكتاب',
-    'isbn' => 'الرقم الدولي',
+    'isbn' => 'الترقيم الدولي',
     'author' => 'المؤلف',
     'category' => 'التصنيف',
     'cover_type' => 'نوع الغلاف',

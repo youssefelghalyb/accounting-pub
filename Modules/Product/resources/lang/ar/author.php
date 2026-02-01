@@ -69,4 +69,6 @@ return [
     'enter_whatsapp' => 'أدخل رقم الواتساب',
     'enter_email' => 'أدخل البريد الإلكتروني',
     'upload_id_image' => 'رفع صورة الهوية',
+    'quick_add' => 'إضافة سريعة',
+    'quick_add_author' => 'إضافة مؤلف سريع'
 ];
