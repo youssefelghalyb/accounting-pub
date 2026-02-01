@@ -195,16 +195,18 @@
                         <div class="p-6">
                             <div id="itemsContainer" class="space-y-4">
                                 <!-- Items will be added here dynamically -->
-                                <div class="text-center py-8 text-gray-500" id="noItemsMessage">
-                                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
-                                        </path>
-                                    </svg>
-                                    {{ __('finance::purchase.no_items_yet') }}
-                                </div>
                             </div>
+                            <button type="button" id="floatingAddItemBtn"
+                                class="fixed bottom-6 {{ app()->getLocale() == 'ar' ? 'left-6' : 'right-6' }} z-40 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all hover:scale-110 flex items-center justify-center group">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span
+                                    class="absolute {{ app()->getLocale() == 'ar' ? 'right-16' : 'left-16' }} bg-gray-900 text-white text-sm px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    {{ __('finance::invoice.add_item') }}
+                                </span>
+                            </button>
                         </div>
                     </div>
 

@@ -200,18 +200,18 @@
                         <div class="p-6">
                             <div id="itemsContainer" class="space-y-4">
                                 <!-- Items will be added here dynamically -->
-                                <button type="button" id="floatingAddItemBtn"
-                                    class="fixed bottom-6 {{ app()->getLocale() == 'ar' ? 'left-6' : 'right-6' }} z-40 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all hover:scale-110 flex items-center justify-center group">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4"></path>
-                                    </svg>
-                                    <span
-                                        class="absolute {{ app()->getLocale() == 'ar' ? 'right-16' : 'left-16' }} bg-gray-900 text-white text-sm px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                        {{ __('finance::invoice.add_item') }}
-                                    </span>
-                                </button>
                             </div>
+                            <button type="button" id="floatingAddItemBtn"
+                                class="fixed bottom-6 {{ app()->getLocale() == 'ar' ? 'left-6' : 'right-6' }} z-40 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all hover:scale-110 flex items-center justify-center group">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span
+                                    class="absolute {{ app()->getLocale() == 'ar' ? 'right-16' : 'left-16' }} bg-gray-900 text-white text-sm px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    {{ __('finance::invoice.add_item') }}
+                                </span>
+                            </button>
                         </div>
                     </div>
 
