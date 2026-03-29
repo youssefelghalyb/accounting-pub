@@ -2,6 +2,30 @@
 
 <!-- Main Container -->
 <div class="max-w-7xl mx-auto px-6 py-8">
+
+    {{-- DEBUG INFO --}}
+    <div class="mb-4 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
+        <h3 class="font-bold text-yellow-900 mb-2">🐛 DEBUG INFO:</h3>
+        <ul class="text-sm text-yellow-800 space-y-1">
+            <li><strong>Has session('success'):</strong> {{ session('success') ? 'YES - ' . session('success') : 'NO' }}</li>
+            <li><strong>Has session('errors'):</strong> {{ session()->has('errors') ? 'YES' : 'NO' }}</li>
+            <li><strong>Errors count:</strong> {{ session()->has('errors') ? session('errors')->count() : 0 }}</li>
+            <li><strong>Form action:</strong> {{ $action }}</li>
+            <li><strong>Form method:</strong> {{ $method }}</li>
+            <li><strong>Old input exists:</strong> {{ old() ? 'YES' : 'NO' }}</li>
+            @if (session()->has('errors'))
+                <li><strong>All errors:</strong>
+                    <ul class="ml-4 list-disc">
+                        @foreach (session('errors')->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </li>
+            @endif
+        </ul>
+    </div>
+    {{-- END DEBUG --}}
+
     @if (session('success'))
         <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <div class="flex items-center gap-2">
@@ -1277,6 +1301,13 @@
         const formElement = document.getElementById('dynamicForm');
         const formBuilder = new FormBuilder(formElement);
 
+        // DEBUG: Log form initialization
+        console.log('🐛 Form Builder Initialized');
+        console.log('🐛 Form action:', formElement.action);
+        console.log('🐛 Form method:', formElement.method);
+        console.log('🐛 Server errors:', formBuilder.errors);
+        console.log('🐛 Old input:', formBuilder.oldInput);
+
         // Get form configuration from component prop
         @if ($formConfig)
             const formConfig = @json($formConfig);
@@ -1294,5 +1325,21 @@
             // Default example form if no config provided
             formBuilder.defineGroups(groupedFormFields).build();
         @endif
+
+        // DEBUG: Add submit event listener
+        formElement.addEventListener('submit', function(e) {
+            console.log('🐛 Form submit event fired!');
+            console.log('🐛 Form data:', new FormData(formElement));
+            console.log('🐛 Has _method field:', formElement.querySelector('input[name="_method"]') !== null);
+            console.log('🐛 _method value:', formElement.querySelector('input[name="_method"]')?.value);
+            console.log('🐛 Has _token field:', formElement.querySelector('input[name="_token"]') !== null);
+
+            // Log all form fields
+            const formData = new FormData(formElement);
+            console.log('🐛 All form fields:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`  ${key}: ${value}`);
+            }
+        });
     </script>
 @endpush
