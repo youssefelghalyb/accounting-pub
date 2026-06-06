@@ -23,19 +23,20 @@ class PartyController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Party::query();
+        $query = Party::query()
+            ->withSum('salesInvoices as total_sales', 'total_amount')
+            ->withSum('receiptVouchers as total_receipts', 'amount')
+            ->withSum('purchaseInvoices as total_purchases', 'total_amount')
+            ->withSum('paymentVouchers as total_payments', 'amount');
 
-        // Search
         if ($request->filled('search')) {
             $query->search($request->search);
         }
 
-        // Filter by type
         if ($request->filled('type')) {
             $query->ofType($request->type);
         }
 
-        // Filter by role
         if ($request->filled('role')) {
             if ($request->role === 'customer') {
                 $query->customers();
@@ -44,7 +45,6 @@ class PartyController extends Controller
             }
         }
 
-        // Filter by status
         if ($request->filled('status')) {
             if ($request->status === 'active') {
                 $query->active();
@@ -53,7 +53,8 @@ class PartyController extends Controller
             }
         }
 
-        $parties = $query->orderBy('created_at', 'desc')->get();
+        $parties = $query->orderBy('created_at', 'desc')->paginate(25)->withQueryString();
+
         $stats = $this->partyService->getStatistics();
 
         return view('finance::parties.index', compact('parties', 'stats'));
@@ -131,28 +132,38 @@ class PartyController extends Controller
 
         // Sales Invoices
         $salesQuery = $party->salesInvoices()->with('items');
-        if ($dateFrom) $salesQuery->where('invoice_date', '>=', $dateFrom);
-        if ($dateTo) $salesQuery->where('invoice_date', '<=', $dateTo);
-        if ($filterStatus) $salesQuery->where('status', $filterStatus);
+        if ($dateFrom)
+            $salesQuery->where('invoice_date', '>=', $dateFrom);
+        if ($dateTo)
+            $salesQuery->where('invoice_date', '<=', $dateTo);
+        if ($filterStatus)
+            $salesQuery->where('status', $filterStatus);
         $salesInvoices = $salesQuery->orderBy('invoice_date', 'desc')->get();
 
         // Purchase Invoices
         $purchaseQuery = $party->purchaseInvoices()->with('items');
-        if ($dateFrom) $purchaseQuery->where('invoice_date', '>=', $dateFrom);
-        if ($dateTo) $purchaseQuery->where('invoice_date', '<=', $dateTo);
-        if ($filterStatus) $purchaseQuery->where('status', $filterStatus);
+        if ($dateFrom)
+            $purchaseQuery->where('invoice_date', '>=', $dateFrom);
+        if ($dateTo)
+            $purchaseQuery->where('invoice_date', '<=', $dateTo);
+        if ($filterStatus)
+            $purchaseQuery->where('status', $filterStatus);
         $purchaseInvoices = $purchaseQuery->orderBy('invoice_date', 'desc')->get();
 
         // Receipt Vouchers
         $receiptsQuery = $party->receiptVouchers()->with('salesInvoice');
-        if ($dateFrom) $receiptsQuery->where('voucher_date', '>=', $dateFrom);
-        if ($dateTo) $receiptsQuery->where('voucher_date', '<=', $dateTo);
+        if ($dateFrom)
+            $receiptsQuery->where('voucher_date', '>=', $dateFrom);
+        if ($dateTo)
+            $receiptsQuery->where('voucher_date', '<=', $dateTo);
         $receiptVouchers = $receiptsQuery->orderBy('voucher_date', 'desc')->get();
 
         // Payment Vouchers
         $paymentsQuery = $party->paymentVouchers()->with('purchaseInvoice');
-        if ($dateFrom) $paymentsQuery->where('voucher_date', '>=', $dateFrom);
-        if ($dateTo) $paymentsQuery->where('voucher_date', '<=', $dateTo);
+        if ($dateFrom)
+            $paymentsQuery->where('voucher_date', '>=', $dateFrom);
+        if ($dateTo)
+            $paymentsQuery->where('voucher_date', '<=', $dateTo);
         $paymentVouchers = $paymentsQuery->orderBy('voucher_date', 'desc')->get();
 
         // Statistics

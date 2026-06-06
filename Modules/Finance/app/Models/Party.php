@@ -4,10 +4,6 @@ namespace Modules\Finance\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Modules\Finance\Models\SalesInvoice;
-use Modules\Finance\Models\ReceiptVoucher;
-use Modules\Finance\Models\PurchaseInvoice;
-use Modules\Finance\Models\PaymentVoucher;
 
 class Party extends Model
 {
@@ -27,15 +23,9 @@ class Party extends Model
         'is_active' => 'boolean',
     ];
 
-    protected $appends = [
-        'type_label',
-        'type_color',
-        'is_customer',
-        'is_vendor',
-        'customer_balance',
-        'vendor_balance',
-        'role_label',
-    ];
+    // $appends is intentionally empty — accessors are lazy,
+    // called explicitly only when needed, never auto-serialized
+    protected $appends = [];
 
     // ==================== Relationships ====================
 
@@ -91,7 +81,7 @@ class Party extends Model
         return $query->where('type', $type);
     }
 
-    public function scopeSearch($query, $search)
+    public function scopeSearch($query, string $search)
     {
         return $query->where(function ($q) use ($search) {
             $q->where('name', 'like', "%{$search}%")
@@ -101,15 +91,34 @@ class Party extends Model
         });
     }
 
-    // ==================== Accessors (Computed Attributes) ====================
+    // ==================== Helpers ====================
+
+    /**
+     * True if the model was loaded with withSum aggregates from the controller.
+     * Used by accessors to avoid firing individual queries per party.
+     */
+    private function hasPreloadedSums(): bool
+    {
+        return array_key_exists('total_sales', $this->attributes)
+            && array_key_exists('total_receipts', $this->attributes)
+            && array_key_exists('total_purchases', $this->attributes)
+            && array_key_exists('total_payments', $this->attributes);
+    }
+
+    private function preloadedSum(string $key): float
+    {
+        return (float) ($this->attributes[$key] ?? 0);
+    }
+
+    // ==================== Accessors ====================
 
     public function getTypeLabelAttribute(): string
     {
         return match ($this->type) {
             'individual' => __('finance::party.types.individual'),
-            'company' => __('finance::party.types.company'),
-            'online' => __('finance::party.types.online'),
-            default => $this->type,
+            'company'    => __('finance::party.types.company'),
+            'online'     => __('finance::party.types.online'),
+            default      => $this->type,
         };
     }
 
@@ -117,93 +126,127 @@ class Party extends Model
     {
         return match ($this->type) {
             'individual' => 'blue',
-            'company' => 'purple',
-            'online' => 'green',
-            default => 'gray',
+            'company'    => 'purple',
+            'online'     => 'green',
+            default      => 'gray',
         };
     }
 
     /**
-     * Determine if party is a customer (has sales invoices)
+     * True if the party has any sales invoices.
+     * Uses pre-loaded total_sales sum when available — zero queries.
      */
     public function getIsCustomerAttribute(): bool
     {
+        if (array_key_exists('total_sales', $this->attributes)) {
+            return $this->preloadedSum('total_sales') > 0;
+        }
+
         return $this->salesInvoices()->exists();
     }
 
     /**
-     * Determine if party is a vendor (has purchase invoices)
+     * True if the party has any purchase invoices.
+     * Uses pre-loaded total_purchases sum when available — zero queries.
      */
     public function getIsVendorAttribute(): bool
     {
+        if (array_key_exists('total_purchases', $this->attributes)) {
+            return $this->preloadedSum('total_purchases') > 0;
+        }
+
         return $this->purchaseInvoices()->exists();
     }
 
     /**
-     * Get role label (Customer, Vendor, or Both)
+     * Customer / Vendor / Both / None label.
+     * Relies on is_customer and is_vendor — both are pre-load aware.
      */
     public function getRoleLabelAttribute(): string
     {
         $isCustomer = $this->is_customer;
-        $isVendor = $this->is_vendor;
+        $isVendor   = $this->is_vendor;
 
-        if ($isCustomer && $isVendor) {
-            return __('finance::party.roles.both');
-        } elseif ($isCustomer) {
-            return __('finance::party.roles.customer');
-        } elseif ($isVendor) {
-            return __('finance::party.roles.vendor');
-        }
+        if ($isCustomer && $isVendor) return __('finance::party.roles.both');
+        if ($isCustomer)              return __('finance::party.roles.customer');
+        if ($isVendor)                return __('finance::party.roles.vendor');
 
         return __('finance::party.roles.none');
     }
 
     /**
-     * Calculate customer balance
-     * Balance = Total Sales Invoices - Total Receipt Vouchers
+     * Net balance across both sales and purchase sides.
+     * Formula: (Sales - Receipts) - (Purchases - Payments)
+     *
+     * Uses withSum pre-loaded aggregates when available (index/list pages).
+     * Falls back to direct queries for single-party contexts (show page, etc.).
      */
     public function getCustomerBalanceAttribute(): float
     {
-        $totalSales     = $this->salesInvoices()->sum('total_amount');
-        $totalReceipts  = $this->receiptVouchers()->sum('amount'); // تحصيل من العميل
+        if ($this->hasPreloadedSums()) {
+            $net = (
+                ($this->preloadedSum('total_sales')     - $this->preloadedSum('total_receipts')) -
+                ($this->preloadedSum('total_purchases') - $this->preloadedSum('total_payments'))
+            );
 
-        $totalPurchase  = $this->purchaseInvoices()->sum('total_amount');
-        $totalPayments  = $this->paymentVouchers()->sum('amount'); // دفع للمورد
+            return round($net, 2);
+        }
 
-        $net = ($totalSales - $totalReceipts) - ($totalPurchase - $totalPayments);
+        $net = (
+            ($this->salesInvoices()->sum('total_amount')    - $this->receiptVouchers()->sum('amount')) -
+            ($this->purchaseInvoices()->sum('total_amount') - $this->paymentVouchers()->sum('amount'))
+        );
 
         return round($net, 2);
     }
 
     /**
-     * Calculate vendor balance
-     * Balance = Total Purchase Invoices - Total Payment Vouchers
+     * Vendor-only balance: Purchases - Payments.
+     * Uses pre-loaded aggregates when available.
      */
     public function getVendorBalanceAttribute(): float
     {
-        $totalPurchases = $this->purchaseInvoices()->sum('total_amount');
-        $totalPayments = $this->paymentVouchers()->sum('amount');
-        return round($totalPurchases - $totalPayments, 2);
+        if (array_key_exists('total_purchases', $this->attributes)
+            && array_key_exists('total_payments', $this->attributes)) {
+            return round(
+                $this->preloadedSum('total_purchases') - $this->preloadedSum('total_payments'),
+                2
+            );
+        }
+
+        return round(
+            $this->purchaseInvoices()->sum('total_amount') - $this->paymentVouchers()->sum('amount'),
+            2
+        );
     }
 
     /**
-     * Get total sales amount
+     * Raw total of all sales invoices.
      */
     public function getTotalSalesAttribute(): float
     {
-        return $this->salesInvoices()->sum('total_amount');
+        if (array_key_exists('total_sales', $this->attributes)) {
+            return $this->preloadedSum('total_sales');
+        }
+
+        return (float) $this->salesInvoices()->sum('total_amount');
     }
 
     /**
-     * Get total payments received
+     * Raw total of all receipts collected from customer.
      */
     public function getTotalPaymentsReceivedAttribute(): float
     {
-        return $this->receiptVouchers()->sum('amount');
+        if (array_key_exists('total_receipts', $this->attributes)) {
+            return $this->preloadedSum('total_receipts');
+        }
+
+        return (float) $this->receiptVouchers()->sum('amount');
     }
 
     /**
-     * Get count of unpaid invoices
+     * Count of unpaid / partially paid sales invoices.
+     * Always queries — no aggregate shortcut for filtered counts.
      */
     public function getUnpaidInvoicesCountAttribute(): int
     {
@@ -213,7 +256,7 @@ class Party extends Model
     }
 
     /**
-     * Get count of fully paid invoices
+     * Count of fully paid sales invoices.
      */
     public function getPaidInvoicesCountAttribute(): int
     {
@@ -223,7 +266,7 @@ class Party extends Model
     }
 
     /**
-     * Get count of unpaid purchase invoices
+     * Count of unpaid / partially paid purchase invoices.
      */
     public function getUnpaidPurchaseInvoicesCountAttribute(): int
     {
@@ -233,7 +276,7 @@ class Party extends Model
     }
 
     /**
-     * Get count of fully paid purchase invoices
+     * Count of fully paid purchase invoices.
      */
     public function getPaidPurchaseInvoicesCountAttribute(): int
     {

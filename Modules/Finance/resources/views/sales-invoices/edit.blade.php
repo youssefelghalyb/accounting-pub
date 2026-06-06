@@ -23,7 +23,7 @@
             </ol>
         </nav>
 
-    
+
 
         <form action="{{ route('finance.sales-invoices.update', $salesInvoice) }}" method="POST" id="invoiceForm">
             @csrf

@@ -43,7 +43,7 @@
             </div>
 
             <div class="p-6">
-                <form action="{{ route('warehouse.sub_warehouses.store_stock', $subWarehouse) }}" method="POST" id="stockForm">
+                <form action="{{ route('warehouse.sub_warehouses.add-stock', $subWarehouse) }}" method="POST" id="stockForm">
                     @csrf
 
                     <div id="products-container">
@@ -183,9 +183,9 @@
                     try {
                         const book = JSON.parse(selectedOption.dataset.book);
 
-                        if (book.isbn || book.author || book.category || book.pages) {
+                        if (book.isbn || book.contract.authors || book.category || book.pages) {
                             bookDetails.querySelector('.book-isbn').textContent = book.isbn || '-';
-                            bookDetails.querySelector('.book-author').textContent = book.author?.full_name || '-';
+                            bookDetails.querySelector('.book-author').textContent = book.contract.authors?.full_name || '-';
                             bookDetails.querySelector('.book-category').textContent = book.category?.name || '-';
                             bookDetails.querySelector('.book-pages').textContent = book.pages || '-';
                             bookDetails.classList.remove('hidden');

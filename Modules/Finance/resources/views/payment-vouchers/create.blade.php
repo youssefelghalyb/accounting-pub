@@ -35,15 +35,8 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     {{ __('finance::payment.vendor') }} <span class="text-red-500">*</span>
                                 </label>
-                                <select name="party_id" id="party_id" required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                    <option value="">{{ __('finance::payment.select_vendor') }}</option>
-                                    @foreach($parties as $party)
-                                        <option value="{{ $party->id }}" {{ $selectedParty == $party->id ? 'selected' : '' }}>
-                                            {{ $party->name }} - {{ __('finance::payment.balance') }}: {{ number_format($party->vendor_balance, 2) }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                  <x-searchable-select name="party_id" url="{{ route('search-select', 'parties') }}"
+                                placeholder="{{ __('finance::invoice.select_party') }}" :required="true"  />
                                 @error('party_id')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -55,17 +48,10 @@
                                     {{ __('finance::payment.invoice') }}
                                     <span class="text-gray-500 text-xs">({{ __('finance::payment.optional') }})</span>
                                 </label>
-                                <select name="purchase_invoice_id" id="purchase_invoice_id"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                    <option value="">{{ __('finance::payment.select_invoice') }}</option>
-                                    @foreach($invoices as $invoice)
-                                        <option value="{{ $invoice->id }}" 
-                                            data-outstanding="{{ $invoice->outstanding_balance }}"
-                                            {{ $selectedInvoice == $invoice->id ? 'selected' : '' }}>
-                                            {{ $invoice->invoice_number }} - {{ __('finance::payment.outstanding') }}: {{ number_format($invoice->outstanding_balance, 2) }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                 <x-searchable-select name="invoice_id" url="{{ route('search-select', 'purchase-invoices') }}"
+                                placeholder="{{ __('finance::invoice.sales_invoice') }}" :required="false" 
+                               
+                                />
                                 <div id="invoiceInfo" class="mt-2 hidden">
                                     <p class="text-sm text-gray-600">
                                         {{ __('finance::payment.outstanding_amount') }}: 

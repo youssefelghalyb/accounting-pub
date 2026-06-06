@@ -82,14 +82,14 @@ class PurchaseInvoiceController extends Controller
         $orgSettings = OrganizationSetting::first();
 
         // Get products with book information
-        $products = Product::with(['book.author', 'book.category', 'book.subCategory'])
+        $products = Product::with(['book.contract.authors', 'book.category', 'book.subCategory'])
             ->where('status', 'active')
             ->get();
 
         // Get categories, sub-categories, and authors for filters
         $categories = BookCategory::whereHas('books')->get();
         $subCategories = BookCategory::whereHas('books')->get();
-        $authors = Author::whereHas('books')->get();
+        $authors = Author::whereHas('contracts.book')->get();
 
         // Prepare simple products list for basic operations
         $productsForJs = $products->map(function ($p) {

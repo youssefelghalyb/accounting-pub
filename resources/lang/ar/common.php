@@ -406,5 +406,7 @@ return [
     'type_to_search' => 'نوع البحث',
     'searching' => 'جارٍ البحث...',
     'loading_more' => 'جارٍ تحميل المزيد من النتائج...',
+    'first_page' => 'الأولى',
+    'last_page' => 'الأخيرة',
 
 ];

@@ -4,394 +4,749 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('finance::invoice.sales_invoices') }} #{{ $salesInvoice->invoice_number }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{ $printLang == 'ar' ? 'فاتورة مبيعات' : 'Sales Invoice' }} #{{ $salesInvoice->invoice_number }}</title>
+
     @if ($printLang == 'ar')
-        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
-        <style>
-            body {
-                font-family: 'Cairo', sans-serif;
-            }
-        </style>
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap"
+            rel="stylesheet">
     @else
-        <style>
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            }
-        </style>
+        <link
+            href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+            rel="stylesheet">
     @endif
+
     <style>
+        /* ─── Variables ─────────────────────────────── */
+        :root {
+            --ink: #0d0d0d;
+            --ink-mid: #3a3a3a;
+            --ink-light: #6b6b6b;
+            --rule: #c8c8c8;
+            --rule-heavy: #0d0d0d;
+            --accent: #0d0d0d;
+            --bg-band: #f2f2f2;
+            --bg-total: #0d0d0d;
+            --white: #ffffff;
+            --page-w: 210mm;
+        }
+
+        /* ─── Reset ──────────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ─── Base Typography ────────────────────────── */
+        body {
+            font-family: {{ $printLang == 'ar' ? "'Cairo', sans-serif" : "'IBM Plex Sans', sans-serif" }};
+            font-size: 9pt;
+            color: var(--ink);
+            background: #e5e5e5;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* ─── Screen toolbar ─────────────────────────── */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--ink);
+            color: var(--white);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toolbar h3 {
+            font-size: 11pt;
+            font-weight: 600;
+            flex: 1;
+            letter-spacing: .02em;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            font-size: 8.5pt;
+            font-weight: 600;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            letter-spacing: .03em;
+            transition: opacity .15s;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            opacity: .8;
+        }
+
+        .btn-print {
+            background: var(--white);
+            color: var(--ink);
+        }
+
+        .btn-close {
+            background: transparent;
+            color: #ccc;
+            border: 1px solid #444;
+        }
+
+        /* ─── Page wrapper ───────────────────────────── */
+        .page-wrap {
+            padding: 20px 0 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* ─── Invoice sheet ──────────────────────────── */
+        .invoice {
+            width: var(--page-w);
+            background: var(--white);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
+            padding: 14mm 12mm 12mm;
+        }
+
+        /* ─── Header ─────────────────────────────────── */
+        .inv-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 8px;
+            border-bottom: 2.5px solid var(--rule-heavy);
+            margin-bottom: 10px;
+        }
+
+        .inv-header-left {}
+
+        .org-logo {
+            height: 44px;
+            object-fit: contain;
+            margin-bottom: 5px;
+            filter: grayscale(100%) contrast(1.2);
+        }
+
+        .org-name {
+            font-size: 13pt;
+            font-weight: 800;
+            letter-spacing: -.01em;
+            line-height: 1.1;
+            margin-bottom: 3px;
+        }
+
+        .org-meta {
+            font-size: 7.5pt;
+            color: var(--ink-mid);
+            line-height: 1.6;
+        }
+
+        .inv-header-right {
+            text-align: {{ $printLang == 'ar' ? 'left' : 'right' }};
+        }
+
+        .inv-title-box {
+            display: inline-block;
+            border: 2.5px solid var(--ink);
+            padding: 3px 14px;
+            margin-bottom: 8px;
+        }
+
+        .inv-title {
+            font-size: 20pt;
+            font-weight: 800;
+            letter-spacing: .06em;
+            line-height: 1;
+        }
+
+        .inv-meta-table {
+            font-size: 8.5pt;
+        }
+
+        .inv-meta-table td {
+            padding: 1px 0;
+        }
+
+        .inv-meta-table .label {
+            font-weight: 600;
+            padding-{{ $printLang == 'ar' ? 'left' : 'right' }}: 10px;
+            color: var(--ink-mid);
+            white-space: nowrap;
+        }
+
+        .inv-meta-table .value {
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-block;
+            border: 1.5px solid var(--ink);
+            padding: 1px 6px;
+            font-size: 7.5pt;
+            font-weight: 700;
+            letter-spacing: .05em;
+        }
+
+        /* ─── Bill To ────────────────────────────────── */
+        .bill-to {
+            border: 1px solid var(--rule);
+            border-{{ $printLang == 'ar' ? 'right' : 'left' }}: 3px solid var(--ink);
+            padding: 7px 10px;
+            margin-bottom: 10px;
+            background: var(--bg-band);
+        }
+
+        .bill-to-label {
+            font-size: 7pt;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--ink-light);
+            margin-bottom: 2px;
+        }
+
+        .bill-to-name {
+            font-size: 11pt;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .bill-to-meta {
+            font-size: 7.5pt;
+            color: var(--ink-mid);
+            line-height: 1.5;
+        }
+
+        /* ─── Items Table ────────────────────────────── */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+            font-size: 8.5pt;
+        }
+
+        .items-table thead tr {
+            background: var(--ink);
+            color: var(--white);
+        }
+
+        .items-table thead th {
+            padding: 6px 8px;
+            font-weight: 600;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            font-size: 7.5pt;
+            white-space: nowrap;
+        }
+
+        .items-table thead th.text-center {
+            text-align: center;
+        }
+
+        .items-table thead th.text-start {
+            text-align: {{ $printLang == 'ar' ? 'right' : 'left' }};
+        }
+
+        .items-table thead th.text-end {
+            text-align: {{ $printLang == 'ar' ? 'left' : 'right' }};
+        }
+
+        .items-table tbody tr {
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .items-table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .items-table tbody tr.empty-row {
+            background: var(--white) !important;
+        }
+
+        /* CRITICAL: prevent rows from splitting across printed pages */
+        .items-table tbody tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .items-table thead {
+            display: table-header-group;
+            /* repeat on every page */
+        }
+
+        .items-table tbody td {
+            padding: 6px 8px;
+            vertical-align: top;
+        }
+
+        .items-table tbody td.text-center {
+            text-align: center;
+        }
+
+        .items-table tbody td.text-start {
+            text-align: {{ $printLang == 'ar' ? 'right' : 'left' }};
+        }
+
+        .items-table tbody td.text-end {
+            text-align: {{ $printLang == 'ar' ? 'left' : 'right' }};
+        }
+
+        .item-no {
+            color: var(--ink-light);
+            font-size: 8pt;
+            {{ $printLang == 'ar' ? "'IBM Plex Mono'" : "'IBM Plex Mono'" }};
+        }
+
+        .item-name {
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .item-sku {
+            font-size: 7.5pt;
+            color: var(--ink-light);
+            margin-top: 1px;
+        }
+
+        .item-desc {
+            font-size: 7.5pt;
+            color: var(--ink-mid);
+            margin-top: 1px;
+        }
+
+        .item-qty {
+            font-weight: 700;
+        }
+
+        .item-price {
+            color: var(--ink-mid);
+        }
+
+        .item-disc {
+            color: var(--ink-mid);
+        }
+
+        .item-total {
+            font-weight: 700;
+        }
+
+        .empty-cell {
+            height: 26px;
+        }
+
+        /* ─── Footer section ─────────────────────────── */
+        .inv-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .inv-footer-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Notes / terms */
+        .note-box {
+            border: 1px solid var(--rule);
+            padding: 6px 9px;
+        }
+
+        .note-label {
+            font-size: 7pt;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--ink-light);
+            margin-bottom: 2px;
+        }
+
+        .note-text {
+            font-size: 8pt;
+            color: var(--ink-mid);
+            line-height: 1.5;
+        }
+
+        /* Totals block */
+        .totals-table {
+            width: 260px;
+            border-collapse: collapse;
+            font-size: 8.5pt;
+            flex-shrink: 0;
+        }
+
+        .totals-table tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .totals-table td {
+            padding: 5px 9px;
+            border: 1px solid var(--rule);
+        }
+
+        .totals-table .t-label {
+            font-weight: 600;
+            color: var(--ink-mid);
+        }
+
+        .totals-table .t-value {
+            text-align: {{ $printLang == 'ar' ? 'left' : 'right' }};
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .totals-table .t-band {
+            background: var(--bg-band);
+        }
+
+        .totals-table .t-total-row td {
+            background: var(--bg-total);
+            color: var(--white);
+            font-weight: 800;
+            font-size: 10pt;
+            border-color: var(--bg-total);
+        }
+
+        .totals-table .t-balance-row td {
+            background: var(--bg-band);
+            font-weight: 800;
+            font-size: 10pt;
+            border: 1.5px solid var(--ink);
+        }
+
+        /* ─── Signatures ─────────────────────────────── */
+        .signatures {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1.5px solid var(--rule-heavy);
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .sig-block {
+            text-align: center;
+        }
+
+        .sig-line {
+            height: 44px;
+            border-bottom: 1px solid var(--ink);
+            margin-bottom: 4px;
+        }
+
+        .sig-label {
+            font-size: 8pt;
+            font-weight: 700;
+            letter-spacing: .04em;
+            color: var(--ink-mid);
+        }
+
+        /* ─── Page number watermark (screen only) ──── */
+        .page-stamp {
+            font-size: 7pt;
+            color: var(--rule);
+            text-align: center;
+            margin-top: 6px;
+            letter-spacing: .08em;
+        }
+
+        /* ─── PRINT OVERRIDES ────────────────────────── */
         @media print {
             body {
-                margin: 0 !important;
-                padding: 0 !important;
-                width: 100%;
-                height: 100%;
                 background: white !important;
             }
 
-            .no-print {
+            .toolbar,
+            .page-stamp {
                 display: none !important;
             }
 
-            @page {
-                size: A4;
-                margin: 0 !important;
-                /* ✅ remove all print margins */
+            .page-wrap {
+                padding: 0;
+                background: white;
             }
-        }
 
-        .invoice-container {
-            max-width: 210mm;
-            margin: 0 auto;
-            background: white;
-            min-height: 270mm;
-            /* Minimum A4 height minus margins */
-        }
+            .invoice {
+                width: 100%;
+                box-shadow: none;
+                padding: 10mm 10mm 8mm;
+                /* Let browser handle page breaks naturally */
+            }
 
-        table {
-            border-collapse: collapse;
-        }
-
-        .border-all {
-            border: 1px solid #000;
-        }
-
-        .border-t {
-            border-top: 1px solid #000;
-        }
-
-        .border-b {
-            border-bottom: 1px solid #000;
-        }
-
-        .border-l {
-            border-left: 1px solid #000;
-        }
-
-        .border-r {
-            border-right: 1px solid #000;
-        }
-
-        .border-thick {
-            border-width: 2px;
-        }
-
-        .bg-gray {
-            background-color: #e8e8e8;
-        }
-
-        .text-8 {
-            font-size: 8pt;
-            line-height: 1.2;
-        }
-
-        .text-9 {
-            font-size: 9pt;
-            line-height: 1.3;
-        }
-
-        .text-10 {
-            font-size: 10pt;
-            line-height: 1.3;
-        }
-
-        .text-11 {
-            font-size: 11pt;
-            line-height: 1.3;
-        }
-
-        .text-14 {
-            font-size: 14pt;
-            line-height: 1.2;
-        }
-
-        .text-18 {
-            font-size: 18pt;
-            line-height: 1.1;
+            @page {
+                size: A4 portrait;
+                margin: 8mm 10mm;
+            }
         }
     </style>
 </head>
 
-<body class="bg-gray-100">
-    <!-- Print Toolbar -->
-    <div class="no-print bg-white border-b sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <button onclick="window.print()"
-                    class="px-3 py-1.5 text-sm bg-gray-900 text-white rounded hover:bg-gray-800 flex items-center gap-1.5">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
-                        </path>
-                    </svg>
-                    {{ $printLang == 'ar' ? 'طباعة' : 'Print' }}
-                </button>
-                <button onclick="window.close()"
-                    class="px-3 py-1.5 text-sm border text-gray-700 rounded hover:bg-gray-50">
-                    {{ $printLang == 'ar' ? 'إغلاق' : 'Close' }}
-                </button>
-            </div>
-        </div>
+<body>
+
+    {{-- ── Screen Toolbar ── --}}
+    <div class="toolbar no-print">
+        <h3>
+            {{ $printLang == 'ar' ? 'معاينة الطباعة — فاتورة' : 'Print Preview — Invoice' }}
+            #{{ $salesInvoice->invoice_number }}
+        </h3>
+
+        {{-- Language switcher --}}
+        <a href="{{ request()->fullUrlWithQuery(['lang' => 'ar']) }}"
+            style="color: #aaa; font-size: 8.5pt; text-decoration: none; margin-inline-end: 6px;">AR</a>
+        <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}"
+            style="color: #aaa; font-size: 8.5pt; text-decoration: none; margin-inline-end: 14px;">EN</a>
+
+        <button class="btn btn-print" onclick="window.print()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            {{ $printLang == 'ar' ? 'طباعة' : 'Print' }}
+        </button>
+        <button class="btn btn-close" onclick="window.close()">
+            {{ $printLang == 'ar' ? 'إغلاق' : 'Close' }}
+        </button>
     </div>
 
-    <div class="p-4">
-        <div class="invoice-container shadow-lg">
-            <div class="p-6">
-                <!-- Header -->
-                <div class="flex items-start justify-between mb-4 pb-3 border-b-2 border-black">
-                    <div style="width: 60%;">
-                        @if ($orgSettings->logo_path)
-                            <img src="{{ asset('storage/'.$orgSettings->logo_path) }}"
-                                alt="{{ $orgSettings->organization_name }}" class="h-12 mb-1.5 object-contain"
-                                style="filter: grayscale(100%) contrast(1.2);">
+    <div class="page-wrap">
+        <div class="invoice">
+
+            {{-- ── HEADER ── --}}
+            <div class="inv-header">
+                <div class="inv-header-left">
+                    @if ($orgSettings->logo_path)
+                        <img src="{{ asset('storage/' . $orgSettings->logo_path) }}"
+                            alt="{{ $orgSettings->organization_name }}" class="org-logo">
+                    @endif
+                    <div class="org-name">{{ $orgSettings->organization_name }}</div>
+                    <div class="org-meta">
+                        @if ($orgSettings->address)
+                            <div>{{ $orgSettings->address }}</div>
                         @endif
-                        <h1 class="text-14 font-bold mb-0.5">{{ $orgSettings->organization_name }}</h1>
-                        <div class="text-8">
-                            @if ($orgSettings->address)
-                                <p>{{ $orgSettings->address }}</p>
-                            @endif
-                            <p>
-                                @if ($orgSettings->phone)
-                                    <span>{{ $printLang == 'ar' ? 'ت:' : 'T:' }} {{ $orgSettings->phone }}</span>
-                                @endif
-                                @if ($orgSettings->email)
-                                    <span class="ml-2">{{ $printLang == 'ar' ? 'بريد:' : 'E:' }}
-                                        {{ $orgSettings->email }}</span>
-                                @endif
-                            </p>
-                            @if ($orgSettings->website)
-                                <p>{{ $orgSettings->website }}</p>
-                            @endif
-                        </div>
-                    </div>
-
-                    <div class="text-{{ $printLang == 'ar' ? 'left' : 'right' }}">
-                        <div class="border-2 border-black px-3 py-1 inline-block mb-2">
-                            <h2 class="text-18 font-bold">{{ $printLang == 'ar' ? 'فاتورة' : 'INVOICE' }}</h2>
-                        </div>
-                        <table class="text-9" style="margin-{{ $printLang == 'ar' ? 'right' : 'left' }}: auto;">
-                            <tr>
-                                <td
-                                    class="font-semibold {{ $printLang == 'ar' ? 'pl-3 text-left' : 'pr-3 text-right' }}">
-                                    {{ $printLang == 'ar' ? 'رقم:' : 'No:' }}</td>
-                                <td class="font-bold">{{ $salesInvoice->invoice_number }}</td>
-                            </tr>
-                            <tr>
-                                <td
-                                    class="font-semibold {{ $printLang == 'ar' ? 'pl-3 text-left' : 'pr-3 text-right' }}">
-                                    {{ $printLang == 'ar' ? 'التاريخ:' : 'Date:' }}</td>
-                                <td>{{ $salesInvoice->invoice_date->format('d/m/Y') }}</td>
-                            </tr>
-                            @if ($salesInvoice->due_date)
-                                <tr>
-                                    <td
-                                        class="font-semibold {{ $printLang == 'ar' ? 'pl-3 text-left' : 'pr-3 text-right' }}">
-                                        {{ $printLang == 'ar' ? 'الاستحقاق:' : 'Due:' }}</td>
-                                    <td>{{ $salesInvoice->due_date->format('d/m/Y') }}</td>
-                                </tr>
-                            @endif
-                            <tr>
-                                <td
-                                    class="font-semibold {{ $printLang == 'ar' ? 'pl-3 text-left' : 'pr-3 text-right' }}">
-                                    {{ $printLang == 'ar' ? 'الحالة:' : 'Status:' }}</td>
-                                <td><span
-                                        class="font-bold border border-black px-1.5 py-0.5 inline-block text-8">{{ strtoupper($salesInvoice->status_label) }}</span>
-                                </td>
-                            </tr>
-                        </table>
+                        @if ($orgSettings->phone)
+                            <span>{{ $printLang == 'ar' ? 'ت: ' : 'T: ' }}{{ $orgSettings->phone }}</span>
+                        @endif
+                        @if ($orgSettings->phone && $orgSettings->email)
+                            &nbsp;·&nbsp;
+                        @endif
+                        @if ($orgSettings->email)
+                            <span>{{ $orgSettings->email }}</span>
+                        @endif
+                        @if ($orgSettings->website)
+                            <div>{{ $orgSettings->website }}</div>
+                        @endif
                     </div>
                 </div>
 
-                <!-- Bill To -->
-                <div class="mb-3">
-                    <div class="border border-black px-2 py-1.5 bg-gray">
-                        <p class="text-8 font-bold uppercase mb-0.5">
-                            {{ $printLang == 'ar' ? 'فاتورة إلى' : 'BILL TO' }}</p>
-                        <p class="text-10 font-bold mb-0.5">{{ $salesInvoice->party->name }}</p>
-                        <div class="text-8">
-                            @if ($salesInvoice->party->address)
-                                <p>{{ $salesInvoice->party->address }}</p>
-                            @endif
-                            <p>
-                                @if ($salesInvoice->party->phone)
-                                    <span>{{ $printLang == 'ar' ? 'ت:' : 'T:' }}
-                                        {{ $salesInvoice->party->phone }}</span>
-                                @endif
-                                @if ($salesInvoice->party->email)
-                                    <span class="ml-2">{{ $printLang == 'ar' ? 'بريد:' : 'E:' }}
-                                        {{ $salesInvoice->party->email }}</span>
-                                @endif
-                            </p>
-                        </div>
+                <div class="inv-header-right">
+                    <div class="inv-title-box">
+                        <div class="inv-title">{{ $printLang == 'ar' ? 'فاتورة' : 'INVOICE' }}</div>
                     </div>
-                </div>
-
-                <!-- Items Table -->
-                <table class="w-full text-9 mb-3">
-                    <thead>
-                        <tr class="bg-gray">
-                            <th
-                                class="border-all px-2 py-1.5 text-{{ $printLang == 'ar' ? 'right' : 'left' }} font-bold">
-                                {{ $printLang == 'ar' ? 'البند' : 'Item Description' }}</th>
-                            <th class="border-all px-2 py-1.5 text-center font-bold" style="width: 7%;">
-                                {{ $printLang == 'ar' ? 'كمية' : 'Qty' }}</th>
-                            <th class="border-all px-2 py-1.5 text-{{ $printLang == 'ar' ? 'right' : 'left' }} font-bold"
-                                style="width: 11%;">{{ $printLang == 'ar' ? 'السعر' : 'Unit Price' }}</th>
-                            @if ($salesInvoice->items->sum('discount_amount') > 0)
-                                <th class="border-all px-2 py-1.5 text-{{ $printLang == 'ar' ? 'right' : 'left' }} font-bold"
-                                    style="width: 10%;">{{ $printLang == 'ar' ? 'خصم' : 'Discount' }}</th>
-                            @endif
-                            <th class="border-all px-2 py-1.5 text-{{ $printLang == 'ar' ? 'right' : 'left' }} font-bold"
-                                style="width: 12%;">{{ $printLang == 'ar' ? 'المبلغ' : 'Amount' }}</th>
+                    <table class="inv-meta-table">
+                        <tr>
+                            <td class="label">{{ $printLang == 'ar' ? 'رقم الفاتورة' : 'Invoice No.' }}</td>
+                            <td class="value">{{ $salesInvoice->invoice_number }}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                            $minRows = 12; // Minimum rows to ensure full page
-                            $itemCount = $salesInvoice->items->count();
-                            $hasDiscount = $salesInvoice->items->sum('discount_amount') > 0;
-                            $colspan = $hasDiscount ? 5 : 4;
-                        @endphp
-
-                        @foreach ($salesInvoice->items as $item)
+                        <tr>
+                            <td class="label">{{ $printLang == 'ar' ? 'التاريخ' : 'Date' }}</td>
+                            <td class="value">{{ $salesInvoice->invoice_date->format('d / m / Y') }}</td>
+                        </tr>
+                        @if ($salesInvoice->due_date)
                             <tr>
-                                <td class="border-all px-2 py-1">
-                                    <p class="font-semibold">{{ $item->product_name }}</p>
-                                    @if ($item->product_sku)
-                                        <p class="text-8">{{ $item->product_sku }}</p>
-                                    @endif
-                                    @if ($item->description)
-                                        <p class="text-8">{{ $item->description }}</p>
-                                    @endif
-                                </td>
-                                <td class="border-all px-2 py-1 text-center font-semibold">
-                                    {{ number_format($item->quantity, 0) }}</td>
-                                <td class="border-all px-2 py-1 text-{{ $printLang == 'ar' ? 'right' : 'left' }}">
-                                    {{ number_format($item->unit_price, 2) }}</td>
-                                @if ($hasDiscount)
-                                    <td class="border-all px-2 py-1 text-{{ $printLang == 'ar' ? 'right' : 'left' }}">
-                                        {{ $item->discount_amount > 0 ? number_format($item->discount_amount, 2) : '-' }}
-                                    </td>
-                                @endif
-                                <td
-                                    class="border-all px-2 py-1 text-{{ $printLang == 'ar' ? 'right' : 'left' }} font-bold">
-                                    {{ number_format($item->line_total, 2) }}</td>
+                                <td class="label">{{ $printLang == 'ar' ? 'تاريخ الاستحقاق' : 'Due Date' }}</td>
+                                <td class="value">{{ $salesInvoice->due_date->format('d / m / Y') }}</td>
                             </tr>
-                        @endforeach
-
-                        {{-- Add empty rows to fill the page --}}
-                        @if ($itemCount < $minRows)
-                            @for ($i = $itemCount; $i < $minRows; $i++)
-                                <tr>
-                                    <td class="border-all px-2 py-1" style="height: 30px;">&nbsp;</td>
-                                    <td class="border-all px-2 py-1">&nbsp;</td>
-                                    <td class="border-all px-2 py-1">&nbsp;</td>
-                                    @if ($hasDiscount)
-                                        <td class="border-all px-2 py-1">&nbsp;</td>
-                                    @endif
-                                    <td class="border-all px-2 py-1">&nbsp;</td>
-                                </tr>
-                            @endfor
                         @endif
-                    </tbody>
-                </table>
-
-                <!-- Summary -->
-                <div class="flex justify-between items-start mb-3">
-                    <!-- Notes -->
-                    <div style="width: 52%;">
-                        @if ($salesInvoice->notes)
-                            <div class="border border-black px-2 py-1 mb-2">
-                                <p class="text-8 font-bold mb-0.5">{{ $printLang == 'ar' ? 'ملاحظات:' : 'Notes:' }}</p>
-                                <p class="text-9">{{ $salesInvoice->notes }}</p>
-                            </div>
-                        @endif
-                        @if ($salesInvoice->payment_terms)
-                            <div class="border border-black px-2 py-1">
-                                <p class="text-8 font-bold mb-0.5">
-                                    {{ $printLang == 'ar' ? 'شروط الدفع:' : 'Payment Terms:' }}</p>
-                                <p class="text-9">{{ $salesInvoice->payment_terms }}</p>
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Totals -->
-                    <div style="width: 280px;">
-                        <table class="w-full text-9">
-                            <tr class="bg-gray">
-                                <td class="border-all px-2 py-1 font-bold">
-                                    {{ $printLang == 'ar' ? 'المجموع الفرعي:' : 'Subtotal:' }}</td>
-                                <td class="border-all px-2 py-1 text-{{ $printLang == 'ar' ? 'left' : 'right' }} font-semibold"
-                                    style="width: 35%;">{{ number_format($salesInvoice->subtotal, 2) }}</td>
-                            </tr>
-                            @if ($salesInvoice->discount_amount > 0)
-                                <tr>
-                                    <td class="border-all px-2 py-1 font-bold">
-                                        {{ $printLang == 'ar' ? 'الخصم:' : 'Discount:' }}</td>
-                                    <td
-                                        class="border-all px-2 py-1 text-{{ $printLang == 'ar' ? 'left' : 'right' }} font-semibold">
-                                        ({{ number_format($salesInvoice->discount_amount, 2) }})</td>
-                                </tr>
-                            @endif
-                            @if ($salesInvoice->is_taxable && $salesInvoice->tax_amount > 0)
-                                <tr class="bg-gray">
-                                    <td class="border-all px-2 py-1 font-bold">
-                                        {{ $printLang == 'ar' ? 'الضريبة' : 'Tax' }} ({{ $salesInvoice->tax_rate }}%):
-                                    </td>
-                                    <td
-                                        class="border-all px-2 py-1 text-{{ $printLang == 'ar' ? 'left' : 'right' }} font-semibold">
-                                        {{ number_format($salesInvoice->tax_amount, 2) }}</td>
-                                </tr>
-                            @endif
-                            <tr class="bg-gray">
-                                <td class="border-all border-thick px-2 py-1.5 font-bold text-10">
-                                    {{ $printLang == 'ar' ? 'الإجمالي:' : 'TOTAL:' }}</td>
-                                <td
-                                    class="border-all border-thick px-2 py-1.5 text-{{ $printLang == 'ar' ? 'left' : 'right' }} font-bold text-11">
-                                    {{ number_format($salesInvoice->total_amount, 2) }}
-                                    {{ $orgSettings->currency_symbol }}</td>
-                            </tr>
-                            @if ($salesInvoice->paid_amount > 0)
-                                <tr>
-                                    <td class="border-all px-2 py-1 font-bold">
-                                        {{ $printLang == 'ar' ? 'المدفوع:' : 'Amount Paid:' }}</td>
-                                    <td
-                                        class="border-all px-2 py-1 text-{{ $printLang == 'ar' ? 'left' : 'right' }} font-semibold">
-                                        {{ number_format($salesInvoice->paid_amount, 2) }}</td>
-                                </tr>
-                            @endif
-                            @if ($salesInvoice->outstanding_balance > 0)
-                                <tr class="bg-gray">
-                                    <td class="border-all border-thick px-2 py-1.5 font-bold text-10">
-                                        {{ $printLang == 'ar' ? 'المبلغ المستحق:' : 'BALANCE DUE:' }}</td>
-                                    <td
-                                        class="border-all border-thick px-2 py-1.5 text-{{ $printLang == 'ar' ? 'left' : 'right' }} font-bold text-11">
-                                        {{ number_format($salesInvoice->outstanding_balance, 2) }}</td>
-                                </tr>
-                            @endif
-                        </table>
-                    </div>
+                        <tr>
+                            <td class="label">{{ $printLang == 'ar' ? 'الحالة' : 'Status' }}</td>
+                            <td class="value">
+                                <span class="status-badge">{{ strtoupper($salesInvoice->status_label) }}</span>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
-
-                <!-- Signatures -->
-                <div class="grid grid-cols-2 gap-6 mt-8 pt-4 border-t-2 border-black">
-                    <div class="text-center">
-                        <div class="pt-12 border-t border-black mt-6">
-                            <p class="text-9 font-bold">{{ $printLang == 'ar' ? 'المحاسب' : 'Accountant' }}</p>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <div class="pt-12 border-t border-black mt-6">
-                            <p class="text-9 font-bold">{{ $printLang == 'ar' ? 'العميل' : 'Customer' }}</p>
-                        </div>
-                    </div>
-                </div>
-
-
             </div>
+
+            {{-- ── BILL TO ── --}}
+            <div class="bill-to">
+                <div class="bill-to-label">{{ $printLang == 'ar' ? 'فاتورة إلى' : 'Bill To' }}</div>
+                <div class="bill-to-name">{{ $salesInvoice->party->name }}</div>
+                <div class="bill-to-meta">
+                    @if ($salesInvoice->party->address)
+                        {{ $salesInvoice->party->address }}<br>
+                    @endif
+                    @if ($salesInvoice->party->phone)
+                        {{ $printLang == 'ar' ? 'ت: ' : 'T: ' }}{{ $salesInvoice->party->phone }}
+                    @endif
+                    @if ($salesInvoice->party->phone && $salesInvoice->party->email)
+                        &nbsp;·&nbsp;
+                    @endif
+                    @if ($salesInvoice->party->email)
+                        {{ $salesInvoice->party->email }}
+                    @endif
+                </div>
+            </div>
+
+            {{-- ── ITEMS TABLE ── --}}
+            @php
+                $hasDiscount = $salesInvoice->items->sum('discount_amount') > 0;
+                $itemCount = $salesInvoice->items->count();
+                $minRows = 10;
+            @endphp
+
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width:4%;">#</th>
+                        <th class="text-start">{{ $printLang == 'ar' ? 'البند' : 'Description' }}</th>
+                        <th class="text-center" style="width:7%;">{{ $printLang == 'ar' ? 'كمية' : 'Qty' }}</th>
+                        <th class="text-end" style="width:12%;">{{ $printLang == 'ar' ? 'سعر الوحدة' : 'Unit Price' }}
+                        </th>
+                        @if ($hasDiscount)
+                            <th class="text-end" style="width:10%;">{{ $printLang == 'ar' ? 'خصم' : 'Discount' }}</th>
+                        @endif
+                        <th class="text-end" style="width:13%;">{{ $printLang == 'ar' ? 'الإجمالي' : 'Total' }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($salesInvoice->items as $i => $item)
+                        <tr>
+                            <td class="text-center item-no">{{ $i + 1 }}</td>
+                            <td class="text-start">
+                                <div class="item-name">{{ $item->product_name }}</div>
+                                @if ($item->product_sku)
+                                    <div class="item-sku">{{ $item->product_sku }}</div>
+                                @endif
+                                @if ($item->description)
+                                    <div class="item-desc">{{ $item->description }}</div>
+                                @endif
+                            </td>
+                            <td class="text-center item-qty">{{ number_format($item->quantity, 0) }}</td>
+                            <td class="text-end item-price">{{ number_format($item->unit_price, 2) }}</td>
+                            @if ($hasDiscount)
+                                <td class="text-end item-disc">
+                                    {{ $item->discount_amount > 0 ? '(' . number_format($item->discount_amount, 2) . ')' : '—' }}
+                                </td>
+                            @endif
+                            <td class="text-end item-total">{{ number_format($item->line_total, 2) }}</td>
+                        </tr>
+                    @endforeach
+
+                    {{-- Padding rows --}}
+                    @for ($j = $itemCount; $j < $minRows; $j++)
+                        <tr class="empty-row">
+                            <td class="empty-cell"></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            @if ($hasDiscount)
+                                <td></td>
+                            @endif
+                            <td></td>
+                        </tr>
+                    @endfor
+                </tbody>
+            </table>
+
+            {{-- ── FOOTER (notes + totals) ── --}}
+            <div class="inv-footer">
+
+                {{-- Left: notes & payment terms --}}
+                <div class="inv-footer-left">
+                    @if ($salesInvoice->notes)
+                        <div class="note-box">
+                            <div class="note-label">{{ $printLang == 'ar' ? 'ملاحظات' : 'Notes' }}</div>
+                            <div class="note-text">{{ $salesInvoice->notes }}</div>
+                        </div>
+                    @endif
+                    @if ($salesInvoice->payment_terms)
+                        <div class="note-box">
+                            <div class="note-label">{{ $printLang == 'ar' ? 'شروط الدفع' : 'Payment Terms' }}</div>
+                            <div class="note-text">{{ $salesInvoice->payment_terms }}</div>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Right: totals --}}
+                <table class="totals-table">
+                    <tr class="t-band">
+                        <td class="t-label">{{ $printLang == 'ar' ? 'المجموع الفرعي' : 'Subtotal' }}</td>
+                        <td class="t-value">{{ number_format($salesInvoice->subtotal, 2) }}</td>
+                    </tr>
+                    @if ($salesInvoice->discount_amount > 0)
+                        <tr>
+                            <td class="t-label">{{ $printLang == 'ar' ? 'الخصم' : 'Discount' }}</td>
+                            <td class="t-value">({{ number_format($salesInvoice->discount_amount, 2) }})</td>
+                        </tr>
+                    @endif
+                    @if ($salesInvoice->is_taxable && $salesInvoice->tax_amount > 0)
+                        <tr class="t-band">
+                            <td class="t-label">
+                                {{ $printLang == 'ar' ? 'ضريبة' : 'Tax' }} ({{ $salesInvoice->tax_rate }}%)
+                            </td>
+                            <td class="t-value">{{ number_format($salesInvoice->tax_amount, 2) }}</td>
+                        </tr>
+                    @endif
+                    <tr class="t-total-row">
+                        <td class="t-label">{{ $printLang == 'ar' ? 'الإجمالي' : 'TOTAL' }}</td>
+                        <td class="t-value">
+                            {{ number_format($salesInvoice->total_amount, 2) }}
+                            {{ $orgSettings->currency_symbol }}
+                        </td>
+                    </tr>
+                    @if ($salesInvoice->paid_amount > 0)
+                        <tr>
+                            <td class="t-label">{{ $printLang == 'ar' ? 'المدفوع' : 'Amount Paid' }}</td>
+                            <td class="t-value">{{ number_format($salesInvoice->paid_amount, 2) }}</td>
+                        </tr>
+                    @endif
+                    @if ($salesInvoice->outstanding_balance > 0)
+                        <tr class="t-balance-row">
+                            <td class="t-label">{{ $printLang == 'ar' ? 'المبلغ المستحق' : 'BALANCE DUE' }}</td>
+                            <td class="t-value">
+                                {{ number_format($salesInvoice->outstanding_balance, 2) }}
+                                {{ $orgSettings->currency_symbol }}
+                            </td>
+                        </tr>
+                    @endif
+                </table>
+            </div>
+
+            {{-- ── SIGNATURES ── --}}
+            <div class="signatures">
+                <div class="sig-block">
+                    <div class="sig-line"></div>
+                    <div class="sig-label">{{ $printLang == 'ar' ? 'المحاسب' : 'Accountant' }}</div>
+                </div>
+                <div class="sig-block">
+                    <div class="sig-line"></div>
+                    <div class="sig-label">{{ $printLang == 'ar' ? 'العميل' : 'Customer' }}</div>
+                </div>
+            </div>
+
+        </div>{{-- .invoice --}}
+
+        <div class="page-stamp">
+            {{ $orgSettings->organization_name }} &nbsp;·&nbsp; {{ $salesInvoice->invoice_number }}
         </div>
-    </div>
+    </div>{{-- .page-wrap --}}
+
 </body>
 
 </html>

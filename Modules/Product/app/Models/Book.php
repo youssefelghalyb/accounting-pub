@@ -4,13 +4,12 @@ namespace Modules\Product\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Book extends Model
 {
     protected $fillable = [
         'product_id',
-        'author_id',
         'category_id',
         'sub_category_id',
         'isbn',
@@ -27,19 +26,15 @@ class Book extends Model
     ];
 
     protected $casts = [
-        'published_at' => 'date',
+        'published_at'  => 'date',
         'is_translated' => 'boolean',
     ];
 
-    // Relationships
+    // ─── Relationships ────────────────────────────────────────────────────────
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
-    }
-
-    public function author(): BelongsTo
-    {
-        return $this->belongsTo(Author::class);
     }
 
     public function category(): BelongsTo
@@ -52,9 +47,20 @@ class Book extends Model
         return $this->belongsTo(BookCategory::class, 'sub_category_id');
     }
 
-    public function contracts(): HasMany
+    /**
+     * A book has exactly one contract.
+     */
+    public function contract(): HasOne
     {
-        return $this->hasMany(Contract::class);
+        return $this->hasOne(Contract::class);
+    }
+
+    /**
+     * Convenience: get all authors of this book through its contract.
+     */
+    public function getAuthorsAttribute()
+    {
+        return $this->contract ? $this->contract->authors : collect();
     }
 
     public function creator(): BelongsTo
@@ -67,12 +73,13 @@ class Book extends Model
         return $this->belongsTo(\App\Models\User::class, 'edited_by');
     }
 
-    // Accessors
+    // ─── Accessors ────────────────────────────────────────────────────────────
+
     public function getCoverTypeColorAttribute(): string
     {
         return match ($this->cover_type) {
-            'hard' => 'blue',
-            'soft' => 'green',
+            'hard'  => 'blue',
+            'soft'  => 'green',
             default => 'gray',
         };
     }
@@ -82,24 +89,23 @@ class Book extends Model
         return $this->product ? $this->product->name : '';
     }
 
-    // Get translation info as a formatted string
     public function getTranslationInfoAttribute(): ?string
     {
-        if (!$this->is_translated) {
+        if (! $this->is_translated) {
             return null;
         }
-
         $info = [];
-        if ($this->translated_from) {
-            $info[] = "From: {$this->translated_from}";
-        }
-        if ($this->translated_to) {
-            $info[] = "To: {$this->translated_to}";
-        }
-        if ($this->translator_name) {
-            $info[] = "By: {$this->translator_name}";
-        }
-
+        if ($this->translated_from) $info[] = "From: {$this->translated_from}";
+        if ($this->translated_to)   $info[] = "To: {$this->translated_to}";
+        if ($this->translator_name) $info[] = "By: {$this->translator_name}";
         return implode(' | ', $info);
+    }
+
+    /**
+     * Authors names as a display string — e.g. for listings and cards.
+     */
+    public function getAuthorsNamesAttribute(): string
+    {
+        return $this->authors->pluck('full_name')->implode('، ');
     }
 }

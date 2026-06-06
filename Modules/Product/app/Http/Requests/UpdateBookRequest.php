@@ -59,7 +59,7 @@ class UpdateBookRequest extends FormRequest
             'name.required' => __('product::book.name_required'),
             'isbn.required' => __('product::book.isbn_required'),
             'isbn.unique' => __('product::book.isbn_unique'),
-            'author_id.exists' => __('product::book.author_invalid'),
+            'author_id.exists' => __('product::book.contract.authors_invalid'),
             'category_id.exists' => __('product::book.category_invalid'),
             'sub_category_id.exists' => __('product::book.sub_category_invalid'),
             'cover_type.required' => __('product::book.cover_type_required'),

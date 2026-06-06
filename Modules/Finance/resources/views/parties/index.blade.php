@@ -1,7 +1,7 @@
 <x-dashboard :pageTitle="__('finance::party.party_management')">
     @php
         // Prepare data array
-        $tableData = $parties
+        $tableData = collect($parties->items())
             ->map(function ($party) {
                 return [
                     'id' => $party->id,
@@ -222,8 +222,9 @@
         </div>
 
         <!-- DataTable -->
-        <x-dashboard.packages.data-table :title="__('finance::party.party_list')" :description="__('finance::party.total_parties') . ': ' . $parties->count()" searchable :searchRoute="route('finance.parties.index')"
+        <x-dashboard.packages.data-table :title="__('finance::party.party_list')" :description="__('finance::party.total_parties') . ': ' . $parties->total()" searchable :searchRoute="route('finance.parties.index')"
             :searchPlaceholder="__('finance::party.search_placeholder')" :filters="$tableFilters" :data="$tableData" :columns="$tableColumns" :actions="$tableActions" :createRoute="route('finance.parties.create')"
-            :createLabel="__('finance::party.add_party')" :emptyStateTitle="__('finance::party.no_parties')" :emptyStateDescription="__('common.no_data')" emptyStateIcon="users" />
+            :createLabel="__('finance::party.add_party')" :emptyStateTitle="__('finance::party.no_parties')" :emptyStateDescription="__('common.no_data')" emptyStateIcon="users" :pagination="$parties"
+            showPerPage :perPage="[10, 25, 50, 100]" />
     </div>
 </x-dashboard>

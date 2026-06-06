@@ -37,15 +37,9 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 {{ __('finance::receipt.party') }} <span class="text-red-500">*</span>
                             </label>
-                            <select name="party_id" id="party_id" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">{{ __('finance::receipt.select_party') }}</option>
-                                @foreach($parties as $party)
-                                    <option value="{{ $party->id }}" {{ $receiptVoucher->party_id == $party->id ? 'selected' : '' }}>
-                                        {{ $party->name }} - {{ __('finance::party.outstanding') }}: {{ number_format($party->customer_balance, 2) }}
-                                    </option>
-                                @endforeach
-                            </select>
+                           <x-searchable-select name="party_id" url="{{ route('search-select', 'parties') }}"
+                                placeholder="{{ __('finance::invoice.select_party') }}" :required="true" :value="$receiptVoucher->party_id"
+                                :label="$receiptVoucher->party?->name" />
                             @error('party_id')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -56,19 +50,11 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 {{ __('finance::receipt.invoice') }}
                             </label>
-                            <select name="sales_invoice_id" id="sales_invoice_id"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">{{ __('finance::receipt.select_invoice') }}</option>
-                                @foreach($invoices as $invoice)
-                                    <option value="{{ $invoice->id }}" 
-                                        data-party="{{ $invoice->party_id }}"
-                                        data-outstanding="{{ $invoice->outstanding_balance }}"
-                                        {{ $receiptVoucher->sales_invoice_id == $invoice->id ? 'selected' : '' }}
-                                        style="display: {{ $receiptVoucher->party_id == $invoice->party_id ? 'block' : 'none' }}">
-                                        {{ $invoice->invoice_number }} - {{ $invoice->party->name }} - {{ __('finance::receipt.invoice_outstanding') }}: {{ number_format($invoice->outstanding_balance, 2) }}
-                                    </option>
-                                @endforeach
-                            </select>
+                             <x-searchable-select name="invoice_id" url="{{ route('search-select', 'sales-invoices') }}"
+                                placeholder="{{ __('finance::invoice.sales_invoice') }}" :required="false" 
+                                :value="$receiptVoucher->sales_invoice_id"
+                                :label="$receiptVoucher->salesInvoice?->invoice_number"
+                                />
                         </div>
 
                         <!-- Amount -->

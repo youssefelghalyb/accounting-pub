@@ -35,20 +35,26 @@ Route::prefix('finance')->name('finance.')->middleware(['web', 'auth'])->group(f
         ->name('sales-invoices.cancel');
     Route::post('sales-invoices/{salesInvoice}/activate', [SalesInvoiceController::class, 'activate'])
         ->name('sales-invoices.activate');
+    Route::get('sales-invoices/{salesInvoice}/export-excel', [SalesInvoiceController::class, 'exportExcel'])
+        ->name('sales-invoices.export-excel');
 
-        
     Route::get('products/{product}/details', [SalesInvoiceController::class, 'getProduct'])
         ->name('products.details');
 
     Route::get('sales-invoices/{salesInvoice}/print', [SalesInvoiceController::class, 'print'])
         ->name('sales-invoices.print');
+    Route::get('q/sales-invoices/search-products', [SalesInvoiceController::class, 'searchProducts'])
+        ->name('sales-invoices.search-products');
 
     // Receipt Vouchers
     Route::resource('receipt-vouchers', ReceiptVoucherController::class);
     Route::get('parties/{party}/invoices', [ReceiptVoucherController::class, 'getPartyInvoices'])
         ->name('parties.invoices');
 
-//////////////////////////////////////////////////////////////////
+    Route::get('receipt-vouchers/{receiptVoucher}/print', [ReceiptVoucherController::class, 'print'])->name('receipt-vouchers.print');
+    Route::get('receipt-vouchers/{receiptVoucher}/export-excel', [ReceiptVoucherController::class, 'exportExcel'])->name('receipt-vouchers.export-excel');
+
+    //////////////////////////////////////////////////////////////////
     Route::resource('purchase-invoices', PurchaseInvoiceController::class);
     Route::post('purchase-invoices/{purchaseInvoice}/cancel', [PurchaseInvoiceController::class, 'cancel'])
         ->name('purchase-invoices.cancel');

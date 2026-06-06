@@ -4,6 +4,7 @@ namespace Modules\Product\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Contract extends Model
@@ -11,7 +12,6 @@ class Contract extends Model
     protected $table = 'author_book_contracts';
 
     protected $fillable = [
-        'author_id',
         'book_id',
         'contract_date',
         'contract_price',
@@ -23,15 +23,31 @@ class Contract extends Model
     ];
 
     protected $casts = [
-        'contract_date' => 'date',
-        'contract_price' => 'decimal:2',
+        'contract_date'               => 'date',
+        'contract_price'              => 'decimal:2',
         'percentage_from_book_profit' => 'decimal:2',
     ];
 
-    // Relationships
-    public function author(): BelongsTo
+    // ─── Relationships ────────────────────────────────────────────────────────
+
+    /**
+     * All authors on this contract (via pivot).
+     */
+    public function authors(): BelongsToMany
     {
-        return $this->belongsTo(Author::class);
+        return $this->belongsToMany(Author::class, 'contract_authors')
+                    ->withPivot('is_representative')
+                    ->withTimestamps();
+    }
+
+    /**
+     * The representative author — the one who signs and pays on behalf of the group.
+     */
+    public function representativeAuthor(): BelongsToMany
+    {
+        return $this->belongsToMany(Author::class, 'contract_authors')
+                    ->withPivot('is_representative')
+                    ->wherePivot('is_representative', true);
     }
 
     public function book(): BelongsTo
@@ -54,34 +70,34 @@ class Contract extends Model
         return $this->belongsTo(\App\Models\User::class, 'edited_by');
     }
 
-    // Calculate total paid
+    // ─── Accessors ────────────────────────────────────────────────────────────
+
     public function getTotalPaidAttribute(): float
     {
-        return $this->transactions()->sum('amount');
+        return (float) $this->transactions()->sum('amount');
     }
 
-    // Calculate outstanding balance
     public function getOutstandingBalanceAttribute(): float
     {
-        return max(0, $this->contract_price - $this->total_paid);
+        return max(0, (float) $this->contract_price - $this->total_paid);
     }
 
-    // Calculate payment percentage
     public function getPaymentPercentageAttribute(): float
     {
-        if ($this->contract_price == 0) {
+        if ((float) $this->contract_price == 0) {
             return 0;
         }
-        return round(($this->total_paid / $this->contract_price) * 100, 2);
+        return round(($this->total_paid / (float) $this->contract_price) * 100, 2);
     }
 
-    // Check if fully paid
-    public function isFullyPaid(): bool
+    /**
+     * Comma-separated list of all author names on this contract.
+     */
+    public function getAuthorsNamesAttribute(): string
     {
-        return $this->outstanding_balance <= 0;
+        return $this->authors->pluck('full_name')->implode('، ');
     }
 
-    // Get payment status
     public function getPaymentStatusAttribute(): string
     {
         if ($this->isFullyPaid()) {
@@ -92,24 +108,31 @@ class Contract extends Model
         return 'pending';
     }
 
-    // Get status color
     public function getStatusColorAttribute(): string
     {
         return match ($this->payment_status) {
-            'paid' => 'green',
+            'paid'    => 'green',
             'partial' => 'yellow',
             'pending' => 'red',
-            default => 'gray',
+            default   => 'gray',
         };
     }
 
-    // Scopes
+    // ─── Methods ─────────────────────────────────────────────────────────────
+
+    public function isFullyPaid(): bool
+    {
+        return $this->outstanding_balance <= 0;
+    }
+
+    // ─── Scopes ───────────────────────────────────────────────────────────────
+
     public function scopeFullyPaid($query)
     {
         return $query->whereHas('transactions', function ($q) {
             $q->selectRaw('contract_id, SUM(amount) as total_paid')
-                ->groupBy('contract_id')
-                ->havingRaw('total_paid >= contract_price');
+              ->groupBy('contract_id')
+              ->havingRaw('total_paid >= contract_price');
         });
     }
 
@@ -118,13 +141,15 @@ class Contract extends Model
         return $query->whereDoesntHave('transactions');
     }
 
-    public function scopeForAuthor($query, int $authorId)
-    {
-        return $query->where('author_id', $authorId);
-    }
-
     public function scopeForBook($query, int $bookId)
     {
         return $query->where('book_id', $bookId);
+    }
+
+    public function scopeForAuthor($query, int $authorId)
+    {
+        return $query->whereHas('authors', function ($q) use ($authorId) {
+            $q->where('authors.id', $authorId);
+        });
     }
 }

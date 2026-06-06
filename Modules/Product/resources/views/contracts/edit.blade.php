@@ -1,93 +1,7 @@
-@php
-$formConfig = [
-    'groups' => [
-        [
-            'title' => __('product::contract.contract_details'),
-            'fields' => [
-                [
-                    'name' => 'author_id',
-                    'type' => 'select',
-                    'label' => __('product::contract.author'),
-                    'required' => true,
-                    'value' => $contract->author_id,
-                    'grid' => 4,
-                    'borderColor' => '#3b82f6',
-                    'options' => collect($authors)->map(function($author) {
-                        return ['value' => $author->id, 'label' => $author->full_name];
-                    })->prepend(['value' => '', 'label' => __('product::contract.select_author')])->toArray()
-                ],
-                [
-                    'name' => 'book_id',
-                    'type' => 'select',
-                    'label' => __('product::contract.book'),
-                    'required' => false,
-                    'value' => $contract->book_id,
-                    'grid' => 4,
-                    'borderColor' => '#3b82f6',
-                    'options' => collect($books)->map(function($book) {
-                        return ['value' => $book->id, 'label' => $book->product->name];
-                    })->prepend(['value' => ' ', 'label' => __('product::contract.select_book')])->toArray()
-                ],
-                [
-                    'name' => 'book name', 
-                    'type' => 'text',
-                    'label' => __('product::contract.book_name'),
-                    'required' => false,
-                    'value' => $contract->book_name  ,
-                    'grid' => 4,
-                    'borderColor' => '#3b82f6',
-                ],
-                [
-                    'name' => 'contract_date',
-                    'type' => 'date',
-                    'label' => __('product::contract.contract_date'),
-                    'required' => true,
-                    'value' => $contract->contract_date ? $contract->contract_date->format('Y-m-d') : null,
-                    'grid' => 6,
-                    'borderColor' => '#3b82f6'
-                ],
-                [
-                    'name' => 'contract_price',
-                    'type' => 'number',
-                    'label' => __('product::contract.contract_price'),
-                    'placeholder' => __('product::contract.enter_contract_price'),
-                    'required' => true,
-                    'value' => $contract->contract_price,
-                    'grid' => 6,
-                    'borderColor' => '#3b82f6'
-                ],
-                [
-                    'name' => 'percentage_from_book_profit',
-                    'type' => 'number',
-                    'label' => __('product::contract.percentage_from_book_profit'),
-                    'placeholder' => __('product::contract.enter_percentage'),
-                    'required' => true,
-                    'value' => $contract->percentage_from_book_profit,
-                    'grid' => 12,
-                    'borderColor' => '#10b981'
-                ],
-                [
-                    'name' => 'contract_file',
-                    'type' => 'file',
-                    'label' => __('product::contract.contract_file'),
-                    'required' => false,
-                    'value' => $contract->contract_file,
-                    'grid' => 12,
-                    'borderColor' => '#8b5cf6',
-                    'accept' => '.pdf,.doc,.docx',
-                    'helperText' => $contract->contract_file
-                        ? __('product::contract.upload_contract_file') . ' (' . __('common.current') . ': ' . basename($contract->contract_file) . ')'
-                        : __('product::contract.upload_contract_file')
-                ]
-            ]
-        ]
-    ]
-];
-@endphp
-
 <x-dashboard :pageTitle="__('product::contract.edit_contract')">
-    <div class="max-w-5xl mx-auto">
-        <!-- Breadcrumb -->
+    <div class="max-w-5xl mx-auto" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+
+        {{-- Breadcrumb --}}
         <nav class="mb-6" aria-label="Breadcrumb">
             <ol class="flex items-center space-x-2 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }}">
                 <li>
@@ -97,46 +11,246 @@ $formConfig = [
                 </li>
                 <li>
                     <svg class="w-5 h-5 text-gray-400 {{ app()->getLocale() == 'ar' ? 'rotate-180' : '' }}" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
                 </li>
-                <li>
-                    <span class="text-gray-900 font-medium">{{ __('product::contract.edit_contract') }}</span>
-                </li>
+                <li><span class="text-gray-900 font-medium">{{ __('product::contract.edit_contract') }}</span></li>
             </ol>
         </nav>
 
-        <!-- Form Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-            <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-gray-900">{{ __('product::contract.edit_contract') }}: {{ $contract->author->full_name }} - 
-                    {{ isset($contract->book) ? $contract->book->product->name : $contract->book_name }}</h2>
-                <p class="text-sm text-gray-600 mt-1">{{ __('common.required_fields') }}</p>
-            </div>
+        @php
+            // Build the pre-selected authors array for Alpine
+            $existingAuthors = $contract->authors->map(fn($a) => [
+                'id'   => $a->id,
+                'name' => $a->full_name,
+            ])->values()->toJson();
 
-            <div class="p-6">
-                <x-dashboard.packages.form-builder
-                    :action="route('product.contracts.update', $contract)"
-                    method="POST"
-                    :formConfig="$formConfig"
-                />
+            $existingRepresentativeId = $contract->authors
+                ->firstWhere('pivot.is_representative', true)?->id
+                ?? $contract->authors->first()?->id;
+        @endphp
+
+        <form action="{{ route('product.contracts.update', $contract) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-900">
+                        {{ __('product::contract.edit_contract') }}:
+                        {{ isset($contract->book) ? $contract->book->product->name : $contract->book_name }}
+                    </h2>
+                    <p class="text-sm text-gray-600 mt-1">{{ __('common.required_fields') }}</p>
+                </div>
+
+                <div class="p-6 space-y-8">
+
+                    {{-- ── Authors Section ─────────────────────────────── --}}
+                    <div
+                        x-data="{
+                            selectedAuthors: {{ $existingAuthors }},
+                            representativeId: {{ $existingRepresentativeId ?? 'null' }},
+                            allAuthors: {{ $authors->map(fn($a) => ['id' => $a->id, 'name' => $a->full_name])->toJson() }},
+                            searchQuery: '',
+                            open: false,
+                            get filteredAuthors() {
+                                const q = this.searchQuery.toLowerCase();
+                                return this.allAuthors.filter(a =>
+                                    !this.selectedAuthors.find(s => s.id === a.id) &&
+                                    a.name.toLowerCase().includes(q)
+                                );
+                            },
+                            addAuthor(author) {
+                                this.selectedAuthors.push(author);
+                                if (this.selectedAuthors.length === 1) {
+                                    this.representativeId = author.id;
+                                }
+                                this.searchQuery = '';
+                                this.open = false;
+                            },
+                            removeAuthor(id) {
+                                this.selectedAuthors = this.selectedAuthors.filter(a => a.id !== id);
+                                if (this.representativeId === id) {
+                                    this.representativeId = this.selectedAuthors[0]?.id ?? null;
+                                }
+                            }
+                        }"
+                        class="border border-blue-100 rounded-xl p-5 bg-blue-50/30"
+                    >
+                        <h3 class="text-base font-semibold text-gray-800 mb-4">
+                            {{ __('product::contract.authors') }}
+                            <span class="text-red-500">*</span>
+                        </h3>
+
+                        <div class="relative mb-4">
+                            <input
+                                type="text"
+                                x-model="searchQuery"
+                                @focus="open = true"
+                                @click.outside="open = false"
+                                placeholder="{{ __('product::contract.search_add_author') }}"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500"
+                            />
+                            <div
+                                x-show="open && filteredAuthors.length > 0"
+                                x-cloak
+                                class="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-52 overflow-y-auto"
+                            >
+                                <template x-for="author in filteredAuthors" :key="author.id">
+                                    <button
+                                        type="button"
+                                        @click="addAuthor(author)"
+                                        class="w-full text-start px-4 py-2.5 text-sm hover:bg-blue-50 transition"
+                                        x-text="author.name"
+                                    ></button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <p x-show="selectedAuthors.length === 0" class="text-sm text-gray-500 italic">
+                            {{ __('product::contract.no_authors_selected') }}
+                        </p>
+
+                        <div class="space-y-2">
+                            <template x-for="author in selectedAuthors" :key="author.id">
+                                <div class="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
+                                    <div class="flex items-center gap-3">
+                                        <input
+                                            type="radio"
+                                            :value="author.id"
+                                            x-model="representativeId"
+                                            name="representative_id_display"
+                                            class="text-blue-600 focus:ring-blue-500"
+                                        />
+                                        <span class="text-sm font-medium text-gray-800" x-text="author.name"></span>
+                                        <span
+                                            x-show="representativeId === author.id"
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700"
+                                        >
+                                            {{ __('product::contract.representative') }}
+                                        </span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        @click="removeAuthor(author.id)"
+                                        class="text-red-400 hover:text-red-600 transition"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                    <input type="hidden" :name="'author_ids[]'" :value="author.id" />
+                                </div>
+                            </template>
+                        </div>
+
+                        <input type="hidden" name="representative_id" :value="representativeId" />
+
+                        @error('author_ids')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        @error('representative_id')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- ── Book & Contract Details ──────────────────────── --}}
+                    <div class="grid grid-cols-12 gap-5">
+
+                        <div class="col-span-12 md:col-span-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('product::contract.book') }}</label>
+                            <select name="book_id" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500">
+                                <option value="">{{ __('product::contract.select_book') }}</option>
+                                @foreach ($books as $book)
+                                    <option value="{{ $book->id }}" {{ old('book_id', $contract->book_id) == $book->id ? 'selected' : '' }}>
+                                        {{ $book->product->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-span-12 md:col-span-8">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                {{ __('product::contract.book_name') }} <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                name="book_name"
+                                value="{{ old('book_name', $contract->book_name) }}"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 @error('book_name') border-red-500 @enderror"
+                            />
+                            @error('book_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="col-span-12 md:col-span-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                {{ __('product::contract.contract_date') }} <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="date"
+                                name="contract_date"
+                                value="{{ old('contract_date', $contract->contract_date?->format('Y-m-d')) }}"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500"
+                            />
+                            @error('contract_date') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="col-span-12 md:col-span-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                {{ __('product::contract.contract_price') }} <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                name="contract_price"
+                                value="{{ old('contract_price', $contract->contract_price) }}"
+                                min="0" step="0.01"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500"
+                            />
+                            @error('contract_price') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="col-span-12">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                {{ __('product::contract.percentage_from_book_profit') }} <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                name="percentage_from_book_profit"
+                                value="{{ old('percentage_from_book_profit', $contract->percentage_from_book_profit) }}"
+                                min="0" max="100" step="0.01"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500"
+                            />
+                            @error('percentage_from_book_profit') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="col-span-12">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('product::contract.contract_file') }}</label>
+                            <input
+                                type="file"
+                                name="contract_file"
+                                accept=".pdf,.doc,.docx"
+                                class="w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                            />
+                            @if ($contract->contract_file)
+                                <p class="mt-1 text-xs text-gray-500">
+                                    {{ __('common.current') }}: {{ basename($contract->contract_file) }}
+                                </p>
+                            @endif
+                            @error('contract_file') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3 rounded-b-xl">
+                    <a href="{{ route('product.contracts.index') }}" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        {{ __('common.cancel') }}
+                    </a>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
+                        {{ __('product::contract.save_contract') }}
+                    </button>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
-
-    @push('scripts')
-    <script>
-        // Add hidden method field for PUT request
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('dynamicForm');
-            if (form) {
-                const methodField = document.createElement('input');
-                methodField.type = 'hidden';
-                methodField.name = '_method';
-                methodField.value = 'PUT';
-                form.insertBefore(methodField, form.firstChild);
-            }
-        });
-    </script>
-    @endpush
 </x-dashboard>

@@ -89,7 +89,7 @@ class SubWarehouseController extends Controller
     {
         $subWarehouse = SubWarehouse::with([
             'warehouse',
-            'products.product.book.author',
+            'products.product.book.contract.authors',
             'products.product.book.category',
             'creator',
             'editor'
@@ -214,7 +214,7 @@ class SubWarehouseController extends Controller
     {
         $subWarehouse = SubWarehouse::with('warehouse')->findOrFail($subWarehouseId);
         $warehouseProduct = SubWarehouseProduct::with([
-            'product.book.author',
+            'product.book.contract.authors',
             'product.book.category'
         ])->where('sub_warehouse_id', $subWarehouseId)
           ->findOrFail($warehouseProductId);

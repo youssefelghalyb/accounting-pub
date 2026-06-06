@@ -14,52 +14,52 @@ Route::middleware(['web'])
         Route::prefix('warehouses')
             ->name('warehouses.')
             ->group(function () {
-                Route::get('/', [WarehouseController::class, 'index'])->name('index');
-                Route::get('/create', [WarehouseController::class, 'create'])->name('create');
-                Route::post('/', [WarehouseController::class, 'store'])->name('store');
-                Route::get('/{id}', [WarehouseController::class, 'show'])->name('show');
-                Route::get('/{id}/edit', [WarehouseController::class, 'edit'])->name('edit');
-                Route::put('/{id}', [WarehouseController::class, 'update'])->name('update');
-                Route::delete('/{id}', [WarehouseController::class, 'destroy'])->name('destroy');
-            });
+            Route::get('/', [WarehouseController::class, 'index'])->name('index');
+            Route::get('/create', [WarehouseController::class, 'create'])->name('create');
+            Route::post('/', [WarehouseController::class, 'store'])->name('store');
+            Route::get('/{id}', [WarehouseController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [WarehouseController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [WarehouseController::class, 'update'])->name('update');
+            Route::delete('/{id}', [WarehouseController::class, 'destroy'])->name('destroy');
+        });
 
         // Sub-Warehouse routes
         Route::prefix('sub-warehouses')
             ->name('sub_warehouses.')
             ->group(function () {
-                Route::get('/', [SubWarehouseController::class, 'index'])->name('index');
-                Route::get('/create', [SubWarehouseController::class, 'create'])->name('create');
-                Route::post('/', [SubWarehouseController::class, 'store'])->name('store');
-                Route::get('/{id}', [SubWarehouseController::class, 'show'])->name('show');
-                Route::get('/{id}/edit', [SubWarehouseController::class, 'edit'])->name('edit');
-                Route::put('/{id}', [SubWarehouseController::class, 'update'])->name('update');
-                Route::delete('/{id}', [SubWarehouseController::class, 'destroy'])->name('destroy');
-                                Route::get('/{id}/add-stock', [SubWarehouseController::class, 'addStock'])->name('add-stock');
-                Route::post('/{id}/add-stock', [SubWarehouseController::class, 'storeStock'])->name('store-stock');
-            });
+            Route::get('/', [SubWarehouseController::class, 'index'])->name('index');
+            Route::get('/create', [SubWarehouseController::class, 'create'])->name('create');
+            Route::post('/', [SubWarehouseController::class, 'store'])->name('store');
+            Route::get('/{id}', [SubWarehouseController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [SubWarehouseController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [SubWarehouseController::class, 'update'])->name('update');
+            Route::delete('/{id}', [SubWarehouseController::class, 'destroy'])->name('destroy');
+            Route::get('/{id}/add-stock', [SubWarehouseController::class, 'addStock'])->name('add-stock');
+            Route::post('/{id}/add-stock', [SubWarehouseController::class, 'storeStock'])->name('store-stock');
+        });
 
         // Stock Movement routes
         Route::prefix('stock-movements')
             ->name('stock_movements.')
             ->group(function () {
-                Route::get('/', [StockMovementController::class, 'index'])->name('index');
-                Route::get('/create', [StockMovementController::class, 'create'])->name('create');
-                Route::post('/', [StockMovementController::class, 'store'])->name('store');
-                // search products
-                Route::get('/search-products', [StockMovementController::class, 'searchProducts'])
-                    ->name('search_products');
-            });
+            Route::get('/', [StockMovementController::class, 'index'])->name('index');
+            Route::get('/create', [StockMovementController::class, 'create'])->name('create');
+            Route::post('/', [StockMovementController::class, 'store'])->name('store');
+            // search products
+            Route::get('/search-products', [StockMovementController::class, 'searchProducts'])
+                ->name('search_products');
+        });
 
         // Stock Movement routes
         Route::prefix('stock-movements')
             ->name('stock_movements.')
             ->group(function () {
-                Route::get('/', [StockMovementController::class, 'index'])->name('index');
-                Route::get('/create', [StockMovementController::class, 'create'])->name('create');
-                Route::post('/', [StockMovementController::class, 'store'])->name('store');
-                Route::get('/{id}', [StockMovementController::class, 'show'])->name('show');
-                Route::get('/{id}/edit', [StockMovementController::class, 'edit'])->name('edit');
-                Route::put('/{id}', [StockMovementController::class, 'update'])->name('update');
-                Route::delete('/{id}', [StockMovementController::class, 'destroy'])->name('destroy');
-            });
+            Route::get('/', [StockMovementController::class, 'index'])->name('index');
+            Route::get('/create', [StockMovementController::class, 'create'])->name('create');
+            Route::post('/', [StockMovementController::class, 'store'])->name('store');
+            Route::get('/{id}', [StockMovementController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [StockMovementController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [StockMovementController::class, 'update'])->name('update');
+            Route::delete('/{id}', [StockMovementController::class, 'destroy'])->name('destroy');
+        });
     });

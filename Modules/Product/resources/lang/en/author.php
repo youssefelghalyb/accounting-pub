@@ -71,4 +71,12 @@ return [
     'upload_id_image' => 'Upload ID image',
     'quick_add' => 'Quick Add',
     'quick_add_author' => 'Quick Add Author',
+
+    'register_as_client_title'    => 'Register Author as Client',
+    'register_as_client_desc'     => 'This will create a client record for :name and open a new invoice form.',
+    'confirm_and_create_invoice'  => 'Confirm & Create Invoice',
+    'gift_copies'                 => 'Gift Copies',
+    'gift_copies_desc'            => 'Free copies of this author\'s own books included in invoices.',
+    'client_invoices'             => 'Client Invoices',
+    'no_invoices_yet'             => 'No invoices yet.',
 ];

@@ -98,7 +98,7 @@ class StockMovementController extends Controller
         $page = $request->get('page', 1);
         $perPage = 20;
 
-        $query = Product::with(['book.author', 'book.category'])
+        $query = Product::with(['book.contract.authors', 'book.category'])
             ->when($search, function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('sku', 'like', "%{$search}%");
@@ -274,7 +274,7 @@ class StockMovementController extends Controller
     public function show($id)
     {
         $movement = StockMovement::with([
-            'product.book.author',
+            'product.book.contract.authors',
             'product.book.category',
             'fromSubWarehouse.warehouse',
             'toSubWarehouse.warehouse',

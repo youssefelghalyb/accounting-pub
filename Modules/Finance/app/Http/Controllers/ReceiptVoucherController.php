@@ -4,6 +4,7 @@ namespace Modules\Finance\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Finance\Exports\ExportReceiptVoucher;
 use Modules\Finance\Models\ReceiptVoucher;
 use Modules\Finance\Models\Party;
 use Modules\Finance\Models\Account;
@@ -28,27 +29,18 @@ class ReceiptVoucherController extends Controller
     {
         $query = ReceiptVoucher::with(['party', 'account', 'salesInvoice']);
 
-        // Search
         if ($request->filled('search')) {
             $query->search($request->search);
         }
-
-        // Filter by party
         if ($request->filled('party_id')) {
             $query->byParty($request->party_id);
         }
-
-        // Filter by account
         if ($request->filled('account_id')) {
             $query->byAccount($request->account_id);
         }
-
-        // Filter by payment method
         if ($request->filled('payment_method')) {
             $query->byPaymentMethod($request->payment_method);
         }
-
-        // Filter by date range
         if ($request->filled('date_from')) {
             $query->where('voucher_date', '>=', $request->date_from);
         }
@@ -56,7 +48,11 @@ class ReceiptVoucherController extends Controller
             $query->where('voucher_date', '<=', $request->date_to);
         }
 
-        $receipts = $query->orderBy('voucher_date', 'desc')->get();
+        $receipts = $query
+            ->orderBy('voucher_date', 'desc')
+            ->paginate($request->get('per_page', 10))
+            ->withQueryString();
+
         $stats = $this->receiptService->getStatistics();
         $parties = Party::active()->get();
         $accounts = Account::active()->get();
@@ -69,34 +65,40 @@ class ReceiptVoucherController extends Controller
      */
     public function create(Request $request)
     {
-        $parties = Party::active()->get();
-        $accounts = Account::active()->get();
-        
-        // Get unpaid/partial invoices for dropdown
-        $invoices = SalesInvoice::whereIn('status', ['unpaid', 'partial'])
-            ->with('party')
-            ->orderBy('invoice_date', 'desc')
-            ->get();
+        $validated = $request->validate([
+            'invoice' => ['nullable', 'integer', 'exists:sales_invoices,id'],
+        ]);
 
-        // Pre-select based on query params
-        $selectedInvoice = $request->get('invoice');
+        $accounts = Account::active()->get();
+
+        $selectedInvoice = null;
         $selectedParty = null;
 
-        if ($selectedInvoice) {
-            $invoice = SalesInvoice::find($selectedInvoice);
+        if (!empty($validated['invoice'])) {
+            $invoice = SalesInvoice::with('party')->find($validated['invoice']);
+
             if ($invoice) {
-                $selectedParty = $invoice->party_id;
+                $selectedInvoice = [
+                    'id' => $invoice->id,
+                    'text' => $invoice->invoice_number,
+                    'sublabel' => $invoice->party->name ?? '',
+                ];
+
+                $selectedParty = [
+                    'id' => $invoice->party->id,
+                    'text' => $invoice->party->name,
+                    'sublabel' => $invoice->party->phone ?? '',
+                ];
             }
         }
 
         return view('finance::receipt-vouchers.create', compact(
-            'parties',
             'accounts',
-            'invoices',
             'selectedInvoice',
-            'selectedParty'
+            'selectedParty',
         ));
     }
+
 
     /**
      * Store a newly created receipt voucher
@@ -135,7 +137,7 @@ class ReceiptVoucherController extends Controller
         $receiptVoucher->load(['party', 'account', 'salesInvoice']);
         $parties = Party::active()->get();
         $accounts = Account::active()->get();
-        
+
         $invoices = SalesInvoice::whereIn('status', ['unpaid', 'partial'])
             ->orWhere('id', $receiptVoucher->sales_invoice_id)
             ->with('party')
@@ -196,7 +198,7 @@ class ReceiptVoucherController extends Controller
             ->whereIn('status', ['unpaid', 'partial'])
             ->orderBy('invoice_date', 'desc')
             ->get()
-            ->map(function($invoice) {
+            ->map(function ($invoice) {
                 return [
                     'id' => $invoice->id,
                     'invoice_number' => $invoice->invoice_number,
@@ -207,4 +209,19 @@ class ReceiptVoucherController extends Controller
 
         return response()->json($invoices);
     }
+
+    public function print(ReceiptVoucher $receiptVoucher, Request $request)
+    {
+        $receiptVoucher->load(['party', 'account', 'salesInvoice']);
+        $orgSettings = \Modules\Settings\Models\OrganizationSetting::first();
+        $printLang = $request->get('lang', $orgSettings->default_language ?? 'en');
+
+        return view('finance::receipt-vouchers.print', compact('receiptVoucher', 'orgSettings', 'printLang'));
+    }
+
+    public function exportExcel(ReceiptVoucher $receiptVoucher)
+    {
+        return ExportReceiptVoucher::download($receiptVoucher);
+    }
+
 }

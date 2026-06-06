@@ -10,7 +10,7 @@ class ProductSearchController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['book.author', 'book.category', 'book.subCategory'])
+        $query = Product::with(['book.contract.authors', 'book.category', 'book.subCategory'])
             ->where('status', 'active');
 
         // Search
@@ -75,7 +75,7 @@ class ProductSearchController extends Controller
 
     public function show($id)
     {
-        $product = Product::with(['book.author', 'book.category', 'book.subCategory'])
+        $product = Product::with(['book.contract.authors', 'book.category', 'book.subCategory'])
             ->findOrFail($id);
 
         return response()->json([

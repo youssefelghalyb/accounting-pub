@@ -5,22 +5,22 @@ namespace Modules\Product\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Modules\Product\Models\Author;
+use Illuminate\Support\Facades\DB;
+use Modules\Product\Exports\AuthorsFinancialExport;
 use Modules\Product\Http\Requests\StoreAuthorRequest;
 use Modules\Product\Http\Requests\UpdateAuthorRequest;
-use Modules\Product\Models\ContractTransaction;
+use Modules\Product\Models\Author;
+use Modules\Product\Models\Contract;
+use Modules\Product\Services\AuthorService;
 
 class AuthorController extends Controller
 {
-    /**
-     * Display a listing of authors.
-     */
+    public function __construct(private AuthorService $authorService) {}
+
     public function index(Request $request)
     {
         $query = Author::query();
 
-        // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -31,136 +31,85 @@ class AuthorController extends Controller
             });
         }
 
-        $authors = $query->orderBy('full_name')->get();
+        $authors = $query->orderBy('full_name')
+            ->paginate($request->get('per_page', 10))
+            ->withQueryString();
 
-        // Statistics
         $stats = [
-            'total_authors' => Author::count(),
-            'total_contracts' => \Modules\Product\Models\Contract::count(),
-            'total_contract_value' => \Modules\Product\Models\Contract::sum('contract_price'),
+            'total_authors'        => Author::count(),
+            'total_contracts'      => Contract::count(),
+            'total_contract_value' => Contract::sum('contract_price'),
         ];
 
         return view('product::authors.index', compact('authors', 'stats'));
     }
 
-    /**
-     * Show the form for creating a new author.
-     */
     public function create()
     {
         return view('product::authors.create');
     }
 
-    /**
-     * Store a newly created author.
-     */
     public function store(StoreAuthorRequest $request)
     {
-        $validated = $request->validated();
+        $validated               = $request->validated();
         $validated['created_by'] = Auth::id();
 
-        // Handle file upload
-        if ($request->hasFile('id_image')) {
-            $validated['id_image'] = $request->file('id_image')->store('authors/ids', 'public');
-        }
-
-        Author::create($validated);
+        $this->authorService->createAuthor($validated, $request->file('id_image'));
 
         return redirect()
             ->route('product.authors.index')
             ->with('success', __('product::author.author_added'));
     }
 
-    /**
-     * Display the specified author.
-     */
     public function show($id)
     {
-        $author = Author::with('books.product', 'contracts.book')->findOrFail($id);
+        $author = Author::findOrFail($id);
 
-        // Get payment history
-        $paymentHistory = $author->getAllTransactions();
+        $stats        = $this->authorService->getAuthorStats($author);
+        $transactions = $this->authorService->getAuthorTransactions($author);
 
-        $transactions = ContractTransaction::whereHas('contract', function ($query) use ($author) {
-            $query->where('author_id', $author->id);
-        })->with('contract.book.product')->latest('payment_date')->get();
+        // Eager-load contracts with their book/product for the view
+        $author->load('contracts.book.product');
 
-        // Calculate stats
-        $stats = [
-            'total_books' => $author->books()->count(),
-            'total_contracts' => $author->contracts()->count(),
-            'total_contract_value' => $author->total_contract_value,
-            'total_paid' => $author->total_paid,
-            'outstanding_balance' => $author->outstanding_balance,
-        ];
-
-        return view('product::authors.show', compact('author', 'paymentHistory', 'stats', 'transactions'));
+        return view('product::authors.show', compact('author', 'stats', 'transactions'));
     }
 
-    /**
-     * Show the form for editing the specified author.
-     */
     public function edit($id)
     {
         $author = Author::findOrFail($id);
-
         return view('product::authors.edit', compact('author'));
     }
 
-    /**
-     * Update the specified author.
-     */
     public function update(UpdateAuthorRequest $request, $id)
     {
-        $author = Author::findOrFail($id);
-        $validated = $request->validated();
-        $validated['edited_by'] = Auth::id();
+        $author                  = Author::findOrFail($id);
+        $validated               = $request->validated();
+        $validated['edited_by']  = Auth::id();
 
-        // Handle file upload
-        if ($request->hasFile('id_image')) {
-            // Delete old file
-            if ($author->id_image) {
-                Storage::disk('public')->delete($author->id_image);
-            }
-            $validated['id_image'] = $request->file('id_image')->store('authors/ids', 'public');
-        }
-
-        $author->update($validated);
+        $this->authorService->updateAuthor($author, $validated, $request->file('id_image'));
 
         return redirect()
             ->route('product.authors.index')
             ->with('success', __('product::author.author_updated'));
     }
 
-    /**
-     * Remove the specified author.
-     */
     public function destroy($id)
     {
         $author = Author::findOrFail($id);
 
-        // Check if author has books
-        if ($author->books()->count() > 0) {
+        try {
+            $this->authorService->deleteAuthor($author);
+        } catch (\RuntimeException $e) {
             return redirect()
                 ->route('product.authors.index')
-                ->with('error', __('product::author.cannot_delete_has_books'));
+                ->with('error', $e->getMessage());
         }
-
-        // Delete ID image if exists
-        if ($author->id_image) {
-            Storage::disk('public')->delete($author->id_image);
-        }
-
-        $author->delete();
 
         return redirect()
             ->route('product.authors.index')
             ->with('success', __('product::author.author_deleted'));
     }
 
-    /**
-     * Search authors for Select2
-     */
     public function search(Request $request)
     {
         $query = Author::query();
@@ -174,45 +123,77 @@ class AuthorController extends Controller
             });
         }
 
-        $authors = $query->orderBy('full_name')
-            ->paginate(10);
+        $authors = $query->orderBy('full_name')->paginate(10);
 
         return response()->json([
-            'results' => $authors->map(function ($author) {
-                return [
-                    'id' => $author->id,
-                    'text' => $author->full_name . ($author->nationality ? ' - ' . $author->nationality : '')
-                ];
-            }),
-            'pagination' => [
-                'more' => $authors->hasMorePages()
-            ]
+            'results' => $authors->map(fn($a) => [
+                'id'   => $a->id,
+                'text' => $a->full_name . ($a->nationality ? ' - ' . $a->nationality : ''),
+            ]),
+            'pagination' => ['more' => $authors->hasMorePages()],
         ]);
     }
 
-    /**
-     * Quick store author for inline creation
-     */
     public function quickStore(Request $request)
     {
         $validated = $request->validate([
-            'full_name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:50',
+            'full_name'   => 'required|string|max:255',
+            'email'       => 'nullable|email|max:255',
+            'phone'       => 'nullable|string|max:50',
             'nationality' => 'nullable|string|max:100',
         ]);
 
         $validated['created_by'] = Auth::id();
 
-        $author = Author::create($validated);
+        $author = $this->authorService->createAuthor($validated);
 
         return response()->json([
             'success' => true,
             'message' => __('product::author.author_added'),
-            'author' => [
-                'id' => $author->id,
-                'text' => $author->full_name . ($author->nationality ? ' - ' . $author->nationality : '')
-            ]
+            'author'  => [
+                'id'   => $author->id,
+                'text' => $author->full_name . ($author->nationality ? ' - ' . $author->nationality : ''),
+            ],
         ]);
     }
+
+    public function registerAsClient(Author $author): \Illuminate\Http\JsonResponse
+    {
+        if ($author->party_id) {
+            return response()->json([
+                'success'     => true,
+                'party_id'    => $author->party_id,
+                'invoice_url' => route('finance.sales-invoices.create', ['party_id' => $author->party_id]),
+                'already_client' => true,
+            ]);
+        }
+
+        DB::transaction(function () use ($author) {
+            $party = \Modules\Finance\Models\Party::create([
+                'name'       => $author->full_name,
+                'type'       => 'individual',
+                'email'      => $author->email,
+                'phone'      => $author->phone_number,
+                'status'     => 'active',
+                'created_by' => Auth::id(),
+            ]);
+
+            $author->update(['party_id' => $party->id]);
+        });
+
+        $author->refresh();
+
+        return response()->json([
+            'success'        => true,
+            'party_id'       => $author->party_id,
+            'invoice_url'    => route('finance.sales-invoices.create', ['party_id' => $author->party_id]),
+            'already_client' => false,
+        ]);
+    }
+
+
+    public function exportFinancial(): \Symfony\Component\HttpFoundation\StreamedResponse
+{
+    return (new AuthorsFinancialExport())->download();
+}
 }

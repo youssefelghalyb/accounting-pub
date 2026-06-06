@@ -314,9 +314,9 @@
 
                     if (data.type === 'book' && data.book) {
                         const book = data.book;
-                        if (book.isbn || book.author || book.category || book.pages) {
+                        if (book.isbn || book.contract.authors || book.category || book.pages) {
                             bookDetails.find('.book-isbn').text(book.isbn || '-');
-                            bookDetails.find('.book-author').text(book.author?.full_name || '-');
+                            bookDetails.find('.book-author').text(book.contract.authors?.full_name || '-');
                             bookDetails.find('.book-category').text(book.category?.name || '-');
                             bookDetails.find('.book-pages').text(book.pages || '-');
                             bookDetails.removeClass('hidden');

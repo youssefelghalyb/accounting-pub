@@ -4,6 +4,7 @@ namespace Modules\Finance\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Finance\Exports\ExportSalesInvoice;
 use Modules\Finance\Models\SalesInvoice;
 use Modules\Finance\Models\Party;
 use Modules\Finance\Models\Account;
@@ -12,7 +13,6 @@ use Modules\Finance\Services\PartyService;
 use Modules\Finance\Services\AccountService;
 use Modules\Finance\Http\Requests\StoreSalesInvoiceRequest;
 use Modules\Finance\Http\Requests\UpdateSalesInvoiceRequest;
-use Modules\Product\Http\Controllers\CategoryController;
 use Modules\Product\Models\Author;
 use Modules\Product\Models\BookCategory;
 use Modules\Product\Models\Product;
@@ -43,22 +43,15 @@ class SalesInvoiceController extends Controller
     {
         $query = SalesInvoice::with('party');
 
-        // Search
         if ($request->filled('search')) {
             $query->search($request->search);
         }
-
-        // Filter by party
         if ($request->filled('party_id')) {
             $query->byParty($request->party_id);
         }
-
-        // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-
-        // Filter by date range
         if ($request->filled('date_from')) {
             $query->where('invoice_date', '>=', $request->date_from);
         }
@@ -66,13 +59,16 @@ class SalesInvoiceController extends Controller
             $query->where('invoice_date', '<=', $request->date_to);
         }
 
-        $invoices = $query->orderBy('invoice_date', 'desc')->get();
+        $invoices = $query
+            ->orderBy('invoice_date', 'desc')
+            ->paginate($request->get('per_page', 10))
+            ->withQueryString(); // keeps search/filters in pagination links
+
         $stats = $this->invoiceService->getStatistics();
         $parties = Party::active()->get();
 
         return view('finance::sales-invoices.index', compact('invoices', 'stats', 'parties'));
     }
-
     /**
      * Show the form for creating a new sales invoice
      */
@@ -86,32 +82,34 @@ class SalesInvoiceController extends Controller
         $subWarehouses = SubWarehouse::with('warehouse')->orderBy('name')->get();
 
         // Get products with book information
-        $products = Product::with(['book.author', 'book.category', 'book.subCategory'])
+        $products = Product::with(['book.contract.authors', 'book.category', 'book.subCategory'])
             ->where('status', 'active')
             ->get();
 
         // Get categories, sub-categories, and authors for filters
         $categories = BookCategory::whereHas('books')->get();
         $subCategories = BookCategory::whereHas('books')->get();
-        $authors = Author::whereHas('books')->get();
+        $authors = Author::whereHas('contracts.book')->get();
 
         // Prepare simple products list for basic operations
         $productsForJs = $products->map(function ($p) {
             return [
-                'id'    => (int) $p->id,
-                'name'  => $p->name,
-                'sku'   => $p->sku,
+                'id' => (int) $p->id,
+                'name' => $p->name,
+                'sku' => $p->sku,
                 'price' => (float) $p->base_price,
+                'isbn' => $p->book?->isbn,  // needed for ISBN quick-add
+
             ];
         })->values();
 
         // Prepare detailed products list with book information for drawer
         $allProductsWithBooks = $products->map(function ($p) {
             $data = [
-                'id'             => (int) $p->id,
-                'name'           => $p->name,
-                'sku'            => $p->sku,
-                'price'          => (float) $p->base_price,
+                'id' => (int) $p->id,
+                'name' => $p->name,
+                'sku' => $p->sku,
+                'price' => (float) $p->base_price,
                 'stock_quantity' => $p->stock_quantity,
             ];
 
@@ -131,7 +129,20 @@ class SalesInvoiceController extends Controller
             return $data;
         })->values();
 
-        $selectedParty = $request->get('party_id');
+        $selectedParty = null;
+        if ($request->filled('party_id')) {
+            $party = Party::find($request->party_id);
+            if ($party) {
+                $selectedParty = [
+                    'id'   => $party->id,
+                    'text' => $party->name . ' - ' . number_format($party->customer_balance, 2),
+                ];
+            }
+        }
+
+
+
+
 
         return view('finance::sales-invoices.create', compact(
             'parties',
@@ -227,23 +238,23 @@ class SalesInvoiceController extends Controller
         // Get categories, sub-categories, and authors for filters
         $categories = BookCategory::whereHas('books')->get();
         $subCategories = BookCategory::whereHas('books')->get();
-        $authors = Author::whereHas('books')->get();
+        $authors = Author::whereHas('contracts.book')->get();
 
         $productsForJs = $products->map(function ($p) {
             return [
-                'id'    => (int) $p->id,
-                'name'  => $p->name,
-                'sku'   => $p->sku,
+                'id' => (int) $p->id,
+                'name' => $p->name,
+                'sku' => $p->sku,
                 'price' => (float) $p->base_price,
             ];
         })->values();
 
         $allProductsWithBooks = $products->map(function ($p) {
             $data = [
-                'id'             => (int) $p->id,
-                'name'           => $p->name,
-                'sku'            => $p->sku,
-                'price'          => (float) $p->base_price,
+                'id' => (int) $p->id,
+                'name' => $p->name,
+                'sku' => $p->sku,
+                'price' => (float) $p->base_price,
                 'stock_quantity' => $p->stock_quantity,
             ];
 
@@ -415,5 +426,94 @@ class SalesInvoiceController extends Controller
         $printLang = $request->get('lang', $orgSettings->default_language);
 
         return view('finance::sales-invoices.print', compact('salesInvoice', 'orgSettings', 'printLang'));
+    }
+
+    public function searchProducts(Request $request)
+    {
+        $search = $request->get('q', '');
+        $page   = (int) $request->get('page', 1);
+        $limit  = 15;
+
+        $query = Product::with(['book.contract.authors', 'book.category', 'book.subCategory'])
+            ->where('status', 'active');
+
+        if ($search) {
+            $normalized = $this->normalizeArabic($search);
+
+            $query->where(function ($q) use ($search, $normalized) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$normalized}%")
+                    ->orWhereHas('book', function ($bq) use ($search, $normalized) {
+                        $bq->where('isbn', 'like', "%{$search}%")
+                            ->orWhere('isbn', 'like', "%{$normalized}%");
+                    });
+            });
+        }
+
+        if ($request->filled('category_id')) {
+            $query->whereHas('book', fn($q) => $q->where('category_id', $request->category_id));
+        }
+        if ($request->filled('sub_category_id')) {
+            $query->whereHas('book', fn($q) => $q->where('sub_category_id', $request->sub_category_id));
+        }
+        if ($request->filled('author_id')) {
+            $query->whereHas('book.contract.authors', fn($q) => $q->where('authors.id', $request->author_id));
+        }
+
+        $total    = $query->count();
+        $products = $query->skip(($page - 1) * $limit)->take($limit)->get();
+
+        $mapped = $products->map(function ($p) {
+            $data = [
+                'id'             => (int) $p->id,
+                'name'           => $p->name,
+                'sku'            => $p->sku,
+                'price'          => (float) $p->base_price,
+                'stock_quantity' => $p->stock_quantity,
+            ];
+
+            if ($p->book) {
+                $authors = $p->book->contract?->authors ?? collect();
+
+                $data['isbn']              = $p->book->isbn;
+                $data['category_id']       = $p->book->category_id;
+                $data['sub_category_id']   = $p->book->sub_category_id;
+                $data['author_id']         = $authors->first()?->id;
+                $data['author_name']       = $authors->pluck('full_name')->implode('، ');
+                $data['category_name']     = $p->book->category?->name;
+                $data['sub_category_name'] = $p->book->subCategory?->name;
+            }
+
+            return $data;
+        });
+
+        return response()->json([
+            'data'     => $mapped,
+            'total'    => $total,
+            'page'     => $page,
+            'has_more' => ($page * $limit) < $total,
+        ]);
+    }
+
+    /**
+     * Normalize Arabic text variants so ا أ إ آ ة ه ى ي all match
+     */
+    private function normalizeArabic(string $text): string
+    {
+        $map = [
+            '/[أإآاٱ]/u' => 'ا',   // alef variants
+            '/[ؤو]/u' => 'و',   // waw variants  ← fixes مؤلفات → مولفات
+            '/[ئيىی]/u' => 'ي',   // ya variants
+            '/[ةه]/u' => 'ه',   // ta marbuta / ha
+            '/[ًٌٍَُِّْٰ]/u' => '',   // strip all tashkeel (harakat)
+            '/\s+/u' => ' ',   // normalize whitespace
+        ];
+
+        return trim(preg_replace(array_keys($map), array_values($map), mb_strtolower($text)));
+    }
+
+    public function exportExcel(SalesInvoice $salesInvoice)
+    {
+        return ExportSalesInvoice::download($salesInvoice);
     }
 }

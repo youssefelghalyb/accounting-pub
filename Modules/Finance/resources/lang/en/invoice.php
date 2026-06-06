@@ -9,7 +9,7 @@ return [
     'invoice_details' => 'Invoice Details',
     'invoice_list' => 'Invoice List',
     'invoice_management' => 'Sales Invoice Management',
-
+    'party_locked' => 'Party Locked',
     'invoice_number' => 'Invoice Number',
     'invoice_date' => 'Invoice Date',
     'due_date' => 'Due Date',

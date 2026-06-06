@@ -136,7 +136,7 @@ return [
     'rank' => 'Rank',
     'level' => 'Level',
     'version' => 'Version',
-    
+
     // Status Options
     'yes' => 'Yes',
     'no' => 'No',
@@ -161,7 +161,7 @@ return [
     'unknown' => 'Unknown',
     'not_available' => 'Not Available',
     'not_applicable' => 'Not Applicable',
-    
+
     // Pagination
     'showing' => 'Showing',
     'of' => 'of',
@@ -207,7 +207,7 @@ return [
     'server_error' => 'Server error',
     'maintenance_mode' => 'Maintenance mode',
     'coming_soon' => 'Coming soon',
-    
+
     // Confirmation Messages
     'confirm_delete' => 'Are you sure you want to delete this?',
     'confirm_delete_selected' => 'Are you sure you want to delete the selected items?',
@@ -216,7 +216,7 @@ return [
     'unsaved_changes' => 'You have unsaved changes. Are you sure you want to leave?',
     'cannot_be_undone' => 'This action cannot be undone.',
     'will_be_permanently_deleted' => 'This will be permanently deleted.',
-    
+
     // Validation
     'required' => 'This field is required',
     'required_field' => 'Required field',
@@ -244,7 +244,7 @@ return [
     'must_be_selected' => 'Please select an option',
     'file_too_large' => 'File is too large',
     'invalid_file_type' => 'Invalid file type',
-    
+
     // Time Periods
     'today' => 'Today',
     'yesterday' => 'Yesterday',
@@ -260,7 +260,7 @@ return [
     'next_year' => 'Next Year',
     'custom_range' => 'Custom Range',
     'date_range' => 'Date Range',
-    
+
     // Days of Week
     'monday' => 'Monday',
     'tuesday' => 'Tuesday',
@@ -276,7 +276,7 @@ return [
     'fri' => 'Fri',
     'sat' => 'Sat',
     'sun' => 'Sun',
-    
+
     // Months
     'january' => 'January',
     'february' => 'February',
@@ -302,7 +302,7 @@ return [
     'oct' => 'Oct',
     'nov' => 'Nov',
     'dec' => 'Dec',
-    
+
     // Time Units
     'second' => 'Second',
     'seconds' => 'Seconds',
@@ -321,7 +321,7 @@ return [
     'ago' => 'ago',
     'from_now' => 'from now',
     'just_now' => 'Just now',
-    
+
     // File Management
     'upload_file' => 'Upload File',
     'choose_file' => 'Choose File',
@@ -333,7 +333,7 @@ return [
     'download_file' => 'Download File',
     'view_file' => 'View File',
     'delete_file' => 'Delete File',
-    
+
     // Search & Filter
     'search_placeholder' => 'Search...',
     'advanced_search' => 'Advanced Search',
@@ -345,7 +345,7 @@ return [
     'apply_filters' => 'Apply Filters',
     'show_filters' => 'Show Filters',
     'hide_filters' => 'Hide Filters',
-    
+
     // Bulk Actions
     'bulk_actions' => 'Bulk Actions',
     'select_action' => 'Select Action',
@@ -355,7 +355,7 @@ return [
     'bulk_delete' => 'Bulk Delete',
     'bulk_export' => 'Bulk Export',
     'bulk_update' => 'Bulk Update',
-    
+
     // Reports & Export
     'report' => 'Report',
     'reports' => 'Reports',
@@ -365,7 +365,7 @@ return [
     'export_to_csv' => 'Export to CSV',
     'print_report' => 'Print Report',
     'report_generated' => 'Report generated successfully',
-    
+
     // Help & Support
     'help' => 'Help',
     'documentation' => 'Documentation',
@@ -375,7 +375,7 @@ return [
     'terms_of_service' => 'Terms of Service',
     'privacy_policy' => 'Privacy Policy',
     'about' => 'About',
-    
+
     // Dashboard
     'dashboard' => 'Dashboard',
     'home' => 'Home',
@@ -386,7 +386,7 @@ return [
     'recent_activity' => 'Recent Activity',
     'notifications' => 'Notifications',
     'no_notifications' => 'No notifications',
-    
+
     // Forms
     'form' => 'Form',
     'fill_form' => 'Fill Form',
@@ -404,7 +404,9 @@ return [
     'print_in_en' => 'Print in English',
     'date_from' => 'Date From',
     'date_to' => 'Date To',
-        'type_to_search' => 'Type to search',
+    'type_to_search' => 'Type to search',
     'searching' => 'Searching',
     'loading_more' => 'Loading more results',
+    'first_page' => 'First',
+    'last_page' => 'Last',
 ];

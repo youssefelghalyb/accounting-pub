@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Product\Exports\BooksExport;
 use Modules\Product\Http\Controllers\ProductController;
 use Modules\Product\Http\Controllers\CategoryController;
 use Modules\Product\Http\Controllers\AuthorController;
@@ -43,6 +44,13 @@ Route::middleware(['web'])->prefix('product')->name('product.')->group(function 
         Route::delete('/{id}', [AuthorController::class, 'destroy'])->name('destroy');
         Route::get('/q/search', [AuthorController::class, 'search'])->name('search');
         Route::post('/s/quick-store', [AuthorController::class, 'quickStore'])->name('quick-store');
+        Route::post('/{author}/register-as-client', [AuthorController::class, 'registerAsClient'])
+            ->name('register-as-client');
+
+        Route::get(
+            'authors/export-financial',
+            [AuthorController::class, 'exportFinancial']
+        )->name('export-financial');
     });
 
     // Book Routes
@@ -54,6 +62,14 @@ Route::middleware(['web'])->prefix('product')->name('product.')->group(function 
         Route::get('/{id}/edit', [BookController::class, 'edit'])->name('edit');
         Route::put('/{id}', [BookController::class, 'update'])->name('update');
         Route::delete('/{id}', [BookController::class, 'destroy'])->name('destroy');
+        Route::post('/bulk-price-update', [BookController::class, 'bulkPriceUpdate'])
+            ->name('bulk-price-update');
+        Route::get('/export/books', [BookController::class, 'exportBooks'])->name('export');
+
+        Route::post(
+            'books/import',
+            [BookController::class, 'import']
+        )->name('import');
     });
 
     // Contract Routes

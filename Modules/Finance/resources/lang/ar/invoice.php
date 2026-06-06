@@ -9,7 +9,7 @@ return [
     'invoice_details' => 'تفاصيل الفاتورة',
     'invoice_list' => 'قائمة الفواتير',
     'invoice_management' => 'إدارة فواتير المبيعات',
-
+    'party_locked' => 'العميل مقفل',
     'invoice_number' => 'رقم الفاتورة',
     'invoice_date' => 'تاريخ الفاتورة',
     'due_date' => 'تاريخ الاستحقاق',

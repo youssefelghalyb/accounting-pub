@@ -78,7 +78,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::with('book.author', 'book.category')->findOrFail($id);
+        $product = Product::with('book.contract.authors', 'book.category')->findOrFail($id);
 
         return view('product::products.show', compact('product'));
     }
