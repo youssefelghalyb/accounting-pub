@@ -88,20 +88,23 @@
                         'grid' => 6,
                         'borderColor' => '#10b981',
                     ],
+                    // ADD THIS:
                     [
                         'name' => 'author_id',
-                        'type' => 'select',
+                        'type' => 'searchable_select',
                         'label' => __('product::book.author'),
+                        'placeholder' => __('product::book.select_author'),
                         'required' => false,
-                        'value' => $book->author_id,
                         'grid' => 6,
                         'borderColor' => '#10b981',
-                        'options' => collect($authors)
-                            ->map(function ($author) {
-                                return ['value' => $author->id, 'label' => $author->full_name];
-                            })
-                            ->prepend(['value' => ' ', 'label' => __('product::book.select_author')])
-                            ->toArray(),
+                        'searchRoute' => route('product.authors.search'),
+                        'quickAddModal' => 'openQuickAuthorModal',
+                        'quickAddLabel' => __('product::author.quick_add'),
+                        // Pre-selected author — passed as initial option so Select2 shows it
+                        'options' => $currentAuthor
+                            ? [['value' => $currentAuthor->id, 'label' => $currentAuthor->full_name]]
+                            : [],
+                        'value' => $currentAuthor?->id,
                     ],
                     [
                         'name' => 'category_id',

@@ -106,7 +106,7 @@ class ImportBooksCommand extends Command
                 if ($dryRun) {
                     $this->dryRunRow($row);
                 } else {
-                    DB::transaction(fn () => $this->processRow($row, $skipStock, $stockQty, $subWarehouse));
+                    DB::transaction(fn() => $this->processRow($row, $skipStock, $stockQty, $subWarehouse));
                 }
             } catch (\Throwable $e) {
                 $this->stats['errors'][] = [
@@ -252,6 +252,10 @@ class ImportBooksCommand extends Command
             return;
         }
 
+        // ++ Add these two lines
+        $catId = $this->resolveCategory($row['category']);
+        $this->resolveCategory($row['sub_category'], $catId);
+
         $this->stats['products_inserted']++;
         $this->stats['books_inserted']++;
 
@@ -288,10 +292,24 @@ class ImportBooksCommand extends Command
         }
 
         $required = [
-            'Book ID', 'Product ID', 'Book Name', 'SKU', 'Price', 'Status',
-            'ISBN', 'Pages', 'Cover Type', 'Published Date', 'Language',
-            'Is Translated', 'Translated From', 'Translated To', 'Translator',
-            'Category', 'Sub Category', 'Author 1',
+            'Book ID',
+            'Product ID',
+            'Book Name',
+            'SKU',
+            'Price',
+            'Status',
+            'ISBN',
+            'Pages',
+            'Cover Type',
+            'Published Date',
+            'Language',
+            'Is Translated',
+            'Translated From',
+            'Translated To',
+            'Translator',
+            'Category',
+            'Sub Category',
+            'Author 1',
         ];
 
         $missing = array_diff($required, array_keys($headers));

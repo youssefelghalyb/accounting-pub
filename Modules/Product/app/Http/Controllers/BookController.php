@@ -48,7 +48,6 @@ class BookController extends Controller
         $books      = $query->orderBy('created_at', 'desc')->paginate(15);
         $authors    = Author::orderBy('full_name')->get();
         $categories = BookCategory::whereNull('parent_id')->get();
-
         $stats = [
             'total_books'      => Book::count(),
             'total_pages'      => Book::sum('num_of_pages'),
@@ -172,11 +171,16 @@ class BookController extends Controller
 
     public function edit($id)
     {
-        $book          = Book::with('product')->findOrFail($id);
+        $book = Book::with('product', 'contract.authors')->findOrFail($id);
         $categories    = BookCategory::whereNull('parent_id')->get();
         $subCategories = BookCategory::whereNotNull('parent_id')->get();
 
-        return view('product::books.edit', compact('book', 'categories', 'subCategories'));
+        // Get the representative author (first author on the contract)
+        $currentAuthor = $book->contract?->authors
+            ->firstWhere('pivot.is_representative', 1)
+            ?? $book->contract?->authors->first();
+
+        return view('product::books.edit', compact('book', 'categories', 'subCategories', 'currentAuthor'));
     }
 
     public function update(UpdateBookRequest $request, $id)

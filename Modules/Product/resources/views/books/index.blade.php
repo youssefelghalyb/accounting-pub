@@ -7,7 +7,15 @@
                     'id' => $book->id,
                     'name' => $book->product->name,
                     'isbn' => $book->isbn,
-                    'author_name' => $book->author?->full_name,
+                    'author_name' => $book->contract
+                    ? ($book->contract->authors->firstWhere('pivot.is_representative', 1)
+                        ?? $book->contract->authors->first()
+                    )?->full_name
+                    : null,
+
+
+                    
+
                     'category_name' => $book->category?->name,
                     'num_of_pages' => $book->num_of_pages,
                     'cover_type' => $book->cover_type,
@@ -45,14 +53,24 @@
                 },
             ],
             [
-                'label' => __('product::book.author'),
-                'field' => 'author_name',
-                'format' => function ($value) {
-                    return $value
-                        ? '<span class="text-sm text-gray-600">' . e(limitWords($value, 5)) . '</span>'
-                        : '<span class="text-sm text-gray-400">-</span>';
-                },
-            ],
+    'label' => __('product::book.author'),
+    'field' => 'model',
+    'render' => function ($row) {
+        $authors = $row['model']->contract?->authors;
+        if (!$authors || $authors->isEmpty()) {
+            return '<span class="text-sm text-gray-400">-</span>';
+        }
+
+        $rep   = $authors->firstWhere('pivot.is_representative', 1) ?? $authors->first();
+        $others = $authors->count() - 1;
+
+        $html  = '<span class="text-sm text-gray-700 font-medium">' . e(limitWords($rep->full_name, 4)) . '</span>';
+        if ($others > 0) {
+            $html .= ' <span class="text-xs text-gray-400">(+' . $others . ')</span>';
+        }
+        return $html;
+    },
+],
             [
                 'label' => __('product::book.category'),
                 'field' => 'category_name',
@@ -656,7 +674,8 @@
                                         this.done = true;
                                     }
                                 } catch (_) {
-                                    /* ignore malformed lines */ }
+                                    /* ignore malformed lines */
+                                }
                             }
                         }
                     },
