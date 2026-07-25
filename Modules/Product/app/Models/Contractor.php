@@ -64,6 +64,22 @@ class Contractor extends Model
         })->get();
     }
 
+    /**
+     * Every accounting-backed contract transaction (fees, advances, royalty payouts, refunds,
+     * adjustments) recorded against any of this contractor's books.
+     */
+    public function contractTransactions(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            ContractorTransaction::class,
+            ContractorBook::class,
+            'contractor_id',      // FK on contractor_books referencing this contractor
+            'contractor_book_id', // FK on contract_transactions referencing contractor_books
+            'id',
+            'id'
+        );
+    }
+
     public function isClient(): bool
     {
         return $this->party_id !== null;

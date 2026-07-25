@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Finance\Models\SalesInvoice;
 use Modules\Finance\Models\SalesInvoiceItem;
 use Modules\Product\Models\Product;
+use Modules\Product\Services\BookSaleService;
 use Modules\Warehouse\Models\StockMovement;
 use Modules\Warehouse\Models\SubWarehouseProduct;
 
@@ -78,6 +79,8 @@ class SalesInvoiceService
             // Create invoice
             $invoice = SalesInvoice::create($data);
 
+            $bookSaleService = new BookSaleService();
+
             // Create invoice items and stock movements
             foreach ($items as $itemData) {
                 $product = Product::findOrFail($itemData['product_id']);
@@ -94,6 +97,11 @@ class SalesInvoiceService
                 ]);
                 $item->calculateLineTotal();
                 $invoice->items()->save($item);
+
+                // Record the royalty accrual for this line (no-op for non-book products or
+                // books with no contractor on file — never blocks the sale). `is_gift` is set
+                // by the Contractor gift flow; ordinary sales default to false.
+                $bookSaleService->recordSale($item, $product, isGift: (bool) ($itemData['is_gift'] ?? false));
 
                 // Create outbound stock movement
                 if ($subWarehouseId) {
@@ -202,6 +210,8 @@ class SalesInvoiceService
             }
 
             // Step 2: Delete old items
+            // (book_sales.invoice_item_id cascades on delete, so this also removes the old
+            // BookSale/royalty-accrual rows for this invoice — new ones are created in Step 5)
             $invoice->items()->delete();
 
             // Step 3: Update invoice basic data
@@ -216,6 +226,8 @@ class SalesInvoiceService
             }
 
             // Step 5: Create new items and stock movements
+            $bookSaleService = new BookSaleService();
+
             foreach ($items as $itemData) {
                 $product = Product::findOrFail($itemData['product_id']);
 
@@ -231,6 +243,8 @@ class SalesInvoiceService
                 ]);
                 $item->calculateLineTotal();
                 $invoice->items()->save($item);
+
+                $bookSaleService->recordSale($item, $product, isGift: (bool) ($itemData['is_gift'] ?? false));
 
                 // Create new stock movement
                 if ($subWarehouseId) {

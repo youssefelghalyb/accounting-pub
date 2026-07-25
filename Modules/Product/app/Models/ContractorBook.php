@@ -44,17 +44,22 @@ class ContractorBook extends Model
         return $this->hasMany(BookSale::class);
     }
 
+    public function contractTransactions(): HasMany
+    {
+        return $this->hasMany(ContractorTransaction::class);
+    }
+
     // ─── Business logic ───────────────────────────────────────────────────────
 
     /**
-     * Royalty share for a single unit, given this contract's percentage/basis.
-     * Single source of truth for the formula — used by BookSaleService so the
-     * calculation is never duplicated between the normal sale path and the gift path.
+     * Royalty share for a line item, given this contract's percentage/basis and quantity.
+     * Single source of truth for the formula — used by BookSaleService so the calculation
+     * is never duplicated between the normal sale path and the gift path.
      */
-    public function calculateProfit(float $salePrice, float $basePrice): float
+    public function calculateProfit(float $salePrice, float $basePrice, int $quantity = 1): float
     {
-        $amount = $this->percentage_basis === 'base_price' ? $basePrice : $salePrice;
+        $unitAmount = $this->percentage_basis === 'base_price' ? $basePrice : $salePrice;
 
-        return round($amount * ((float) $this->profit_percentage / 100), 2);
+        return round($unitAmount * $quantity * ((float) $this->profit_percentage / 100), 2);
     }
 }

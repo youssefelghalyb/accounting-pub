@@ -19,6 +19,12 @@ return new class extends Migration
             $table->string('nationality', 150)->nullable();
             $table->text('address')->nullable();
             $table->string('national_id_file')->nullable();
+            // Migration-support column (not part of the original spec's field list): traces which
+            // legacy `authors` row this Contractor was derived from during the one-time Author ->
+            // Contractor data migration. Doubles as the idempotency key so that migration is safely
+            // re-runnable. Harmless to keep afterward as an audit trail; not FK-constrained since
+            // the `authors` table is dropped in a later migration.
+            $table->unsignedBigInteger('legacy_author_id')->nullable()->index();
             $table->timestamps();
             $table->softDeletes();
         });

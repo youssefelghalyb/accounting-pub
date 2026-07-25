@@ -19,6 +19,7 @@ class BookSale extends Model
         'contractor_book_id',
         'invoice_id',
         'invoice_item_id',
+        'quantity',
         'sale_price_snapshot',
         'base_price_snapshot',
         'percentage_snapshot',
@@ -28,6 +29,7 @@ class BookSale extends Model
     ];
 
     protected $casts = [
+        'quantity' => 'integer',
         'sale_price_snapshot' => 'decimal:2',
         'base_price_snapshot' => 'decimal:2',
         'percentage_snapshot' => 'decimal:2',
