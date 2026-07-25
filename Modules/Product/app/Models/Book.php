@@ -21,6 +21,10 @@ class Book extends Model
         'translated_from',
         'translated_to',
         'translator_name',
+        // Plain-text metadata — authors are no longer a business entity (see Contractor).
+        'authors',
+        'supervisor',
+        'introduction_by',
         'created_by',
         'edited_by',
     ];
@@ -49,6 +53,10 @@ class Book extends Model
 
     /**
      * A book has exactly one contract.
+     *
+     * @deprecated Legacy Author/Contract system, being replaced by Contractor/ContractorBook.
+     *             Kept alive until the Author→Contractor migration's destructive phase removes
+     *             the Contract model entirely — do not build new features on this relation.
      */
     public function contract(): HasOne
     {
@@ -56,9 +64,22 @@ class Book extends Model
     }
 
     /**
-     * Convenience: get all authors of this book through its contract.
+     * A book has exactly one contractor (see contractor_books).
      */
-    public function getAuthorsAttribute()
+    public function contractorBook(): HasOne
+    {
+        return $this->hasOne(ContractorBook::class);
+    }
+
+    /**
+     * Convenience: get all authors of this book through its (legacy) contract.
+     *
+     * @deprecated Renamed off `authors`/`authors_names` because those names now belong to the
+     *             real `books.authors` plain-text column. Use the `authors` attribute directly
+     *             for the new free-text author list; this accessor only serves the still-active
+     *             legacy Author/Contract UI until it is removed.
+     */
+    public function getContractAuthorsAttribute()
     {
         return $this->contract ? $this->contract->authors : collect();
     }
@@ -102,10 +123,12 @@ class Book extends Model
     }
 
     /**
-     * Authors names as a display string — e.g. for listings and cards.
+     * Legacy contract authors as a display string — e.g. for listings and cards.
+     *
+     * @deprecated see getContractAuthorsAttribute().
      */
-    public function getAuthorsNamesAttribute(): string
+    public function getContractAuthorsNamesAttribute(): string
     {
-        return $this->authors->pluck('full_name')->implode('، ');
+        return $this->contract_authors->pluck('full_name')->implode('، ');
     }
 }

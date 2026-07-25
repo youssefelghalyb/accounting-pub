@@ -121,8 +121,8 @@
                         <p class="text-gray-900 font-medium">{{ $book->isbn }}</p>
                     </div>
 
-                    {{-- Authors — derived via contract pivot --}}
-                    @php $bookAuthors = $book->authors; @endphp
+                    {{-- Authors — derived via legacy contract pivot (see Book::getContractAuthorsAttribute) --}}
+                    @php $bookAuthors = $book->contract_authors; @endphp
                     @if ($bookAuthors->isNotEmpty())
                         <div>
                             <label
