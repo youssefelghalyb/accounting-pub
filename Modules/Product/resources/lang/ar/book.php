@@ -3,6 +3,7 @@
 return [
     // Page Titles
     'books' => 'الكتب',
+    'book' => 'كتاب',
     'book_list' => 'قائمة الكتب',
     'add_book' => 'إضافة كتاب',
     'edit_book' => 'تعديل كتاب',
@@ -11,7 +12,9 @@ return [
     'register_book' => 'تسجيل كتاب جديد',
 
     // Form Labels
-    'author' => 'المؤلف',
+    'author' => 'المؤلف(ون)',
+    'supervisor' => 'الإشراف',
+    'introduction_by' => 'تقديم',
     'category' => 'الفئة',
     'sub_category' => 'الفئة الفرعية',
     'isbn' => 'الترقيم الدولي',
@@ -23,6 +26,7 @@ return [
     'translated_from' => 'مترجم من',
     'translated_to' => 'مترجم إلى',
     'translator_name' => 'اسم المترجم',
+    'contractor_royalty' => 'المتعاقد والأرباح',
 
     // Cover Types
     'hard' => 'غلاف كرتوني',
@@ -39,25 +43,21 @@ return [
     'translated_books' => 'الكتب المترجمة',
 
     // Actions
-    'search' => 'البحث في الكتب...',
-    'filter_by_author' => 'تصفية حسب المؤلف',
+    'search' => 'البحث بالعنوان أو المؤلف أو الترقيم الدولي أو رمز المنتج أو المتعاقد...',
     'filter_by_category' => 'تصفية حسب الفئة',
-    'all_authors' => 'جميع المؤلفين',
     'all_categories' => 'جميع الفئات',
-    'view_contracts' => 'عرض العقود',
 
     // Messages
     'book_added' => 'تم إضافة الكتاب بنجاح',
     'book_updated' => 'تم تحديث الكتاب بنجاح',
     'book_deleted' => 'تم حذف الكتاب بنجاح',
     'no_books' => 'لم يتم العثور على كتب',
-    'cannot_delete_has_contracts' => 'لا يمكن حذف كتاب له عقود موجودة',
+    'cannot_delete_has_contracts' => 'لا يمكن الحذف: لا يزال لهذا الكتاب متعاقد أو مبيعات مسجلة.',
 
     // Validation
     'name_required' => 'اسم الكتاب مطلوب',
     'isbn_required' => 'الترقيم الدولي مطلوب',
     'isbn_unique' => 'الترقيم الدولي مستخدم بالفعل',
-    'author_invalid' => 'المؤلف غير صحيح',
     'category_invalid' => 'الفئة غير صحيحة',
     'sub_category_invalid' => 'الفئة الفرعية غير صحيحة',
     'cover_type_required' => 'نوع الغلاف مطلوب',
@@ -65,7 +65,9 @@ return [
     'base_price_positive' => 'يجب أن يكون السعر الأساسي رقماً موجباً',
 
     // Placeholders
-    'select_author' => 'اختر المؤلف (اختياري)',
+    'enter_authors' => 'أدخل اسم/أسماء المؤلفين مفصولة بفاصلة',
+    'enter_supervisor' => 'أدخل اسم المشرف',
+    'enter_introduction_by' => 'أدخل اسم كاتب التقديم',
     'select_category' => 'اختر الفئة (اختياري)',
     'select_sub_category' => 'اختر الفئة الفرعية (اختياري)',
     'enter_isbn' => 'أدخل الترقيم الدولي',

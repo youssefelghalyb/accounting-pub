@@ -471,18 +471,6 @@
                         </select>
                     </div>
 
-                    <!-- Author -->
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 mb-2">{{ __('finance::invoice.author') }}</label>
-                        <select id="authorFilter"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">{{ __('finance::invoice.all_authors') }}</option>
-                            @foreach ($authors as $author)
-                                <option value="{{ $author->id }}">{{ $author->full_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
                 </div>
             </div>
 
@@ -592,8 +580,7 @@
             const drawerFilters = {
                 q: '',
                 category_id: '',
-                sub_category_id: '',
-                author_id: ''
+                sub_category_id: ''
             };
 
             // Auto-save
@@ -666,11 +653,6 @@
                     drawerFilters.sub_category_id = this.value;
                     fetchDrawerProducts(true);
                 });
-                document.getElementById('authorFilter').addEventListener('change', function() {
-                    drawerFilters.author_id = this.value;
-                    fetchDrawerProducts(true);
-                });
-
                 // Drawer infinite scroll
                 document.querySelector('#productDrawer .overflow-y-auto')
                     .addEventListener('scroll', function() {
@@ -1086,7 +1068,6 @@
                 document.getElementById('productSearch').value = '';
                 document.getElementById('categoryFilter').value = '';
                 document.getElementById('subCategoryFilter').value = '';
-                document.getElementById('authorFilter').value = '';
                 document.getElementById('productList').innerHTML = '';
 
                 document.getElementById('productDrawer').classList.remove('hidden');
@@ -1117,7 +1098,6 @@
                     page: drawerPage,
                     category_id: drawerFilters.category_id,
                     sub_category_id: drawerFilters.sub_category_id,
-                    author_id: drawerFilters.author_id,
                 });
 
                 try {

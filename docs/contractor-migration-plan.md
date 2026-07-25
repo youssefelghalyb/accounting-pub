@@ -1,7 +1,13 @@
 # Author → Contractor Migration: Impact Analysis & Implementation Plan
 
-> Status: **Phases 0–2 implemented** (branch `claude/product-contractor-refactor`, PR #19).
-> Phases 3+ (data migration, SalesInvoice integration) not yet implemented.
+> Status: **All phases (0–8) implemented** on branch `claude/product-contractor-refactor` (PR #19),
+> including the destructive Phase 8 (Author/Contract deletion + table drop + the
+> ContractorTransaction → ContractTransaction rename). Verified by actually running the full
+> migration chain (additive schema → data migration → destructive drop) against a seeded SQLite
+> database end-to-end, not just reviewed statically. Not done: full rewrite of
+> `Modules/Product/README.md`/`docs/README.md`/`docs/database-documentation.md`/
+> `docs/finance-product-warehouse-architecture.md` prose (deprioritized in favor of code
+> correctness given the size of this change — flagged so it isn't mistaken for finished).
 >
 > **Revision 2** — updates §1/§2/§4/§5/§7/§9 to reflect four business-requirement changes made
 > after the original plan (§ "Revision 2 summary" immediately below). Sections not called out

@@ -52,18 +52,6 @@ class Book extends Model
     }
 
     /**
-     * A book has exactly one contract.
-     *
-     * @deprecated Legacy Author/Contract system, being replaced by Contractor/ContractorBook.
-     *             Kept alive until the Author→Contractor migration's destructive phase removes
-     *             the Contract model entirely — do not build new features on this relation.
-     */
-    public function contract(): HasOne
-    {
-        return $this->hasOne(Contract::class);
-    }
-
-    /**
      * A book has exactly one contractor (see contractor_books).
      */
     public function contractorBook(): HasOne
@@ -71,17 +59,9 @@ class Book extends Model
         return $this->hasOne(ContractorBook::class);
     }
 
-    /**
-     * Convenience: get all authors of this book through its (legacy) contract.
-     *
-     * @deprecated Renamed off `authors`/`authors_names` because those names now belong to the
-     *             real `books.authors` plain-text column. Use the `authors` attribute directly
-     *             for the new free-text author list; this accessor only serves the still-active
-     *             legacy Author/Contract UI until it is removed.
-     */
-    public function getContractAuthorsAttribute()
+    public function bookSales(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->contract ? $this->contract->authors : collect();
+        return $this->hasMany(BookSale::class);
     }
 
     public function creator(): BelongsTo
@@ -122,13 +102,29 @@ class Book extends Model
         return implode(' | ', $info);
     }
 
+    // ─── Scopes ───────────────────────────────────────────────────────────────
+
     /**
-     * Legacy contract authors as a display string — e.g. for listings and cards.
-     *
-     * @deprecated see getContractAuthorsAttribute().
+     * Single shared search predicate for title / authors text / ISBN / SKU / contractor name —
+     * reused across BookController, Finance's invoice item pickers, Warehouse's product search,
+     * and SearchDrawer instead of four near-identical hand-written whereHas chains.
      */
-    public function getContractAuthorsNamesAttribute(): string
+    public function scopeSearch($query, ?string $term)
     {
-        return $this->contract_authors->pluck('full_name')->implode('، ');
+        if (! $term) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($term) {
+            $q->where('isbn', 'like', "%{$term}%")
+                ->orWhere('authors', 'like', "%{$term}%")
+                ->orWhereHas('product', function ($pq) use ($term) {
+                    $pq->where('name', 'like', "%{$term}%")
+                        ->orWhere('sku', 'like', "%{$term}%");
+                })
+                ->orWhereHas('contractorBook.contractor', function ($cq) use ($term) {
+                    $cq->where('name', 'like', "%{$term}%");
+                });
+        });
     }
 }

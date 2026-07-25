@@ -6,47 +6,30 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\Product\Exports\BooksExport;
-use Modules\Product\Models\Author;
 use Modules\Product\Models\Book;
 use Modules\Product\Models\BookCategory;
+use Modules\Product\Models\Contractor;
 use Modules\Product\Models\Product;
 use Modules\Product\Http\Requests\StoreBookRequest;
 use Modules\Product\Http\Requests\UpdateBookRequest;
 use Modules\Product\Imports\BooksImport;
+use Modules\Product\Services\ContractorService;
 
 class BookController extends Controller
 {
+    public function __construct(private ContractorService $contractorService) {}
+
     public function index(Request $request)
     {
-        // Books now load authors through their contract
-        $query = Book::with('product', 'contract.authors', 'category', 'subCategory');
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('isbn', 'like', "%{$search}%")
-                    ->orWhereHas('product', function ($pq) use ($search) {
-                        $pq->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('contract.authors', function ($aq) use ($search) {
-                        $aq->where('full_name', 'like', "%{$search}%");
-                    });
-            });
-        }
-
-        // Filter by author — now via contract pivot
-        if ($request->filled('author_id')) {
-            $query->whereHas('contract.authors', function ($q) use ($request) {
-                $q->where('authors.id', $request->author_id);
-            });
-        }
+        $query = Book::with('product', 'contractorBook.contractor', 'category', 'subCategory')
+            ->search($request->get('search'));
 
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 
         $books      = $query->orderBy('created_at', 'desc')->paginate(15);
-        $authors    = Author::orderBy('full_name')->get();
+        $contractors = Contractor::orderBy('name')->get();
         $categories = BookCategory::whereNull('parent_id')->get();
         $stats = [
             'total_books'      => Book::count(),
@@ -54,15 +37,16 @@ class BookController extends Controller
             'translated_books' => Book::where('is_translated', true)->count(),
         ];
 
-        return view('product::books.index', compact('books', 'authors', 'categories', 'stats'));
+        return view('product::books.index', compact('books', 'contractors', 'categories', 'stats'));
     }
 
     public function create()
     {
         $categories    = BookCategory::whereNull('parent_id')->get();
         $subCategories = BookCategory::whereNotNull('parent_id')->get();
+        $contractors   = Contractor::orderBy('name')->get();
 
-        return view('product::books.create', compact('categories', 'subCategories'));
+        return view('product::books.create', compact('categories', 'subCategories', 'contractors'));
     }
 
     public function store(StoreBookRequest $request)
@@ -79,7 +63,7 @@ class BookController extends Controller
             'created_by'  => Auth::id(),
         ]);
 
-        Book::create([
+        $book = Book::create([
             'product_id'      => $product->id,
             'category_id'     => $validated['category_id'] ?? null,
             'sub_category_id' => $validated['sub_category_id'] ?? null,
@@ -92,26 +76,49 @@ class BookController extends Controller
             'translated_from' => $validated['translated_from'] ?? null,
             'translated_to'   => $validated['translated_to'] ?? null,
             'translator_name' => $validated['translator_name'] ?? null,
+            'authors'         => $validated['authors'] ?? null,
+            'supervisor'      => $validated['supervisor'] ?? null,
+            'introduction_by' => $validated['introduction_by'] ?? null,
             'created_by'      => Auth::id(),
         ]);
+
+        $this->syncContractorBook($book, $validated, $request->file('contract_file'));
 
         return redirect()
             ->route('product.books.index')
             ->with('success', __('product::book.book_added'));
     }
 
+    /**
+     * Creates/updates/removes the book's ContractorBook based on the form's optional
+     * contractor fields — a book's contractor is managed right on the Book form since it's a
+     * strict 1:1 relationship now, not a separate multi-author Contract entity.
+     */
+    private function syncContractorBook(Book $book, array $validated, $contractFile): void
+    {
+        if (empty($validated['contractor_id'])) {
+            if ($book->contractorBook) {
+                $this->contractorService->unassignBook($book->contractorBook);
+            }
+
+            return;
+        }
+
+        $contractor = Contractor::findOrFail($validated['contractor_id']);
+
+        $this->contractorService->assignBook($contractor, [
+            'book_id' => $book->id,
+            'profit_percentage' => $validated['profit_percentage'] ?? 0,
+            'percentage_basis' => $validated['percentage_basis'] ?? 'sale_price',
+            'contract_date' => $validated['contract_date'] ?? null,
+            'end_contract_date' => $validated['end_contract_date'] ?? null,
+        ], $contractFile);
+    }
+
     public function show(Request $request, $id)
     {
-        $book = Book::with('product', 'contract.authors', 'contract.transactions', 'category', 'subCategory')
+        $book = Book::with('product', 'contractorBook.contractor', 'category', 'subCategory')
             ->findOrFail($id);
-
-        $contract      = $book->contract;
-        $contractStats = $contract ? [
-            'contract_price'      => $contract->contract_price,
-            'total_paid'          => $contract->total_paid,
-            'outstanding_balance' => $contract->outstanding_balance,
-            'payment_status'      => $contract->payment_status,
-        ] : null;
 
         // ── Sales rows ────────────────────────────────────────────────────────────
         // line_total = unit_price * qty - item_discount  (already net of item discount)
@@ -163,7 +170,6 @@ class BookController extends Controller
 
         return view('product::books.show', compact(
             'book',
-            'contractStats',
             'salesItems',
             'salesTotals',
         ));
@@ -171,21 +177,17 @@ class BookController extends Controller
 
     public function edit($id)
     {
-        $book = Book::with('product', 'contract.authors')->findOrFail($id);
+        $book = Book::with('product', 'contractorBook')->findOrFail($id);
         $categories    = BookCategory::whereNull('parent_id')->get();
         $subCategories = BookCategory::whereNotNull('parent_id')->get();
+        $contractors   = Contractor::orderBy('name')->get();
 
-        // Get the representative author (first author on the contract)
-        $currentAuthor = $book->contract?->authors
-            ->firstWhere('pivot.is_representative', 1)
-            ?? $book->contract?->authors->first();
-
-        return view('product::books.edit', compact('book', 'categories', 'subCategories', 'currentAuthor'));
+        return view('product::books.edit', compact('book', 'categories', 'subCategories', 'contractors'));
     }
 
     public function update(UpdateBookRequest $request, $id)
     {
-        $book      = Book::with('product')->findOrFail($id);
+        $book      = Book::with('product', 'contractorBook')->findOrFail($id);
         $validated = $request->validated();
 
         $book->product->update([
@@ -207,11 +209,22 @@ class BookController extends Controller
             'published_at'    => $validated['published_at'] ?? null,
             'language'        => $validated['language'] ?? null,
             'is_translated'   => $validated['is_translated'] ?? false,
+            'authors'         => $validated['authors'] ?? null,
+            'supervisor'      => $validated['supervisor'] ?? null,
+            'introduction_by' => $validated['introduction_by'] ?? null,
             'translated_from' => $validated['translated_from'] ?? null,
             'translated_to'   => $validated['translated_to'] ?? null,
             'translator_name' => $validated['translator_name'] ?? null,
             'edited_by'       => Auth::id(),
         ]);
+
+        try {
+            $this->syncContractorBook($book, $validated, $request->file('contract_file'));
+        } catch (\RuntimeException $e) {
+            return redirect()
+                ->route('product.books.edit', $book)
+                ->with('error', $e->getMessage());
+        }
 
         return redirect()
             ->route('product.books.index')
@@ -220,9 +233,9 @@ class BookController extends Controller
 
     public function destroy($id)
     {
-        $book = Book::with('product')->findOrFail($id);
+        $book = Book::with('product', 'contractorBook')->findOrFail($id);
 
-        if ($book->contract()->exists()) {
+        if ($book->contractorBook || $book->bookSales()->exists()) {
             return redirect()
                 ->route('product.books.index')
                 ->with('error', __('product::book.cannot_delete_has_contracts'));

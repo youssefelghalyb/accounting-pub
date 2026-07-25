@@ -46,9 +46,7 @@ class ProductServiceProvider extends ServiceProvider
     protected function registerCommands(): void
     {
         $this->commands([
-              \Modules\Product\Console\SplitMultiAuthorsCommand::class,
-                  \Modules\Product\Console\ImportBooksCommand::class,
-
+            \Modules\Product\Console\ImportBooksCommand::class,
         ]);
     }
 

@@ -102,10 +102,10 @@
                     <span class="text-gray-900">{{ $warehouseProduct->product->book->isbn }}</span>
                 </div>
                 @endif
-                @if($warehouseProduct->product->book->author)
+                @if($warehouseProduct->product->book->authors)
                 <div>
                     <span class="text-gray-700 font-medium">{{ __('warehouse::sub_warehouse.author') }}:</span>
-                    <span class="text-gray-900">{{ $warehouseProduct->product->book->author->name }}</span>
+                    <span class="text-gray-900">{{ $warehouseProduct->product->book->authors }}</span>
                 </div>
                 @endif
                 @if($warehouseProduct->product->book->category)

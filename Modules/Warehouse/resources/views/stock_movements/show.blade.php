@@ -112,8 +112,8 @@
                         @if($movement->product->book)
                             <div class="pt-3 border-t border-gray-200">
                                 <h3 class="text-sm font-medium text-gray-900 mb-2">{{ __('warehouse::sub_warehouse.book_details') }}</h3>
-                                @if($movement->product->book->author)
-                                    <p class="text-sm text-gray-600"><strong>{{ __('warehouse::sub_warehouse.author') }}:</strong> {{ $movement->product->book->author->name }}</p>
+                                @if($movement->product->book->authors)
+                                    <p class="text-sm text-gray-600"><strong>{{ __('warehouse::sub_warehouse.author') }}:</strong> {{ $movement->product->book->authors }}</p>
                                 @endif
                                 @if($movement->product->book->category)
                                     <p class="text-sm text-gray-600"><strong>{{ __('warehouse::sub_warehouse.category') }}:</strong> {{ $movement->product->book->category->name }}</p>

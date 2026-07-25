@@ -71,7 +71,7 @@ class Contractor extends Model
     public function contractTransactions(): HasManyThrough
     {
         return $this->hasManyThrough(
-            ContractorTransaction::class,
+            ContractTransaction::class,
             ContractorBook::class,
             'contractor_id',      // FK on contractor_books referencing this contractor
             'contractor_book_id', // FK on contract_transactions referencing contractor_books

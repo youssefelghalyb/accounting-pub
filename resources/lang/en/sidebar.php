@@ -45,5 +45,5 @@ return [
     
     // User
     'logout' => 'Logout',
-    'authors' => 'Authors'
+    'contractors' => 'Contractors'
 ];

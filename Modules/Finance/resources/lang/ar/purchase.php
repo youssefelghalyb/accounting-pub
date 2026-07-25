@@ -15,6 +15,7 @@ return [
     'cancel_invoice' => 'إلغاء الفاتورة',
 
     // Fields
+    'author' => 'المؤلف',
     'invoice_number' => 'رقم الفاتورة',
     'vendor' => 'المورد',
     'select_vendor' => 'اختر المورد',
