@@ -120,7 +120,6 @@ return [
     'sub_category' => 'Sub Category',
     'all_sub_categories' => 'All Sub Categories',
     'author' => 'Author',
-    'all_authors' => 'All Authors',
     'no_products_found' => 'No products found',
     'stock' => 'Stock',
     'add' => 'Add',

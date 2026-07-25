@@ -121,25 +121,27 @@
                         <p class="text-gray-900 font-medium">{{ $book->isbn }}</p>
                     </div>
 
-                    {{-- Authors — derived via legacy contract pivot (see Book::getContractAuthorsAttribute) --}}
-                    @php $bookAuthors = $book->contract_authors; @endphp
-                    @if ($bookAuthors->isNotEmpty())
+                    @if ($book->authors)
                         <div>
                             <label
-                                class="block text-sm font-medium text-gray-600 mb-2">{{ __('product::book.author') }}</label>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach ($bookAuthors as $author)
-                                    <a href="{{ route('product.authors.show', $author) }}"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition
-                                           {{ $author->pivot->is_representative ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                                        {{ $author->full_name }}
-                                        @if ($author->pivot->is_representative)
-                                            <span
-                                                class="text-xs opacity-70">({{ __('product::contract.representative') }})</span>
-                                        @endif
-                                    </a>
-                                @endforeach
-                            </div>
+                                class="block text-sm font-medium text-gray-600 mb-1">{{ __('product::book.author') }}</label>
+                            <p class="text-gray-900">{{ $book->authors }}</p>
+                        </div>
+                    @endif
+
+                    @if ($book->supervisor)
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-600 mb-1">{{ __('product::book.supervisor') }}</label>
+                            <p class="text-gray-900">{{ $book->supervisor }}</p>
+                        </div>
+                    @endif
+
+                    @if ($book->introduction_by)
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-600 mb-1">{{ __('product::book.introduction_by') }}</label>
+                            <p class="text-gray-900">{{ $book->introduction_by }}</p>
                         </div>
                     @endif
 
@@ -201,52 +203,42 @@
             </div>
         </div>
 
-        {{-- Contract Summary --}}
-        @if ($book->contract)
-            @php $contract = $book->contract; @endphp
+        {{-- Contractor & Royalty --}}
+        @if ($book->contractorBook)
+            @php $contractorBook = $book->contractorBook; @endphp
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
                 <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-gray-900">{{ __('product::contract.contract_details') }}</h2>
-                    <a href="{{ route('product.contracts.show', $contract) }}"
+                    <h2 class="text-lg font-bold text-gray-900">{{ __('product::book.contractor_royalty') }}</h2>
+                    <a href="{{ route('product.contractors.show', $contractorBook->contractor_id) }}"
                         class="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                        {{ __('common.view') }} →
+                        {{ $contractorBook->contractor->name }} →
                     </a>
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
                             <p class="text-xs font-medium text-gray-500 uppercase">
-                                {{ __('product::contract.contract_price') }}</p>
+                                {{ __('product::contractor.profit_percentage') }}</p>
                             <p class="text-lg font-bold text-gray-900 mt-1">
-                                {{ number_format($contract->contract_price, 2) }}</p>
+                                {{ number_format($contractorBook->profit_percentage, 2) }}%</p>
                         </div>
                         <div>
                             <p class="text-xs font-medium text-gray-500 uppercase">
-                                {{ __('product::contract.total_paid') }}</p>
-                            <p class="text-lg font-bold text-green-600 mt-1">
-                                {{ number_format($contract->total_paid, 2) }}</p>
+                                {{ __('product::contractor.percentage_basis') }}</p>
+                            <p class="text-lg font-bold text-gray-900 mt-1">
+                                {{ __('product::contractor.basis_' . $contractorBook->percentage_basis) }}</p>
                         </div>
                         <div>
                             <p class="text-xs font-medium text-gray-500 uppercase">
-                                {{ __('product::contract.outstanding_balance') }}</p>
-                            <p class="text-lg font-bold text-orange-600 mt-1">
-                                {{ number_format($contract->outstanding_balance, 2) }}</p>
+                                {{ __('product::contractor.contract_date') }}</p>
+                            <p class="text-lg font-bold text-gray-900 mt-1">
+                                {{ $contractorBook->contract_date?->format('Y-m-d') ?? '—' }}</p>
                         </div>
                         <div>
                             <p class="text-xs font-medium text-gray-500 uppercase">
-                                {{ __('product::contract.payment_status') }}</p>
-                            @php
-                                $colors = [
-                                    'paid' => 'bg-green-100 text-green-800',
-                                    'partial' => 'bg-yellow-100 text-yellow-800',
-                                    'pending' => 'bg-red-100 text-red-800',
-                                ];
-                                $color = $colors[$contract->payment_status] ?? 'bg-gray-100 text-gray-800';
-                            @endphp
-                            <span
-                                class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $color }} mt-1">
-                                {{ __('product::contract.' . $contract->payment_status) }}
-                            </span>
+                                {{ __('product::contractor.end_contract_date') }}</p>
+                            <p class="text-lg font-bold text-gray-900 mt-1">
+                                {{ $contractorBook->end_contract_date?->format('Y-m-d') ?? '—' }}</p>
                         </div>
                     </div>
                 </div>

@@ -11,13 +11,7 @@ return new class extends Migration
      * Neutral, accounting-backed ledger for a contractor_book (publishing fees, royalty
      * payouts, advances, refunds, adjustments). Every row must reference exactly one of
      * receipt_voucher_id (money IN, from the contractor) or payment_voucher_id (money OUT,
-     * to the contractor) — never both, never neither.
-     *
-     * Implemented for now on the Modules\Product\Models\ContractorTransaction class (table name
-     * is already the final `contract_transactions`) — the still-active legacy
-     * Modules\Product\Models\ContractTransaction (table author_contract_transactions) occupies
-     * that class name until it is deleted; this gets a pure rename in the destructive migration
-     * phase. See docs/contractor-migration-plan.md §2.2.
+     * to the contractor) — never both, never neither. Backed by Modules\Product\Models\ContractTransaction.
      */
     public function up(): void
     {
@@ -54,7 +48,7 @@ return new class extends Migration
 
     /**
      * Defense-in-depth: DB-level CHECK enforcing exactly one of the two voucher FKs is set.
-     * Also enforced in the application layer (ContractorTransaction::booted()'s `saving` guard),
+     * Also enforced in the application layer (ContractTransaction::booted()'s `saving` guard),
      * which is what protects every write path the app itself uses (Eloquent). This CHECK is the
      * backstop against raw SQL that bypasses Eloquent entirely.
      *
@@ -74,7 +68,7 @@ return new class extends Migration
         $driver = Schema::getConnection()->getDriverName();
 
         if ($driver === 'sqlite') {
-            Log::info('contract_transactions: exactly-one-voucher CHECK constraint not applied at the DB level on SQLite (unsupported via ALTER TABLE). Enforced via the ContractorTransaction model only.');
+            Log::info('contract_transactions: exactly-one-voucher CHECK constraint not applied at the DB level on SQLite (unsupported via ALTER TABLE). Enforced via the ContractTransaction model only.');
 
             return;
         }

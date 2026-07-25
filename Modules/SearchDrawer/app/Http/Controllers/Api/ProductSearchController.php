@@ -10,17 +10,17 @@ class ProductSearchController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['book.contract.authors', 'book.category', 'book.subCategory'])
+        $query = Product::with(['book.contractorBook.contractor', 'book.category', 'book.subCategory'])
             ->where('status', 'active');
 
-        // Search
+        // Search — title / SKU / ISBN / authors text / contractor name
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('sku', 'like', "%{$search}%")
                   ->orWhereHas('book', function($bq) use ($search) {
-                      $bq->where('isbn', 'like', "%{$search}%");
+                      $bq->search($search);
                   });
             });
         }
@@ -36,13 +36,6 @@ class ProductSearchController extends Controller
         if ($request->filled('sub_category_id')) {
             $query->whereHas('book', function($q) use ($request) {
                 $q->where('sub_category_id', $request->sub_category_id);
-            });
-        }
-
-        // Filter by author
-        if ($request->filled('author_id')) {
-            $query->whereHas('book', function($q) use ($request) {
-                $q->where('author_id', $request->author_id);
             });
         }
 
@@ -63,8 +56,8 @@ class ProductSearchController extends Controller
                 'category_name' => $p->book->category->name ?? null,
                 'sub_category_id' => $p->book->sub_category_id ?? null,
                 'sub_category_name' => $p->book->subCategory->name ?? null,
-                'author_id' => $p->book->author_id ?? null,
-                'author_name' => $p->book->author->name ?? null,
+                'author_name' => $p->book->authors ?? null,
+                'contractor_name' => $p->book->contractorBook?->contractor?->name,
                 'highlight_value' => number_format($p->base_price, 2),
                 'highlight_class' => 'text-blue-600',
             ];
@@ -75,7 +68,7 @@ class ProductSearchController extends Controller
 
     public function show($id)
     {
-        $product = Product::with(['book.contract.authors', 'book.category', 'book.subCategory'])
+        $product = Product::with(['book.contractorBook.contractor', 'book.category', 'book.subCategory'])
             ->findOrFail($id);
 
         return response()->json([
@@ -87,8 +80,8 @@ class ProductSearchController extends Controller
             'stock_quantity' => $product->stock_quantity,
             'category_id' => $product->book->category_id ?? null,
             'category_name' => $product->book->category->name ?? null,
-            'author_id' => $product->book->author_id ?? null,
-            'author_name' => $product->book->author->name ?? null,
+            'author_name' => $product->book->authors ?? null,
+            'contractor_name' => $product->book->contractorBook?->contractor?->name,
         ]);
     }
 }

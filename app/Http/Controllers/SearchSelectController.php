@@ -106,13 +106,12 @@ class SearchSelectController extends Controller
         'books' => [
             'model' => \Modules\Product\Models\Book::class,
             'labelColumn' => 'name',
-            'searchColumns' => ['name', 'isbn', 'sku'],
+            'searchColumns' => ['name', 'isbn', 'sku', 'authors'],
             'sublabel' => 'isbn',
             'scopes' => ['active'],
             'filters' => [
                 'category_id' => 'category_id',
                 'sub_category_id' => 'sub_category_id',
-                'author_id' => 'author_id',
             ],
             'orderBy' => 'name',
         ],

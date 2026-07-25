@@ -46,7 +46,7 @@ class ContractorBook extends Model
 
     public function contractTransactions(): HasMany
     {
-        return $this->hasMany(ContractorTransaction::class);
+        return $this->hasMany(ContractTransaction::class);
     }
 
     // ─── Business logic ───────────────────────────────────────────────────────

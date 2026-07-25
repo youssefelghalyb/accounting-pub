@@ -4,10 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Modules\Product\Exports\BooksExport;
 use Modules\Product\Http\Controllers\ProductController;
 use Modules\Product\Http\Controllers\CategoryController;
-use Modules\Product\Http\Controllers\AuthorController;
+use Modules\Product\Http\Controllers\ContractorController;
 use Modules\Product\Http\Controllers\BookController;
-use Modules\Product\Http\Controllers\ContractController;
-use Modules\Product\Http\Controllers\TransactionController;
 
 Route::middleware(['web'])->prefix('product')->name('product.')->group(function () {
 
@@ -33,24 +31,22 @@ Route::middleware(['web'])->prefix('product')->name('product.')->group(function 
         Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy');
     });
 
-    // Author Routes
-    Route::prefix('authors')->name('authors.')->group(function () {
-        Route::get('/', [AuthorController::class, 'index'])->name('index');
-        Route::get('/create', [AuthorController::class, 'create'])->name('create');
-        Route::post('/', [AuthorController::class, 'store'])->name('store');
-        Route::get('/{id}', [AuthorController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [AuthorController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [AuthorController::class, 'update'])->name('update');
-        Route::delete('/{id}', [AuthorController::class, 'destroy'])->name('destroy');
-        Route::get('/q/search', [AuthorController::class, 'search'])->name('search');
-        Route::post('/s/quick-store', [AuthorController::class, 'quickStore'])->name('quick-store');
-        Route::post('/{author}/register-as-client', [AuthorController::class, 'registerAsClient'])
+    // Contractor Routes
+    Route::prefix('contractors')->name('contractors.')->group(function () {
+        Route::get('/', [ContractorController::class, 'index'])->name('index');
+        Route::get('/create', [ContractorController::class, 'create'])->name('create');
+        Route::post('/', [ContractorController::class, 'store'])->name('store');
+        Route::get('/{contractor}', [ContractorController::class, 'show'])->name('show');
+        Route::get('/{contractor}/edit', [ContractorController::class, 'edit'])->name('edit');
+        Route::put('/{contractor}', [ContractorController::class, 'update'])->name('update');
+        Route::delete('/{contractor}', [ContractorController::class, 'destroy'])->name('destroy');
+        Route::post('/{contractor}/register-as-client', [ContractorController::class, 'registerAsClient'])
             ->name('register-as-client');
-
-        Route::get(
-            'authors/export-financial',
-            [AuthorController::class, 'exportFinancial']
-        )->name('export-financial');
+        Route::post('/{contractor}/gift', [ContractorController::class, 'storeGift'])->name('gift');
+        Route::post('/{contractor}/transactions', [ContractorController::class, 'storeTransaction'])
+            ->name('transactions.store');
+        Route::delete('/transactions/{transaction}', [ContractorController::class, 'destroyTransaction'])
+            ->name('transactions.destroy');
     });
 
     // Book Routes
@@ -70,27 +66,5 @@ Route::middleware(['web'])->prefix('product')->name('product.')->group(function 
             'books/import',
             [BookController::class, 'import']
         )->name('import');
-    });
-
-    // Contract Routes
-    Route::prefix('contracts')->name('contracts.')->group(function () {
-        Route::get('/', [ContractController::class, 'index'])->name('index');
-        Route::get('/create', [ContractController::class, 'create'])->name('create');
-        Route::post('/', [ContractController::class, 'store'])->name('store');
-        Route::get('/{id}', [ContractController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [ContractController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [ContractController::class, 'update'])->name('update');
-        Route::delete('/{id}', [ContractController::class, 'destroy'])->name('destroy');
-    });
-
-    // Transaction Routes (Contract Payments)
-    Route::prefix('transactions')->name('transactions.')->group(function () {
-        Route::get('/', [TransactionController::class, 'index'])->name('index');
-        Route::get('/create', [TransactionController::class, 'create'])->name('create');
-        Route::post('/', [TransactionController::class, 'store'])->name('store');
-        Route::get('/{id}', [TransactionController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [TransactionController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [TransactionController::class, 'update'])->name('update');
-        Route::delete('/{id}', [TransactionController::class, 'destroy'])->name('destroy');
     });
 });

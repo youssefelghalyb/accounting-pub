@@ -638,7 +638,7 @@
                                 <span class="sidebar-text font-medium">{{ __('sidebar.categories') }}</span>
                                 <span class="sidebar-tooltip">{{ __('sidebar.categories') }}</span>
                             </a>
-                            <a href="{{ route('product.authors.index') }}"
+                            <a href="{{ route('product.contractors.index') }}"
                                 class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">
                                 <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -646,8 +646,8 @@
                                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
                                     </path>
                                 </svg>
-                                <span class="sidebar-text font-medium">{{ __('sidebar.authors') }}</span>
-                                <span class="sidebar-tooltip">{{ __('sidebar.authors') }}</span>
+                                <span class="sidebar-text font-medium">{{ __('sidebar.contractors') }}</span>
+                                <span class="sidebar-tooltip">{{ __('sidebar.contractors') }}</span>
                             </a>
                             <a href="{{ route('product.books.index') }}"
                                 class="sidebar-item flex items-center space-x-3 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100">

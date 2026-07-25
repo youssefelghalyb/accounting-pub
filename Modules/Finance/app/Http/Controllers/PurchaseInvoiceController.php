@@ -12,7 +12,6 @@ use Modules\Finance\Services\PartyService;
 use Modules\Finance\Services\AccountService;
 use Modules\Finance\Http\Requests\StorePurchaseInvoiceRequest;
 use Modules\Finance\Http\Requests\UpdatePurchaseInvoiceRequest;
-use Modules\Product\Models\Author;
 use Modules\Product\Models\BookCategory;
 use Modules\Product\Models\Product;
 use Modules\Settings\Models\OrganizationSetting;
@@ -82,14 +81,13 @@ class PurchaseInvoiceController extends Controller
         $orgSettings = OrganizationSetting::first();
 
         // Get products with book information
-        $products = Product::with(['book.contract.authors', 'book.category', 'book.subCategory'])
+        $products = Product::with(['book.contractorBook.contractor', 'book.category', 'book.subCategory'])
             ->where('status', 'active')
             ->get();
 
-        // Get categories, sub-categories, and authors for filters
+        // Get categories and sub-categories for filters
         $categories = BookCategory::whereHas('books')->get();
         $subCategories = BookCategory::whereHas('books')->get();
-        $authors = Author::whereHas('contracts.book')->get();
 
         // Prepare simple products list for basic operations
         $productsForJs = $products->map(function ($p) {
@@ -116,10 +114,10 @@ class PurchaseInvoiceController extends Controller
                 $data['isbn'] = $p->book->isbn;
                 $data['category_id'] = $p->book->category_id;
                 $data['sub_category_id'] = $p->book->sub_category_id;
-                $data['author_id'] = $p->book->author_id;
                 $data['category_name'] = $p->book->category ? $p->book->category->name : null;
                 $data['sub_category_name'] = $p->book->subCategory ? $p->book->subCategory->name : null;
-                $data['author_name'] = $p->book->author ? $p->book->author->name : null;
+                $data['author_name'] = $p->book->authors;
+                $data['contractor_name'] = $p->book->contractorBook?->contractor?->name;
             }
 
             return $data;
@@ -136,8 +134,7 @@ class PurchaseInvoiceController extends Controller
             'productsForJs',
             'allProductsWithBooks',
             'categories',
-            'subCategories',
-            'authors'
+            'subCategories'
         ));
     }
 

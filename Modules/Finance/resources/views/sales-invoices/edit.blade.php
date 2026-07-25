@@ -381,18 +381,6 @@
                         </select>
                     </div>
 
-                    <!-- Author -->
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 mb-2">{{ __('finance::invoice.author') }}</label>
-                        <select id="authorFilter"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">{{ __('finance::invoice.all_authors') }}</option>
-                            @foreach ($authors as $author)
-                                <option value="{{ $author->id }}">{{ $author->full_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
                 </div>
             </div>
 
@@ -538,18 +526,6 @@
                         </select>
                     </div>
 
-                    <!-- Author -->
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 mb-2">{{ __('finance::invoice.author') }}</label>
-                        <select id="authorFilter"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">{{ __('finance::invoice.all_authors') }}</option>
-                            @foreach ($authors as $author)
-                                <option value="{{ $author->id }}">{{ $author->full_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
                 </div>
             </div>
 
@@ -759,7 +735,6 @@
                 document.getElementById('productSearch').addEventListener('input', filterProducts);
                 document.getElementById('categoryFilter').addEventListener('change', filterProducts);
                 document.getElementById('subCategoryFilter').addEventListener('change', filterProducts);
-                document.getElementById('authorFilter').addEventListener('change', filterProducts);
 
                 // Initial product list load
                 renderProductList(allProducts);
@@ -1032,7 +1007,6 @@
                 document.getElementById('productSearch').value = '';
                 document.getElementById('categoryFilter').value = '';
                 document.getElementById('subCategoryFilter').value = '';
-                document.getElementById('authorFilter').value = '';
                 renderProductList(allProducts);
             }
 
@@ -1040,17 +1014,18 @@
                 const search = document.getElementById('productSearch').value.toLowerCase();
                 const categoryId = document.getElementById('categoryFilter').value;
                 const subCategoryId = document.getElementById('subCategoryFilter').value;
-                const authorId = document.getElementById('authorFilter').value;
 
                 let filtered = allProducts.filter(product => {
                     let matches = true;
 
-                    // Search filter
+                    // Search filter (title / ISBN / SKU / author / contractor)
                     if (search) {
                         matches = matches && (
                             product.name.toLowerCase().includes(search) ||
                             (product.isbn && product.isbn.toLowerCase().includes(search)) ||
-                            (product.sku && product.sku.toLowerCase().includes(search))
+                            (product.sku && product.sku.toLowerCase().includes(search)) ||
+                            (product.author_name && product.author_name.toLowerCase().includes(search)) ||
+                            (product.contractor_name && product.contractor_name.toLowerCase().includes(search))
                         );
                     }
 
@@ -1062,11 +1037,6 @@
                     // Sub category filter
                     if (subCategoryId) {
                         matches = matches && product.sub_category_id == subCategoryId;
-                    }
-
-                    // Author filter
-                    if (authorId) {
-                        matches = matches && product.author_id == authorId;
                     }
 
                     return matches;

@@ -4,30 +4,65 @@ namespace Modules\Product\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Finance\Models\PaymentVoucher;
+use Modules\Finance\Models\ReceiptVoucher;
 
+/**
+ * Neutral, accounting-backed ledger entry against a contractor_book: publishing fees,
+ * royalty payouts, advances, refunds, adjustments. Table: contract_transactions.
+ */
 class ContractTransaction extends Model
 {
-    protected $table = 'author_contract_transactions';
+    protected $table = 'contract_transactions';
 
     protected $fillable = [
-        'contract_id',
+        'contractor_book_id',
+        'type',
         'amount',
-        'payment_date',
+        'transaction_date',
         'notes',
         'receipt_file',
+        'receipt_voucher_id',
+        'payment_voucher_id',
         'created_by',
         'edited_by',
     ];
 
     protected $casts = [
-        'payment_date' => 'date',
+        'transaction_date' => 'date',
         'amount' => 'decimal:2',
     ];
 
-    // Relationships
-    public function contract(): BelongsTo
+    protected static function booted(): void
     {
-        return $this->belongsTo(Contract::class, 'contract_id');
+        static::saving(function (self $transaction) {
+            $hasReceipt = ! is_null($transaction->receipt_voucher_id);
+            $hasPayment = ! is_null($transaction->payment_voucher_id);
+
+            if ($hasReceipt === $hasPayment) {
+                throw new \LogicException(
+                    'A contract transaction must reference exactly one of receipt_voucher_id or '
+                    . 'payment_voucher_id — never both, never neither.'
+                );
+            }
+        });
+    }
+
+    // ─── Relationships ────────────────────────────────────────────────────────
+
+    public function contractorBook(): BelongsTo
+    {
+        return $this->belongsTo(ContractorBook::class);
+    }
+
+    public function receiptVoucher(): BelongsTo
+    {
+        return $this->belongsTo(ReceiptVoucher::class);
+    }
+
+    public function paymentVoucher(): BelongsTo
+    {
+        return $this->belongsTo(PaymentVoucher::class);
     }
 
     public function creator(): BelongsTo
@@ -40,20 +75,45 @@ class ContractTransaction extends Model
         return $this->belongsTo(\App\Models\User::class, 'edited_by');
     }
 
-    // Scopes
-    public function scopeForContract($query, int $contractId)
+    // ─── Scopes ───────────────────────────────────────────────────────────────
+
+    public function scopeOfType($query, string $type)
     {
-        return $query->where('contract_id', $contractId);
+        return $query->where('type', $type);
     }
 
-    public function scopeThisMonth($query)
+    /**
+     * Money that came IN from the contractor (backed by a ReceiptVoucher).
+     */
+    public function scopeIncoming($query)
     {
-        return $query->whereYear('payment_date', now()->year)
-            ->whereMonth('payment_date', now()->month);
+        return $query->whereNotNull('receipt_voucher_id');
     }
 
-    public function scopeThisYear($query)
+    /**
+     * Money that went OUT to the contractor (backed by a PaymentVoucher).
+     */
+    public function scopeOutgoing($query)
     {
-        return $query->whereYear('payment_date', now()->year);
+        return $query->whereNotNull('payment_voucher_id');
+    }
+
+    // ─── Accessors ────────────────────────────────────────────────────────────
+
+    /**
+     * 'in' when money came from the contractor (ReceiptVoucher), 'out' when money was
+     * paid to the contractor (PaymentVoucher). Derived from the voucher link, never stored.
+     */
+    public function getDirectionAttribute(): ?string
+    {
+        if ($this->receipt_voucher_id) {
+            return 'in';
+        }
+
+        if ($this->payment_voucher_id) {
+            return 'out';
+        }
+
+        return null;
     }
 }

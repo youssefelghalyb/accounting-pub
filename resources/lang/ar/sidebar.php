@@ -55,6 +55,6 @@ return [
     
     // User
     'logout' => 'تسجيل الخروج',
-    'authors' => 'المؤلفون',
+    'contractors' => 'المتعاقدون',
 
 ];

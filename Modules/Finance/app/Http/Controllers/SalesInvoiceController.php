@@ -13,7 +13,6 @@ use Modules\Finance\Services\PartyService;
 use Modules\Finance\Services\AccountService;
 use Modules\Finance\Http\Requests\StoreSalesInvoiceRequest;
 use Modules\Finance\Http\Requests\UpdateSalesInvoiceRequest;
-use Modules\Product\Models\Author;
 use Modules\Product\Models\BookCategory;
 use Modules\Product\Models\Product;
 use Modules\Settings\Models\OrganizationSetting;
@@ -82,14 +81,13 @@ class SalesInvoiceController extends Controller
         $subWarehouses = SubWarehouse::with('warehouse')->orderBy('name')->get();
 
         // Get products with book information
-        $products = Product::with(['book.contract.authors', 'book.category', 'book.subCategory'])
+        $products = Product::with(['book.contractorBook.contractor', 'book.category', 'book.subCategory'])
             ->where('status', 'active')
             ->get();
 
-        // Get categories, sub-categories, and authors for filters
+        // Get categories and sub-categories for filters
         $categories = BookCategory::whereHas('books')->get();
         $subCategories = BookCategory::whereHas('books')->get();
-        $authors = Author::whereHas('contracts.book')->get();
 
         // Prepare simple products list for basic operations
         $productsForJs = $products->map(function ($p) {
@@ -118,12 +116,12 @@ class SalesInvoiceController extends Controller
                 $data['isbn'] = $p->book->isbn;
                 $data['category_id'] = $p->book->category_id;
                 $data['sub_category_id'] = $p->book->sub_category_id;
-                $data['author_id'] = $p->book->author_id;
 
                 // Add relationship names
                 $data['category_name'] = $p->book->category ? $p->book->category->name : null;
                 $data['sub_category_name'] = $p->book->subCategory ? $p->book->subCategory->name : null;
-                $data['author_name'] = $p->book->author ? $p->book->author->name : null;
+                $data['author_name'] = $p->book->authors;
+                $data['contractor_name'] = $p->book->contractorBook?->contractor?->name;
             }
 
             return $data;
@@ -154,7 +152,6 @@ class SalesInvoiceController extends Controller
             'allProductsWithBooks',
             'categories',
             'subCategories',
-            'authors',
             'subWarehouses'
         ));
     }
@@ -235,10 +232,9 @@ class SalesInvoiceController extends Controller
         $orgSettings = OrganizationSetting::first();
         $subWarehouses = SubWarehouse::with('warehouse')->orderBy('name')->get();
 
-        // Get categories, sub-categories, and authors for filters
+        // Get categories and sub-categories for filters
         $categories = BookCategory::whereHas('books')->get();
         $subCategories = BookCategory::whereHas('books')->get();
-        $authors = Author::whereHas('contracts.book')->get();
 
         $productsForJs = $products->map(function ($p) {
             return [
@@ -262,10 +258,10 @@ class SalesInvoiceController extends Controller
                 $data['isbn'] = $p->book->isbn;
                 $data['category_id'] = $p->book->category_id;
                 $data['sub_category_id'] = $p->book->sub_category_id;
-                $data['author_id'] = $p->book->author_id;
                 $data['category_name'] = $p->book->category ? $p->book->category->name : null;
                 $data['sub_category_name'] = $p->book->subCategory ? $p->book->subCategory->name : null;
-                $data['author_name'] = $p->book->author ? $p->book->author->name : null;
+                $data['author_name'] = $p->book->authors;
+                $data['contractor_name'] = $p->book->contractorBook?->contractor?->name;
             }
 
             return $data;
@@ -298,7 +294,6 @@ class SalesInvoiceController extends Controller
             'subWarehouses',
             'categories',
             'subCategories',
-            'authors',
             'hasReceiptVouchers',
             'receiptVouchersCount'
         ));
@@ -434,7 +429,7 @@ class SalesInvoiceController extends Controller
         $page   = (int) $request->get('page', 1);
         $limit  = 15;
 
-        $query = Product::with(['book.contract.authors', 'book.category', 'book.subCategory'])
+        $query = Product::with(['book.contractorBook.contractor', 'book.category', 'book.subCategory'])
             ->where('status', 'active');
 
         if ($search) {
@@ -444,8 +439,9 @@ class SalesInvoiceController extends Controller
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('name', 'like', "%{$normalized}%")
                     ->orWhereHas('book', function ($bq) use ($search, $normalized) {
-                        $bq->where('isbn', 'like', "%{$search}%")
-                            ->orWhere('isbn', 'like', "%{$normalized}%");
+                        $bq->search($search)->orWhere(function ($bq2) use ($normalized) {
+                            $bq2->search($normalized);
+                        });
                     });
             });
         }
@@ -455,9 +451,6 @@ class SalesInvoiceController extends Controller
         }
         if ($request->filled('sub_category_id')) {
             $query->whereHas('book', fn($q) => $q->where('sub_category_id', $request->sub_category_id));
-        }
-        if ($request->filled('author_id')) {
-            $query->whereHas('book.contract.authors', fn($q) => $q->where('authors.id', $request->author_id));
         }
 
         $total    = $query->count();
@@ -473,13 +466,11 @@ class SalesInvoiceController extends Controller
             ];
 
             if ($p->book) {
-                $authors = $p->book->contract?->authors ?? collect();
-
                 $data['isbn']              = $p->book->isbn;
                 $data['category_id']       = $p->book->category_id;
                 $data['sub_category_id']   = $p->book->sub_category_id;
-                $data['author_id']         = $authors->first()?->id;
-                $data['author_name']       = $authors->pluck('full_name')->implode('، ');
+                $data['author_name']       = $p->book->authors;
+                $data['contractor_name']   = $p->book->contractorBook?->contractor?->name;
                 $data['category_name']     = $p->book->category?->name;
                 $data['sub_category_name'] = $p->book->subCategory?->name;
             }

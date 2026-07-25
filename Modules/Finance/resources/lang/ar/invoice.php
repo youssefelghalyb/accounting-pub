@@ -120,7 +120,6 @@ return [
     'sub_category' => 'التصنيف الفرعي',
     'all_sub_categories' => 'جميع التصنيفات الفرعية',
     'author' => 'المؤلف',
-    'all_authors' => 'جميع المؤلفين',
     'no_products_found' => 'لم يتم العثور على منتجات',
     'stock' => 'المخزون',
     'add' => 'إضافة',

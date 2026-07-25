@@ -35,7 +35,9 @@ class UpdateBookRequest extends FormRequest
             'status' => 'required|in:active,inactive',
 
             // Book fields
-            'author_id' => 'nullable|exists:authors,id',
+            'authors' => 'nullable|string|max:500',
+            'supervisor' => 'nullable|string|max:255',
+            'introduction_by' => 'nullable|string|max:255',
             'category_id' => 'nullable|exists:book_categories,id',
             'sub_category_id' => 'nullable|exists:book_categories,id',
             'isbn' => 'required|string|max:50|unique:books,isbn,' . $bookId,
@@ -47,6 +49,14 @@ class UpdateBookRequest extends FormRequest
             'translated_from' => 'nullable|string|max:100',
             'translated_to' => 'nullable|string|max:100',
             'translator_name' => 'nullable|string|max:255',
+
+            // Contractor / royalty (optional — a book need not have a contractor on file)
+            'contractor_id' => 'nullable|exists:contractors,id',
+            'profit_percentage' => 'required_with:contractor_id|nullable|numeric|min:0|max:100',
+            'percentage_basis' => 'nullable|in:base_price,sale_price',
+            'contract_date' => 'nullable|date',
+            'end_contract_date' => 'nullable|date|after_or_equal:contract_date',
+            'contract_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:8192',
         ];
     }
 
@@ -59,7 +69,6 @@ class UpdateBookRequest extends FormRequest
             'name.required' => __('product::book.name_required'),
             'isbn.required' => __('product::book.isbn_required'),
             'isbn.unique' => __('product::book.isbn_unique'),
-            'author_id.exists' => __('product::book.contract.authors_invalid'),
             'category_id.exists' => __('product::book.category_invalid'),
             'sub_category_id.exists' => __('product::book.sub_category_invalid'),
             'cover_type.required' => __('product::book.cover_type_required'),

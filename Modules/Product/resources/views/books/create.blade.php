@@ -82,16 +82,31 @@
                         'borderColor' => '#10b981',
                     ],
                     [
-                        'name' => 'author_id',
-                        'type' => 'searchable_select',
+                        'name' => 'authors',
+                        'type' => 'text',
                         'label' => __('product::book.author'),
-                        'placeholder' => __('product::book.select_author'),
+                        'placeholder' => __('product::book.enter_authors'),
                         'required' => false,
                         'grid' => 6,
                         'borderColor' => '#10b981',
-                        'searchRoute' => route('product.authors.search'),
-                        'quickAddModal' => 'openQuickAuthorModal',
-                        'quickAddLabel' => __('product::author.quick_add'),
+                    ],
+                    [
+                        'name' => 'supervisor',
+                        'type' => 'text',
+                        'label' => __('product::book.supervisor'),
+                        'placeholder' => __('product::book.enter_supervisor'),
+                        'required' => false,
+                        'grid' => 6,
+                        'borderColor' => '#10b981',
+                    ],
+                    [
+                        'name' => 'introduction_by',
+                        'type' => 'text',
+                        'label' => __('product::book.introduction_by'),
+                        'placeholder' => __('product::book.enter_introduction_by'),
+                        'required' => false,
+                        'grid' => 6,
+                        'borderColor' => '#10b981',
                     ],
                     [
                         'name' => 'category_id',
@@ -205,6 +220,68 @@
                     ],
                 ],
             ],
+            [
+                'title' => __('product::book.contractor_royalty'),
+                'fields' => [
+                    [
+                        'name' => 'contractor_id',
+                        'type' => 'select',
+                        'label' => __('product::contractor.contractors'),
+                        'required' => false,
+                        'grid' => 6,
+                        'borderColor' => '#f59e0b',
+                        'options' => collect($contractors)
+                            ->map(fn($c) => ['value' => $c->id, 'label' => $c->name])
+                            ->prepend(['value' => '', 'label' => __('common.none')])
+                            ->toArray(),
+                    ],
+                    [
+                        'name' => 'percentage_basis',
+                        'type' => 'select',
+                        'label' => __('product::contractor.percentage_basis'),
+                        'required' => false,
+                        'grid' => 6,
+                        'borderColor' => '#f59e0b',
+                        'options' => [
+                            ['value' => 'sale_price', 'label' => __('product::contractor.basis_sale_price')],
+                            ['value' => 'base_price', 'label' => __('product::contractor.basis_base_price')],
+                        ],
+                    ],
+                    [
+                        'name' => 'profit_percentage',
+                        'type' => 'number',
+                        'label' => __('product::contractor.profit_percentage'),
+                        'required' => false,
+                        'grid' => 4,
+                        'borderColor' => '#f59e0b',
+                    ],
+                    [
+                        'name' => 'contract_date',
+                        'type' => 'date',
+                        'label' => __('product::contractor.contract_date'),
+                        'required' => false,
+                        'grid' => 4,
+                        'borderColor' => '#f59e0b',
+                    ],
+                    [
+                        'name' => 'end_contract_date',
+                        'type' => 'date',
+                        'label' => __('product::contractor.end_contract_date'),
+                        'required' => false,
+                        'grid' => 4,
+                        'borderColor' => '#f59e0b',
+                    ],
+                    [
+                        'name' => 'contract_file',
+                        'type' => 'file',
+                        'label' => __('product::contractor.contract_file'),
+                        'accept' => '.pdf,image/*',
+                        'required' => false,
+                        'grid' => 12,
+                        'borderColor' => '#f59e0b',
+                    ],
+                ],
+            ],
         ],
     ];
 @endphp
@@ -245,150 +322,4 @@
             </div>
         </div>
     </div>
-    <!-- Quick Add Author Modal -->
-<div id="quickAuthorModal" class="fixed inset-0 z-50 hidden">
-    <!-- Backdrop -->
-    <div class="absolute inset-0 bg-black bg-opacity-50" onclick="closeQuickAuthorModal()"></div>
-
-    <!-- Modal -->
-    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-xl">
-        <div class="p-6 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-                <h3 class="text-xl font-bold text-gray-900">{{ __('product::author.quick_add_author') }}</h3>
-                <button type="button" onclick="closeQuickAuthorModal()" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <form id="quickAuthorForm" class="p-6 space-y-4">
-            <!-- Full Name -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    {{ __('product::author.full_name') }} <span class="text-red-500">*</span>
-                </label>
-                <input type="text" id="quick_author_name" required
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            </div>
-
-            <!-- Email -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    {{ __('product::author.email') }}
-                </label>
-                <input type="email" id="quick_author_email"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            </div>
-
-            <!-- Phone -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    {{ __('product::author.phone') }}
-                </label>
-                <input type="text" id="quick_author_phone"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            </div>
-
-            <!-- Nationality -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    {{ __('product::author.nationality') }}
-                </label>
-                <input type="text" id="quick_author_nationality"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            </div>
-
-            <!-- Buttons -->
-            <div class="flex gap-3 pt-4">
-                <button type="button" onclick="closeQuickAuthorModal()"
-                    class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
-                    {{ __('common.cancel') }}
-                </button>
-                <button type="submit" id="quickAuthorSubmitBtn"
-                    class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    {{ __('product::author.add_author') }}
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-@push('scripts')
-<script>
-    // Quick Author Modal Functions
-    function openQuickAuthorModal() {
-        document.getElementById('quickAuthorModal').classList.remove('hidden');
-        document.getElementById('quick_author_name').focus();
-    }
-
-    function closeQuickAuthorModal() {
-        document.getElementById('quickAuthorModal').classList.add('hidden');
-        document.getElementById('quickAuthorForm').reset();
-    }
-
-    // Quick Author Form Submit
-    document.getElementById('quickAuthorForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const submitBtn = document.getElementById('quickAuthorSubmitBtn');
-        const originalText = submitBtn.textContent;
-        submitBtn.disabled = true;
-        submitBtn.textContent = '{{ __('common.saving') }}...';
-
-        const formData = {
-            full_name: document.getElementById('quick_author_name').value,
-            email: document.getElementById('quick_author_email').value,
-            phone: document.getElementById('quick_author_phone').value,
-            nationality: document.getElementById('quick_author_nationality').value,
-            _token: '{{ csrf_token() }}'
-        };
-
-        try {
-            const response = await fetch('{{ route('product.authors.quick-store') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify(formData)
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                // Add new option to select2
-                const newOption = new Option(data.author.text, data.author.id, true, true);
-                $('#author_id').append(newOption).trigger('change');
-
-                closeQuickAuthorModal();
-                
-                // Show success message
-                showToast(data.message);
-            } else {
-                alert(data.message);
-            }
-        } catch (error) {
-            alert('{{ __('common.error_occurred') }}');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-        }
-    });
-
-    // Toast notification function (if not already present)
-    function showToast(message) {
-        const toast = document.createElement('div');
-        toast.className = 'fixed bottom-4 {{ app()->getLocale() == 'ar' ? 'left-4' : 'right-4' }} bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-up';
-        toast.textContent = message;
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.classList.add('animate-fade-out');
-            setTimeout(() => toast.remove(), 300);
-        }, 2000);
-    }
-</script>
-@endpush
 </x-dashboard>

@@ -15,6 +15,7 @@ return [
     'cancel_invoice' => 'Cancel Invoice',
 
     // Fields
+    'author' => 'Author',
     'invoice_number' => 'Invoice Number',
     'vendor' => 'Vendor',
     'select_vendor' => 'Select Vendor',

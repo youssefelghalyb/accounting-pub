@@ -142,8 +142,8 @@
                                         <td class="px-6 py-4">
                                             @if($warehouseProduct->product->book)
                                                 <div class="text-sm text-gray-900">
-                                                    @if($warehouseProduct->product->book->author)
-                                                        <p><strong>{{ __('warehouse::sub_warehouse.author') }}:</strong> {{ $warehouseProduct->product->book->author->name }}</p>
+                                                    @if($warehouseProduct->product->book->authors)
+                                                        <p><strong>{{ __('warehouse::sub_warehouse.author') }}:</strong> {{ $warehouseProduct->product->book->authors }}</p>
                                                     @endif
                                                     @if($warehouseProduct->product->book->category)
                                                         <p><strong>{{ __('warehouse::sub_warehouse.category') }}:</strong> {{ $warehouseProduct->product->book->category->name }}</p>
