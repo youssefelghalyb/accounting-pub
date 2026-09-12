@@ -63,6 +63,8 @@ Route::prefix('finance')->name('finance.')->middleware(['web', 'auth'])->group(f
     Route::resource('payment-vouchers', PaymentVoucherController::class);
     Route::get('parties/{party}/purchase-invoices', [PaymentVoucherController::class, 'getPartyInvoices'])
         ->name('parties.purchase-invoices');
+    Route::get('payment-vouchers/{paymentVoucher}/print', [PaymentVoucherController::class, 'print'])
+        ->name('payment-vouchers.print');
 
     Route::get('sales-invoices/check/product-stock', [SalesInvoiceController::class, 'getProductStock'])
         ->name('sales-invoices.product-stock');

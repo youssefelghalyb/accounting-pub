@@ -209,4 +209,13 @@ class PaymentVoucherController extends Controller
 
         return response()->json($invoices);
     }
+
+        public function print(PaymentVoucher $paymentVoucher, Request $request)
+    {
+        $paymentVoucher->load(['party', 'account', 'purchaseInvoice']);
+        $orgSettings = OrganizationSetting::first();
+        $printLang = $request->get('lang', $orgSettings->default_language ?? 'en');
+
+        return view('finance::payment-vouchers.print', compact('paymentVoucher', 'orgSettings', 'printLang'));
+    }
 }

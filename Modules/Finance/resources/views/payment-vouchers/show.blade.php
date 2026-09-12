@@ -31,13 +31,28 @@
                     {{ __('finance::payment.edit') }}
                 </a>
 
-                <button onclick="window.print()" 
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                    </svg>
-                    {{ __('finance::payment.print') }}
-                </button>
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" type="button"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        {{ __('finance::payment.print') }}
+                    </button>
+                    <div x-show="open" @click.away="open = false"
+                        class="absolute {{ app()->getLocale() == 'ar' ? 'left-0' : 'right-0' }} mt-2 w-48 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                        <div class="py-1">
+                            @foreach ($orgSettings->available_languages ?? ['en'] as $lang)
+                                <a href="{{ route('finance.payment-vouchers.print', ['paymentVoucher' => $paymentVoucher, 'lang' => $lang]) }}"
+                                    target="_blank"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    {{ __('common.print_in_' . $lang) }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
