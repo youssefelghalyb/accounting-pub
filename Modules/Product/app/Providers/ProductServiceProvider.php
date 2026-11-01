@@ -47,6 +47,8 @@ class ProductServiceProvider extends ServiceProvider
     {
         $this->commands([
             \Modules\Product\Console\ImportBooksCommand::class,
+            \Modules\Product\Console\SyncBooksCommand::class,
+            \Modules\Product\Console\PruneBooksCommand::class,
         ]);
     }
 
