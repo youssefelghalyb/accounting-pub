@@ -58,7 +58,8 @@ Royalty %: the sheet has none, so every contract the sync **creates** gets **10%
 
 * Invoice lines store their own snapshot (`product_name`, `product_sku`, `unit_price`, `line_total`); royalty rows (`book_sales`) store price/percentage snapshots. Changing a book's name/price/ISBN changes none of them.
 * IDs and SKUs of existing products are never edited; products are never re-numbered.
-* A book's **contractor is not switched** if its contract already has royalty accruals or transactions (that would silently re-assign money already earned) — it is written to the conflicts report instead.
+* Contractors are matched **ignoring titles and spelling** (د./أ.د., أ/ا, ى/ي, ة/ه, عبد الله/عبدالله), so the same person is not created twice.
+* A book's **contractor is moved to the one in the sheet** (the contractors currently on the books are the temporary ones from the author migration) — **unless the contract carries money**: a royalty payment/transaction, or royalty actually accrued (≠ 0). Past sales at 0% carry no money, so nothing is re-attributed. Money-carrying contracts are written to the conflicts report instead.
 * Stock tables are not touched by the sync.
 * Everything runs in **one DB transaction**; before commit the command compares a fingerprint (row counts + sums of money/qty/ID columns) of invoices, invoice lines, royalties, receipts, payments, purchases, stock and contract transactions with the one taken before. Any difference → rollback + error.
 * **Dry run is the default** (executes for real, then rolls back), so the report is exactly what `--apply` will do.

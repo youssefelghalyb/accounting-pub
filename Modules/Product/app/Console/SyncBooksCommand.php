@@ -68,6 +68,8 @@ class SyncBooksCommand extends Command
             $this->table(['table.column', 'rows changed'], collect($stats['changed_columns'])->map(fn ($v, $k) => [$k, $v])->values()->all());
         }
         if ($svc->conflicts) {
+            $this->warn('Conflicts by type:');
+            $this->table(['type', 'rows'], collect($svc->conflicts)->countBy('type')->map(fn ($v, $k) => [$k, $v])->values()->all());
             $this->warn(count($svc->conflicts) . ' row(s) NOT applied (need a human) — first 15:');
             $this->table(['Row', 'Book', 'Product', 'Type', 'Detail'], array_map(
                 fn ($c) => [$c['excel_row'], $c['book_id'], $c['product_id'], $c['type'], mb_strimwidth($c['detail'], 0, 110, '…')],
