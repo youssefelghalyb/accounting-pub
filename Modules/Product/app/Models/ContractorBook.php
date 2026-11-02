@@ -17,6 +17,8 @@ class ContractorBook extends Model
         'contract_file',
         'profit_percentage',
         'percentage_basis',
+        'gift_copies_given',
+        'status',
         'contract_date',
         'end_contract_date',
     ];

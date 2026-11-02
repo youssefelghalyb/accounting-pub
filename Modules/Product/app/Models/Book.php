@@ -25,6 +25,10 @@ class Book extends Model
         'authors',
         'supervisor',
         'introduction_by',
+        'deposit_number',
+        'deposit_year',
+        'deposit_status',
+        'contract_status',
         'created_by',
         'edited_by',
     ];
