@@ -92,11 +92,6 @@ SELECT 'T07 stock on hand unchanged (surviving products)', COUNT(*) FROM (
 ) x
 
 UNION ALL
--- T08 deleted products had NO stock on hand
-SELECT 'T08 removed products had zero stock', COUNT(*) FROM accounting_old.sub_warehouse_products o
- WHERE o.quantity <> 0 AND NOT EXISTS (SELECT 1 FROM accounting_new.products p WHERE p.id = o.product_id)
-
-UNION ALL
 -- T09 contract money history identical
 SELECT 'T09 contract_transactions identical', COUNT(*) FROM (
   SELECT o.id FROM accounting_old.contract_transactions o LEFT JOIN accounting_new.contract_transactions n ON n.id = o.id
@@ -221,6 +216,13 @@ SELECT o.id, o.sku, o.name FROM accounting_old.products o
 -- B5 added products
 SELECT n.id, n.sku, n.name FROM accounting_new.products n
  LEFT JOIN accounting_old.products o ON o.id = n.id WHERE o.id IS NULL ORDER BY n.id;
+
+-- B4b removed products that still had stock in the OLD copy (only expected for books deleted with --zero-stock;
+--     compare with storage/app/book-sync/*_zeroed_stock.csv — the list and quantities must be the same)
+SELECT o.product_id, p.name, SUM(o.quantity) AS stock_removed
+FROM accounting_old.sub_warehouse_products o JOIN accounting_old.products p ON p.id = o.product_id
+WHERE o.quantity <> 0 AND NOT EXISTS (SELECT 1 FROM accounting_new.products n WHERE n.id = o.product_id)
+GROUP BY o.product_id, p.name;
 
 -- B6 new categories / new contractors / new contracts (at the 10% default)
 SELECT 'new category' AS what, n.id, n.name FROM accounting_new.book_categories n LEFT JOIN accounting_old.book_categories o ON o.id = n.id WHERE o.id IS NULL

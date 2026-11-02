@@ -22,6 +22,7 @@ class PruneBooksCommand extends Command
         {--delete : Actually delete the SAFE ones (without it this is a read-only check)}
         {--include-history : Also delete items whose only reference is old stock_movements}
         {--deactivate-blocked : Set BLOCKED (used) items to inactive instead of leaving them}
+        {--zero-stock : Also delete BLOCKED books whose ONLY blocker is stock on hand (never ones used by invoices/royalties); the quantities are written to a CSV}
         {--yes : Skip the confirmation question}
         {--report-dir= : CSV output directory (default storage/app/book-sync)}';
 
@@ -85,21 +86,35 @@ class PruneBooksCommand extends Command
         }
 
         $include = (bool) $this->option('include-history');
-        $toDelete = count(array_filter($analysed, fn ($a) => $a['verdict'] === 'SAFE' || ($include && $a['verdict'] === 'SAFE_HISTORY')));
-        if (! $this->option('yes') && ! $this->confirm("Delete {$toDelete} book(s)/product(s) permanently? (a DB backup should exist)")) {
+        $zero = (bool) $this->option('zero-stock');
+        $toDelete = count(array_filter($analysed, fn ($a) => $a['verdict'] === 'SAFE' || ($include && $a['verdict'] === 'SAFE_HISTORY') || ($zero && $a['stock_only'])));
+        $units = $zero ? array_sum(array_map(fn ($a) => $a['stock_only'] ? $a['stock_qty'] : 0, $analysed)) : 0;
+        $extra = $zero ? " — including {$units} unit(s) of stock that will be DESTROYED" : '';
+        if (! $this->option('yes') && ! $this->confirm("Delete {$toDelete} book(s)/product(s) permanently{$extra}? (a DB backup should exist)")) {
             $this->warn('Cancelled.');
 
             return self::SUCCESS;
         }
 
         try {
-            $res = $svc->delete($analysed, $include, (bool) $this->option('deactivate-blocked'), new BooksSyncService());
+            $res = $svc->delete($analysed, $include, (bool) $this->option('deactivate-blocked'), new BooksSyncService(), $zero);
         } catch (\Throwable $e) {
             $this->error('ABORTED and rolled back: ' . $e->getMessage());
 
             return self::FAILURE;
         }
 
+        if ($res['zeroed']) {
+            $zp = "{$dir}/" . date('Ymd_His') . '_zeroed_stock.csv';
+            $zh = fopen($zp, 'w');
+            fwrite($zh, "\xEF\xBB\xBF");
+            fputcsv($zh, ['product_id', 'book_id', 'name', 'sub_warehouse_id', 'quantity_removed']);
+            foreach ($res['zeroed'] as $z) {
+                fputcsv($zh, $z);
+            }
+            fclose($zh);
+            $this->line("Stock removed with the books is listed in {$zp}");
+        }
         $this->info("Deleted {$res['deleted']}; set inactive {$res['deactivated']}; left untouched " . (count($res['skipped']) - $res['deactivated']) . '.');
 
         return self::SUCCESS;

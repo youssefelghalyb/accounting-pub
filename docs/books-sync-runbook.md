@@ -102,6 +102,7 @@ php artisan product:prune-books /path/new_books.xlsx
 php artisan product:prune-books /path/new_books.xlsx --delete
 #    options:  --include-history      also delete ones whose only reference is old stock movements
 #              --deactivate-blocked   set used (BLOCKED) books to inactive so they leave the selling lists
+#              --zero-stock           also delete BLOCKED books whose ONLY blocker is stock on hand (never ones used by invoices/royalties); quantities destroyed are written to *_zeroed_stock.csv
 #              --yes                  no confirmation prompt
 ```
 
