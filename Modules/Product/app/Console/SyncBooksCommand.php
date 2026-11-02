@@ -17,6 +17,7 @@ class SyncBooksCommand extends Command
 {
     protected $signature = 'product:sync-books
         {file : Path to the .xlsx master sheet}
+        {--export-csv= : Do nothing else: write the sheet as a clean CSV for the phpMyAdmin verification (docs/sql/books-sync/PHPMYADMIN.md)}
         {--apply : Save the changes (without it everything is rolled back)}
         {--default-percentage=10 : Royalty % (of sale price) for contracts created by the sync and for existing contracts still at 0%}
         {--relink : Repair Book ID/Product ID mismatches that have no invoice/royalty history}
@@ -41,6 +42,13 @@ class SyncBooksCommand extends Command
             }
 
             return self::FAILURE;
+        }
+
+        if ($csv = $this->option('export-csv')) {
+            $this->reader()->exportStagingCsv($parsed['rows'], $csv);
+            $this->info(count($parsed['rows']) . " rows written to {$csv}");
+
+            return self::SUCCESS;
         }
 
         $apply = (bool) $this->option('apply');
@@ -80,6 +88,11 @@ class SyncBooksCommand extends Command
         $this->info($apply ? 'Done — safety fingerprint of invoices/payments/stock/royalties matched before and after.' : 'Dry run finished. Re-run with --apply to save.');
 
         return self::SUCCESS;
+    }
+
+    private function reader(): BooksSheetReader
+    {
+        return new BooksSheetReader();
     }
 
     private function csv(string $path, array $cols, array $rows): void

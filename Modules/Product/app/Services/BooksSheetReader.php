@@ -118,6 +118,28 @@ class BooksSheetReader
         return ['rows' => $rows, 'errors' => $errors];
     }
 
+    /**
+     * Writes the rows in the exact column order of the `sheet_books` staging table used by
+     * docs/sql/books-sync (phpMyAdmin import). Values are the normalised ones the sync uses, so
+     * ISBNs stay full digits (a CSV saved from Excel would turn them into 9.78E+12).
+     */
+    public function exportStagingCsv(array $rows, string $path): void
+    {
+        $h = fopen($path, 'w');
+        fputcsv($h, ['book_id', 'product_id', 'book_name', 'sku', 'price', 'status', 'description', 'isbn', 'pages', 'cover_type',
+            'published_date', 'language', 'is_translated', 'translated_from', 'translated_to', 'translator', 'supervisor',
+            'introduction', 'category', 'sub_category', 'used_in_sales', 'author1', 'contractor', 'nationality', 'notes',
+            'status2', 'gift_copies', 'deposit_number', 'deposit_year', 'deposit_status']);
+        foreach ($rows as $r) {
+            fputcsv($h, [$r['book_id'], $r['product_id'], $r['name'], $r['sku'], $r['price'], $r['status'], '', $r['isbn'], $r['pages'],
+                $r['cover_type'], $r['published_at'], $r['language'], $r['is_translated'] ? 'Yes' : 'No', $r['translated_from'],
+                $r['translated_to'], $r['translator_name'], $r['supervisor'], $r['introduction_by'], $r['category'], $r['sub_category'],
+                '', $r['authors'], $r['contractor'], $r['nationality'], $r['description'],
+                $r['contract_status'] === 'ended' ? 'ملغي' : '', $r['gift_copies'], $r['deposit_number'], $r['deposit_year'], $r['deposit_status']]);
+        }
+        fclose($h);
+    }
+
     /** Sheet sometimes spells the language out; the system stores ISO-style codes ('ar', 'en', ...). */
     private function language(?string $v): ?string
     {
