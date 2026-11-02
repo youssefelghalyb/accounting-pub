@@ -107,12 +107,13 @@ SELECT 'T09 contract_transactions identical', COUNT(*) FROM (
 ) x
 
 UNION ALL
--- T10 contracts that have royalty history kept the same contractor / percentage / basis
+-- T10 contracts that have royalty history kept the same contractor / basis, and the same percentage
+--     (a contract that was at 0% is allowed to become the 10% default)
 SELECT 'T10 contracts with history not re-attributed', COUNT(*) FROM accounting_old.contractor_books o
  LEFT JOIN accounting_new.contractor_books n ON n.id = o.id
  WHERE (EXISTS (SELECT 1 FROM accounting_old.book_sales s WHERE s.contractor_book_id = o.id)
      OR EXISTS (SELECT 1 FROM accounting_old.contract_transactions t WHERE t.contractor_book_id = o.id))
-   AND (n.id IS NULL OR NOT (o.contractor_id <=> n.contractor_id AND o.profit_percentage <=> n.profit_percentage
+   AND (n.id IS NULL OR NOT (o.contractor_id <=> n.contractor_id AND (o.profit_percentage <=> n.profit_percentage OR o.profit_percentage = 0)
         AND o.percentage_basis <=> n.percentage_basis AND o.book_id <=> n.book_id))
 
 UNION ALL
@@ -220,10 +221,14 @@ SELECT o.id, o.sku, o.name FROM accounting_old.products o
 SELECT n.id, n.sku, n.name FROM accounting_new.products n
  LEFT JOIN accounting_old.products o ON o.id = n.id WHERE o.id IS NULL ORDER BY n.id;
 
--- B6 new categories / new contractors / new contracts (percentage still 0 → must be set by hand)
+-- B6 new categories / new contractors / new contracts (at the 10% default)
 SELECT 'new category' AS what, n.id, n.name FROM accounting_new.book_categories n LEFT JOIN accounting_old.book_categories o ON o.id = n.id WHERE o.id IS NULL
 UNION ALL SELECT 'new contractor', n.id, n.name FROM accounting_new.contractors n LEFT JOIN accounting_old.contractors o ON o.id = n.id WHERE o.id IS NULL
-UNION ALL SELECT 'new contract at 0%', n.id, CONCAT('book ', n.book_id) FROM accounting_new.contractor_books n LEFT JOIN accounting_old.contractor_books o ON o.id = n.id WHERE o.id IS NULL AND n.profit_percentage = 0;
+UNION ALL SELECT 'new contract (default %)', n.id, CONCAT('book ', n.book_id) FROM accounting_new.contractor_books n LEFT JOIN accounting_old.contractor_books o ON o.id = n.id WHERE o.id IS NULL AND n.profit_percentage > 0;
+
+-- B7b existing contracts moved from 0% to the default
+SELECT n.id AS contractor_book_id, n.book_id, o.profit_percentage AS old_pct, n.profit_percentage AS new_pct
+FROM accounting_old.contractor_books o JOIN accounting_new.contractor_books n ON n.id = o.id WHERE o.profit_percentage = 0 AND n.profit_percentage <> 0;
 
 -- B7 contractors whose contract changed owner (only possible for contracts WITHOUT history — see T10)
 SELECT n.book_id, o.contractor_id AS old_contractor, n.contractor_id AS new_contractor

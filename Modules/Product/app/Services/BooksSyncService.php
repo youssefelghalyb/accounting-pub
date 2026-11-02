@@ -48,8 +48,12 @@ class BooksSyncService
     /** @var array<int,array> rows that were NOT applied and need a human */
     public array $conflicts = [];
 
-    public function __construct(?BooksSheetReader $reader = null)
+    /** royalty % given to contracts the sheet creates, and to existing contracts still sitting at 0% */
+    private float $defaultPercentage;
+
+    public function __construct(?BooksSheetReader $reader = null, float $defaultPercentage = 10.0)
     {
+        $this->defaultPercentage = $defaultPercentage;
         $this->reader = $reader ?? new BooksSheetReader();
         $this->resetStats();
     }
@@ -284,11 +288,11 @@ class BooksSyncService
         if (! $existing) {
             DB::table('contractor_books')->insert([
                 'book_id' => $row['book_id'], 'contractor_id' => $contractorId,
-                'profit_percentage' => 0, 'percentage_basis' => 'sale_price', // not in the sheet — set later by hand
+                'profit_percentage' => $this->defaultPercentage, 'percentage_basis' => 'sale_price', // % not in the sheet — default (10%) of the sale price
                 'gift_copies_given' => $row['gift_copies'], 'status' => $row['contract_status'],
                 'created_at' => now(), 'updated_at' => now(),
             ]);
-            $this->stats['contracts_created_zero_percent']++;
+            $this->stats['contracts_created']++;
 
             return;
         }
@@ -303,6 +307,11 @@ class BooksSyncService
             } else {
                 $data['contractor_id'] = $contractorId;
             }
+        }
+        if ((float) $existing->profit_percentage == 0.0 && $this->defaultPercentage > 0) {
+            // only contracts still at 0% (e.g. made by the old importer); negotiated percentages are never overwritten
+            $data['profit_percentage'] = $this->defaultPercentage;
+            $this->stats['zero_percent_contracts_set_to_default']++;
         }
         if ($existing->deleted_at) {
             $data['deleted_at'] = null; // sheet says the book has this contractor -> contract is live again
@@ -433,7 +442,7 @@ class BooksSyncService
             'rows' => 0, 'products_inserted' => 0, 'books_inserted' => 0,
             'products_updated' => 0, 'books_updated' => 0, 'contractor_books_updated' => 0,
             'pairing_fixed' => 0, 'categories_created' => 0, 'contractors_created' => 0,
-            'contractor_nationality_updated' => 0, 'contracts_created_zero_percent' => 0,
+            'contractor_nationality_updated' => 0, 'contracts_created' => 0, 'zero_percent_contracts_set_to_default' => 0,
             'conflicts' => 0, 'changed_columns' => [], 'applied' => false,
         ];
     }

@@ -18,6 +18,7 @@ class SyncBooksCommand extends Command
     protected $signature = 'product:sync-books
         {file : Path to the .xlsx master sheet}
         {--apply : Save the changes (without it everything is rolled back)}
+        {--default-percentage=10 : Royalty % (of sale price) for contracts created by the sync and for existing contracts still at 0%}
         {--relink : Repair Book ID/Product ID mismatches that have no invoice/royalty history}
         {--report-dir= : Where to write the CSV reports (default storage/app/book-sync)}';
 
@@ -45,7 +46,7 @@ class SyncBooksCommand extends Command
         $apply = (bool) $this->option('apply');
         $this->info(($apply ? 'APPLYING' : 'DRY RUN (nothing will be saved)') . ' — ' . count($parsed['rows']) . ' rows from ' . basename($file));
 
-        $svc = new BooksSyncService();
+        $svc = new BooksSyncService(null, (float) $this->option('default-percentage'));
         try {
             $stats = $svc->run($parsed['rows'], $apply, (bool) $this->option('relink'));
         } catch (\Throwable $e) {
