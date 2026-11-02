@@ -79,6 +79,7 @@ class BooksPruneService
             'sales_lines' => $salesLines, 'sales_invoices' => $salesInvoices, 'live_invoices' => $liveInvoices,
             'purchase_lines' => $purchaseLines, 'book_sales' => $bookSales, 'contract_tx' => $contractTx,
             'stock_qty' => $stockQty, 'stock_movements' => $movements,
+            'stock_only' => $blocked && $stockQty !== 0 && ! $salesLines && ! $purchaseLines && ! $bookSales && ! $contractTx,
             'verdict' => $blocked ? 'BLOCKED' : ($movements ? 'SAFE_HISTORY' : 'SAFE'),
             'reason' => implode('; ', $blocked) ?: ($movements ? "{$movements} old stock movement(s) will be deleted with it" : ''),
         ];
@@ -88,15 +89,18 @@ class BooksPruneService
      * Deletes SAFE (and optionally SAFE_HISTORY) items. Re-checks every candidate inside the
      * transaction, so a row that became used since the check is skipped, never deleted.
      *
-     * @return array{deleted:int, skipped:array, deactivated:int}
+     * With $zeroStock, BLOCKED items whose ONLY blocker is stock on hand (no invoice/purchase/royalty/
+     * contract reference) are removed too; the quantities destroyed are returned in 'zeroed' for the report.
+     *
+     * @return array{deleted:int, skipped:array, deactivated:int, zeroed:array}
      */
-    public function delete(array $analysed, bool $includeHistory, bool $deactivateBlocked, BooksSyncService $guard): array
+    public function delete(array $analysed, bool $includeHistory, bool $deactivateBlocked, BooksSyncService $guard, bool $zeroStock = false): array
     {
         $deleted = $deactivated = 0;
-        $skipped = [];
+        $skipped = $zeroed = [];
         $before = $guard->fingerprint();
 
-        DB::transaction(function () use ($analysed, $includeHistory, $deactivateBlocked, &$deleted, &$deactivated, &$skipped, $guard, $before) {
+        DB::transaction(function () use ($analysed, $includeHistory, $deactivateBlocked, $zeroStock, &$deleted, &$deactivated, &$skipped, &$zeroed, $guard, $before) {
             foreach ($analysed as $item) {
                 $fresh = $this->references((object) [
                     'product_id' => $item['product_id'], 'book_id' => $item['book_id'], 'name' => $item['name'],
@@ -104,6 +108,14 @@ class BooksPruneService
                 ]);
 
                 $deletable = $fresh['verdict'] === 'SAFE' || ($includeHistory && $fresh['verdict'] === 'SAFE_HISTORY');
+
+                if (! $deletable && $zeroStock && $fresh['verdict'] === 'BLOCKED' && $fresh['stock_only']) {
+                    foreach (DB::table('sub_warehouse_products')->where('product_id', $fresh['product_id'])->where('quantity', '!=', 0)->get() as $row) {
+                        $zeroed[] = ['product_id' => $fresh['product_id'], 'book_id' => $fresh['book_id'], 'name' => $fresh['name'],
+                            'sub_warehouse_id' => $row->sub_warehouse_id, 'quantity_removed' => $row->quantity];
+                    }
+                    $deletable = true;
+                }
 
                 if ($deletable) {
                     $this->deleteOne($fresh['product_id'], $fresh['book_id']);
@@ -127,7 +139,7 @@ class BooksPruneService
             }
         });
 
-        return ['deleted' => $deleted, 'deactivated' => $deactivated, 'skipped' => $skipped];
+        return ['deleted' => $deleted, 'deactivated' => $deactivated, 'skipped' => $skipped, 'zeroed' => $zeroed];
     }
 
     private function deleteOne(int $productId, ?int $bookId): void
@@ -136,7 +148,7 @@ class BooksPruneService
             DB::table('contractor_books')->where('book_id', $bookId)->delete();
             DB::table('books')->where('id', $bookId)->delete();
         }
-        DB::table('sub_warehouse_products')->where('product_id', $productId)->delete(); // qty 0 rows only (checked)
+        DB::table('sub_warehouse_products')->where('product_id', $productId)->delete(); // zero rows, or stock-only rows approved with --zero-stock
         DB::table('stock_movements')->where('product_id', $productId)->delete();
         DB::table('products')->where('id', $productId)->delete();
     }
