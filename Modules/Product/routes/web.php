@@ -7,6 +7,7 @@ use Modules\Product\Http\Controllers\CategoryController;
 use Modules\Product\Http\Controllers\ContractorController;
 use Modules\Product\Http\Controllers\BookController;
 use Modules\Product\Http\Controllers\BookGridController;
+use Modules\Product\Http\Controllers\BookGridHistoryController;
 
 Route::middleware(['web'])->prefix('product')->name('product.')->group(function () {
 
@@ -59,8 +60,6 @@ Route::middleware(['web'])->prefix('product')->name('product.')->group(function 
         Route::get('/{id}/edit', [BookController::class, 'edit'])->name('edit');
         Route::put('/{id}', [BookController::class, 'update'])->name('update');
         Route::delete('/{id}', [BookController::class, 'destroy'])->name('destroy');
-        Route::post('/bulk-price-update', [BookController::class, 'bulkPriceUpdate'])
-            ->name('bulk-price-update');
         Route::get('/export/books', [BookController::class, 'exportBooks'])->name('export');
 
         Route::post(
@@ -76,4 +75,10 @@ Route::middleware(['web', 'auth'])->prefix('product/book-grid')->name('product.b
     Route::get('/data', [BookGridController::class, 'data'])->name('data');
     Route::post('/preview', [BookGridController::class, 'preview'])->name('preview');
     Route::post('/apply', [BookGridController::class, 'apply'])->name('apply');
+
+    // History of saved batches + restore (revert a batch)
+    Route::get('/history', [BookGridHistoryController::class, 'index'])->name('history');
+    Route::post('/history/restore-apply', [BookGridHistoryController::class, 'restoreApply'])->name('history.restore-apply');
+    Route::get('/history/{batch}', [BookGridHistoryController::class, 'show'])->name('history.show');
+    Route::post('/history/{batch}/restore-preview', [BookGridHistoryController::class, 'restorePreview'])->name('history.restore-preview');
 });

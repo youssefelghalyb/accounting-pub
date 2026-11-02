@@ -99,7 +99,7 @@ selling/buying side.
    any `SalesInvoiceItem` for one of the author's own products where
    `discount_amount >= unit_price * quantity` (i.e. 100%+ discounted) — a *heuristic*, not an
    explicit `is_gift` flag.
-7. **Bulk price update** (`BookController::bulkPriceUpdate`) streams NDJSON progress
+7. **Bulk price update** (removed — `BookController::bulkPriceUpdate`) streams NDJSON progress
    (`response()->stream`) while incrementing/decrementing every book's `base_price` by a fixed
    amount or percentage — a nice UX touch, but it loads **all** books into memory
    (`Book::with('product')->get()`) and does one `save()` per row with no transaction/batching.
@@ -605,7 +605,7 @@ sequenceDiagram
 17. All balances (`Account`, `Party`) are computed from `SUM()` over the full history of vouchers
     every time they're read — fine now, will degrade linearly as transaction volume grows, with no
     materialized/cached running balance anywhere.
-18. `BookController::bulkPriceUpdate` loads every book into memory (`Book::with('product')->get()`)
+18. *(Resolved — the bulk price update was removed.)* `BookController::bulkPriceUpdate` loaded every book into memory (`Book::with('product')->get()`)
     rather than using `chunk()`/`cursor()`.
 
 ---
