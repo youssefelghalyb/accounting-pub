@@ -142,7 +142,7 @@ class BooksPruneService
         return ['deleted' => $deleted, 'deactivated' => $deactivated, 'skipped' => $skipped, 'zeroed' => $zeroed];
     }
 
-    private function deleteOne(int $productId, ?int $bookId): void
+    public function deleteOne(int $productId, ?int $bookId): void
     {
         if ($bookId) {
             DB::table('contractor_books')->where('book_id', $bookId)->delete();

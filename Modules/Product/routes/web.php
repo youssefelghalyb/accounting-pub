@@ -6,6 +6,7 @@ use Modules\Product\Http\Controllers\ProductController;
 use Modules\Product\Http\Controllers\CategoryController;
 use Modules\Product\Http\Controllers\ContractorController;
 use Modules\Product\Http\Controllers\BookController;
+use Modules\Product\Http\Controllers\BookGridController;
 
 Route::middleware(['web'])->prefix('product')->name('product.')->group(function () {
 
@@ -67,4 +68,12 @@ Route::middleware(['web'])->prefix('product')->name('product.')->group(function 
             [BookController::class, 'import']
         )->name('import');
     });
+});
+
+// Books grid editor — spreadsheet-style source of truth for books (auth required)
+Route::middleware(['web', 'auth'])->prefix('product/book-grid')->name('product.book-grid.')->group(function () {
+    Route::get('/', [BookGridController::class, 'index'])->name('index');
+    Route::get('/data', [BookGridController::class, 'data'])->name('data');
+    Route::post('/preview', [BookGridController::class, 'preview'])->name('preview');
+    Route::post('/apply', [BookGridController::class, 'apply'])->name('apply');
 });
