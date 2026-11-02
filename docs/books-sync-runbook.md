@@ -15,6 +15,21 @@ The commands were exercised against a throw-away SQLite database with invoices, 
 
 ---
 
+## 0. Quick checklist (do these in order)
+
+1. Stop users creating invoices during the update.
+2. Backup + create `accounting_old` copy (§3 step 1).
+3. `php artisan migrate`.
+4. Save the new sheet on the server, e.g. `/var/www/new_books.xlsx` (keep the header names exactly as in your sheet).
+5. `php artisan product:sync-books /var/www/new_books.xlsx` → read the tables and `storage/app/book-sync/*_conflicts.csv`. Fix the sheet or accept the conflicts.
+6. `php artisan product:sync-books /var/www/new_books.xlsx --apply` (add `--relink` only if the dry run listed `id_pairing_mismatch` rows you want repaired).
+7. `php artisan product:prune-books /var/www/new_books.xlsx` → review `SAFE` vs `BLOCKED`.
+8. `php artisan product:prune-books /var/www/new_books.xlsx --delete --deactivate-blocked` (type `yes`).
+9. Run `02_compare_old_vs_new.sql` → every PART A row must say PASS.
+10. Export the sheet to CSV and run `03_verify_against_sheet.sql` → every query returns 0 rows.
+11. Open a few books and an old invoice in the UI; then let users back in.
+12. Anything fails in step 9 → restore from the backup (§8) and send me the output.
+
 ## 1. Column → field mapping
 
 | Sheet column | Saved to | Rule |
@@ -37,7 +52,7 @@ The commands were exercised against a throw-away SQLite database with invoices, 
 | نسخ الهدايا | `contractor_books.gift_copies_given` | number of gift copies already given to the author |
 | رقم الإيداع / سنة الإيداع / حالة الإيداع | `books.deposit_number` / `deposit_year` / `deposit_status` | new columns |
 
-New contracts get `profit_percentage = 0`, basis `sale_price` (not in the sheet) — set them in the UI afterwards (SQL test 3h lists them).
+Royalty %: the sheet has none, so every contract the sync **creates** gets **10% of the sale price** (`--default-percentage=10`, change if needed). Existing contracts still at 0% (e.g. made by the old importer) are also set to 10%; contracts that already have a non-zero percentage are never overwritten. Past royalty accruals keep their own snapshot, so only future sales use the new %.
 
 ## 2. Why invoices cannot be affected
 

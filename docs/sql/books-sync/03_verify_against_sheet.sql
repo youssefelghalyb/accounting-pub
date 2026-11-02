@@ -88,7 +88,7 @@ WHERE (s.contractor IS NOT NULL AND (c.id IS NULL OR c.name <> s.contractor))
 -- 3g. counts: sheet vs DB (equal unless BLOCKED leftovers remain)
 SELECT (SELECT COUNT(*) FROM sheet_books) AS sheet_rows, (SELECT COUNT(*) FROM books) AS db_books, (SELECT COUNT(*) FROM products WHERE type = 'book') AS db_book_products;
 
--- 3h. informational: contracts created by the sync with 0% (percentage/basis are not in the sheet — set them in the UI)
+-- 3h. contracts whose percentage is still 0 (should be none after the sync; default is 10% of sale price)
 SELECT cb.id, cb.book_id, c.name AS contractor FROM contractor_books cb JOIN contractors c ON c.id = cb.contractor_id
 WHERE cb.profit_percentage = 0 AND cb.deleted_at IS NULL ORDER BY cb.book_id;
 
