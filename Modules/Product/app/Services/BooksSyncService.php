@@ -70,7 +70,11 @@ class BooksSyncService
         DB::beginTransaction();
         try {
             foreach ($rows as $row) {
-                $this->processRow($row, $relink);
+                try {
+                    DB::transaction(fn () => $this->processRow($row, $relink)); // savepoint: a bad row is skipped, not fatal
+                } catch (\Throwable $e) {
+                    $this->conflict($row, 'row_error', mb_strimwidth($e->getMessage(), 0, 300, '…'));
+                }
             }
 
             $after = $this->fingerprint();
@@ -115,6 +119,15 @@ class BooksSyncService
             }
         }
 
+        if ($row['isbn'] === null) {
+            if ($mode === 'insert' || $mode === 'book_only') {
+                $this->conflict($row, 'isbn_missing_cannot_insert', 'ISBN is empty in the sheet and this book is new — fill the ISBN cell');
+
+                return;
+            }
+            $this->conflict($row, 'isbn_missing_kept_old', 'ISBN is empty in the sheet — the existing ISBN in the system was kept; fill the cell if it should change');
+        }
+
         $categoryId = $this->resolveCategory($row['category']);
         $subCategoryId = $this->resolveCategory($row['sub_category'], $categoryId);
 
@@ -148,6 +161,10 @@ class BooksSyncService
             'deposit_status' => $row['deposit_status'],
             'contract_status' => $row['contract_status'],
         ];
+
+        if ($row['isbn'] === null) {
+            unset($bookData['isbn']); // update path: never null out a NOT NULL column / erase a known ISBN
+        }
 
         if ($mode === 'insert' || $mode === 'book_only') {
             if ($mode === 'insert') {
