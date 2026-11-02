@@ -40,6 +40,7 @@ class BooksSyncService
 
     private array $categoryCache = [];
     private array $contractorCache = [];
+    private bool $contractorIndexLoaded = false;
     private BooksSheetReader $reader;
 
     public array $stats = [];
@@ -319,7 +320,7 @@ class BooksSyncService
         if ((int) $existing->contractor_id !== $contractorId) {
             if ($this->contractHasHistory((int) $existing->id)) {
                 $this->conflict($row, 'contractor_change_blocked',
-                    "contract #{$existing->id} already has royalty accruals/transactions; DB contractor #{$existing->contractor_id}, sheet '{$row['contractor']}' (#{$contractorId}). Change it manually / via a new contract."
+                    "contract #{$existing->id} already has royalty money (accrued profit or payments); DB contractor #{$existing->contractor_id}, sheet '{$row['contractor']}' (#{$contractorId}). Change it manually / via a new contract."
                 );
             } else {
                 $data['contractor_id'] = $contractorId;
@@ -339,22 +340,16 @@ class BooksSyncService
 
     private function resolveContractor(string $name, ?string $nationality): int
     {
-        $key = mb_strtolower($name);
+        $this->loadContractorIndex();
+        $key = $this->normName($name);
+
         if (isset($this->contractorCache[$key])) {
             $id = $this->contractorCache[$key];
         } else {
-            $existing = DB::table('contractors')->where('name', $name)->orderByRaw('deleted_at is not null')->first();
-            if ($existing) {
-                $id = (int) $existing->id;
-                if ($existing->deleted_at) {
-                    DB::table('contractors')->where('id', $id)->update(['deleted_at' => null]);
-                }
-            } else {
-                $id = DB::table('contractors')->insertGetId([
-                    'name' => $name, 'nationality' => $nationality, 'created_at' => now(), 'updated_at' => now(),
-                ]);
-                $this->stats['contractors_created']++;
-            }
+            $id = DB::table('contractors')->insertGetId([
+                'name' => $name, 'nationality' => $nationality, 'created_at' => now(), 'updated_at' => now(),
+            ]);
+            $this->stats['contractors_created']++;
             $this->contractorCache[$key] = $id;
         }
 
@@ -367,6 +362,40 @@ class BooksSyncService
         }
 
         return $id;
+    }
+
+    /** normalised name -> contractor id (live rows win over soft-deleted; lowest id wins ties). */
+    private function loadContractorIndex(): void
+    {
+        if ($this->contractorIndexLoaded) {
+            return;
+        }
+        foreach (DB::table('contractors')->orderByRaw('deleted_at is not null')->orderBy('id')->get(['id', 'name', 'deleted_at']) as $c) {
+            $k = $this->normName((string) $c->name);
+            if (! isset($this->contractorCache[$k])) {
+                $this->contractorCache[$k] = (int) $c->id;
+                if ($c->deleted_at) {
+                    DB::table('contractors')->where('id', $c->id)->update(['deleted_at' => null]); // sheet uses him again
+                }
+            }
+        }
+        $this->contractorIndexLoaded = true;
+    }
+
+    /** Same person, different spelling: titles, hamza/alef, ya/alef-maqsura, ta-marbuta, diacritics, punctuation. */
+    public function normName(string $n): string
+    {
+        $orig = $n;
+        $n = preg_replace('/[\x{064B}-\x{065F}\x{0670}\x{0640}]/u', '', $n);
+        $n = strtr($n, ['أ' => 'ا', 'إ' => 'ا', 'آ' => 'ا', 'ٱ' => 'ا', 'ى' => 'ي', 'ة' => 'ه', 'ؤ' => 'و', 'ئ' => 'ي']);
+        $n = mb_strtolower($n);
+        $n = preg_replace('/[.,،\-_()"\'\/:؛]+/u', ' ', $n);
+        $n = trim(preg_replace('/\s+/u', ' ', $n));
+        $n = preg_replace('/(^|\s)عبد\s+/u', '$1عبد', $n); // عبد الله == عبدالله
+        $titles = 'الاستاذ الدكتور|الدكتوره|الدكتور|دكتوره|دكتور|الاستاذه|الاستاذ|استاذه|استاذ|السيد|السيده|ا د|د|م|ا|dr|prof|mr|mrs|ms';
+        $n = trim(preg_replace('/^(?:(?:' . $titles . ')\s+)+/u', '', $n . ' '));
+
+        return $n !== '' ? $n : mb_strtolower(trim($orig));
     }
 
     private function resolveCategory(?string $name, ?int $parentId = null): ?int
@@ -407,10 +436,15 @@ class BooksSyncService
                 DB::table('contractor_books')->where('book_id', $bookId)->select('id'))->exists();
     }
 
+    /**
+     * Money attached to the contract: payments/transactions, or royalty actually accrued.
+     * Past sales at 0% royalty carry no money, so moving such a contract to the real contractor
+     * from the sheet (the old contractor was a temporary placeholder) re-attributes nothing.
+     */
     private function contractHasHistory(int $contractorBookId): bool
     {
-        return DB::table('book_sales')->where('contractor_book_id', $contractorBookId)->exists()
-            || DB::table('contract_transactions')->where('contractor_book_id', $contractorBookId)->exists();
+        return DB::table('contract_transactions')->where('contractor_book_id', $contractorBookId)->exists()
+            || (float) DB::table('book_sales')->where('contractor_book_id', $contractorBookId)->sum('contractor_profit') != 0.0;
     }
 
     /** count + per-column sums (and row-id hash) for every money/stock table. */
@@ -455,6 +489,7 @@ class BooksSyncService
     {
         $this->changes = $this->conflicts = [];
         $this->categoryCache = $this->contractorCache = [];
+        $this->contractorIndexLoaded = false;
         $this->stats = [
             'rows' => 0, 'products_inserted' => 0, 'books_inserted' => 0,
             'products_updated' => 0, 'books_updated' => 0, 'contractor_books_updated' => 0,

@@ -107,11 +107,12 @@ SELECT 'T09 contract_transactions identical', COUNT(*) FROM (
 ) x
 
 UNION ALL
--- T10 contracts that have royalty history kept the same contractor / basis, and the same percentage
---     (a contract that was at 0% is allowed to become the 10% default)
-SELECT 'T10 contracts with history not re-attributed', COUNT(*) FROM accounting_old.contractor_books o
+-- T10 contracts that carry MONEY (accrued royalty <> 0 or any payment/transaction) kept the same contractor / basis
+--     and percentage. (A contract at 0% may become the 10% default, a contract whose past sales earned 0 may move to the
+--     real contractor from the sheet — nothing is re-attributed because nothing was earned.)
+SELECT 'T10 contracts carrying money not re-attributed', COUNT(*) FROM accounting_old.contractor_books o
  LEFT JOIN accounting_new.contractor_books n ON n.id = o.id
- WHERE (EXISTS (SELECT 1 FROM accounting_old.book_sales s WHERE s.contractor_book_id = o.id)
+ WHERE (IFNULL((SELECT SUM(s.contractor_profit) FROM accounting_old.book_sales s WHERE s.contractor_book_id = o.id), 0) <> 0
      OR EXISTS (SELECT 1 FROM accounting_old.contract_transactions t WHERE t.contractor_book_id = o.id))
    AND (n.id IS NULL OR NOT (o.contractor_id <=> n.contractor_id AND (o.profit_percentage <=> n.profit_percentage OR o.profit_percentage = 0)
         AND o.percentage_basis <=> n.percentage_basis AND o.book_id <=> n.book_id))
@@ -153,12 +154,12 @@ SELECT 'T14 party balances identical', COUNT(*) FROM (
 ) b WHERE ROUND(bal_old,2) <> ROUND(bal_new,2)
 
 UNION ALL
--- T15 royalty owed per contractor identical
+-- T15 royalty owed per contractor identical (contractors whose accrued total was 0 are ignored)
 SELECT 'T15 royalty per contractor identical', COUNT(*) FROM (
   SELECT cb.contractor_id, SUM(s.contractor_profit) AS v FROM accounting_old.book_sales s JOIN accounting_old.contractor_books cb ON cb.id = s.contractor_book_id GROUP BY cb.contractor_id
 ) o LEFT JOIN (
   SELECT cb.contractor_id, SUM(s.contractor_profit) AS v FROM accounting_new.book_sales s JOIN accounting_new.contractor_books cb ON cb.id = s.contractor_book_id GROUP BY cb.contractor_id
-) n ON n.contractor_id = o.contractor_id WHERE n.contractor_id IS NULL OR ROUND(o.v,2) <> ROUND(n.v,2)
+) n ON n.contractor_id = o.contractor_id WHERE ROUND(IFNULL(o.v,0),2) <> 0 AND (n.contractor_id IS NULL OR ROUND(o.v,2) <> ROUND(n.v,2))
 
 UNION ALL
 -- T16 Book ID <-> Product ID integrity in NEW: every book has a product, one book per product
