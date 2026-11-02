@@ -4,7 +4,7 @@
 <div class="max-w-7xl mx-auto px-6 py-8">
 
     {{-- DEBUG INFO --}}
-    <div class="mb-4 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
+    {{-- <div class="mb-4 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
         <h3 class="font-bold text-yellow-900 mb-2">🐛 DEBUG INFO:</h3>
         <ul class="text-sm text-yellow-800 space-y-1">
             <li><strong>Has session('success'):</strong> {{ session('success') ? 'YES - ' . session('success') : 'NO' }}</li>
@@ -23,7 +23,7 @@
                 </li>
             @endif
         </ul>
-    </div>
+    </div> --}}
     {{-- END DEBUG --}}
 
     @if (session('success'))
