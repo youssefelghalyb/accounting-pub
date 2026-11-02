@@ -94,7 +94,7 @@ class BooksSheetReader
                 'pages' => is_numeric($get('Pages', $r)) ? (int) $get('Pages', $r) : null,
                 'cover_type' => strtolower($get('Cover Type', $r) ?? 'soft') === 'hard' ? 'hard' : 'soft',
                 'published_at' => $this->date($get('Published Date', $r)),
-                'language' => $this->text($get('Language', $r)),
+                'language' => $this->language($this->text($get('Language', $r))),
                 'is_translated' => $isTranslated ? 1 : 0,
                 'translated_from' => $isTranslated ? $this->text($get('Translated From', $r)) : null,
                 'translated_to' => $isTranslated ? $this->text($get('Translated To', $r)) : null,
@@ -116,6 +116,21 @@ class BooksSheetReader
         }
 
         return ['rows' => $rows, 'errors' => $errors];
+    }
+
+    /** Sheet sometimes spells the language out; the system stores ISO-style codes ('ar', 'en', ...). */
+    private function language(?string $v): ?string
+    {
+        if ($v === null) {
+            return null;
+        }
+        $map = [
+            'اللغة العربية' => 'ar', 'العربية' => 'ar', 'عربي' => 'ar', 'arabic' => 'ar',
+            'اللغة الانجليزية' => 'en', 'اللغة الإنجليزية' => 'en', 'الانجليزية' => 'en', 'الإنجليزية' => 'en', 'english' => 'en',
+            'اللغة الفرنسية' => 'fr', 'الفرنسية' => 'fr', 'french' => 'fr',
+        ];
+
+        return $map[mb_strtolower($v)] ?? $v;
     }
 
     /** Trim + collapse inner whitespace (Arabic names often carry double/NBSP spaces). */
@@ -145,6 +160,9 @@ class BooksSheetReader
     {
         if (! $value) {
             return null;
+        }
+        if (is_numeric($value) && (float) $value >= 1000 && (float) $value <= 2999) {
+            return ((int) $value) . '-01-01'; // a bare year typed as a number (not an Excel date serial)
         }
         if (is_numeric($value)) {
             return Date::excelToDateTimeObject((float) $value)->format('Y-m-d');
