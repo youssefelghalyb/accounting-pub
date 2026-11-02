@@ -17,7 +17,7 @@
     .bgx .bg-r.bg-new { --rb:#f0fdf4; } .bgx .bg-r.bg-del { --rb:#fef2f2; } .bgx .bg-r.bg-rsel { --rb:#eef2ff; }
     .bgx .bg-r.bg-del .bg-c { text-decoration:line-through; color:#9ca3af; }
     .bgx .bg-c { flex:none; box-sizing:border-box; padding:0 10px; display:flex; align-items:center; font-size:13px; color:#1f2937; border-inline-end:1px solid #f1f5f9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:cell; position:relative; background:inherit; }
-    .bgx .bg-c.bg-num { justify-content:flex-end; font-variant-numeric:tabular-nums; }
+    .bgx .bg-c.bg-num { direction:ltr; justify-content:flex-end; font-variant-numeric:tabular-nums; }
     .bgx .bg-c.bg-ro { color:#6b7280; background:#f9fafb; cursor:default; }
     .bgx .bg-c.bg-cc { background:#fffbeb; box-shadow:inset 3px 0 0 #f59e0b; }
     .bgx .bg-r.bg-new .bg-c.bg-cc { background:#ecfdf5; box-shadow:inset 3px 0 0 #10b981; }

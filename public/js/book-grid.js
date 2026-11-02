@@ -7,7 +7,7 @@
 (function () {
     'use strict';
 
-    var ROW_H = 34, HEAD_H = 40, GUTTER_W = 58, OVERSCAN = 8, DEFAULT_PCT = 10;
+    var ROW_H = 34, HEAD_H = 40, GUTTER_W = 92, OVERSCAN = 8, DEFAULT_PCT = 10;
     var MAXLEN = { name: 255, isbn: 50, authors: 500, contractor: 255, nationality: 150, category: 255, sub_category: 255, language: 100,
         translated_from: 100, translated_to: 100, translator_name: 255, supervisor: 255, introduction_by: 255, deposit_number: 50,
         deposit_status: 50, sku: 100 };
@@ -218,6 +218,12 @@
         this.raf = requestAnimationFrame(function () { self.raf = null; self.render(); });
     };
 
+    /* render right now (typing right after a move/add must find the cell in the DOM) */
+    P.flush = function () {
+        if (this.raf) { cancelAnimationFrame(this.raf); this.raf = null; }
+        this.dirtyRender = true; this.render();
+    };
+
     P.render = function () {
         var h = this.host.clientHeight || 600, top = this.host.scrollTop;
         var start = Math.max(0, Math.floor(top / ROW_H) - OVERSCAN), end = Math.min(this.view.length - 1, Math.ceil((top + h) / ROW_H) + OVERSCAN);
@@ -350,6 +356,7 @@
 
     P.startEdit = function (initial) {
         if (!this.active) return;
+        this.flush();
         var ref = this.cellRef(this.active.r, this.active.c); if (!ref || !this.canEdit(ref.row, ref.col)) return;
         var row = ref.row, col = ref.col;
         if (col.type === 'bool') { this.setCell(row, col.key, !row.vals[col.key]); this.afterChange(); return; }

@@ -63,7 +63,7 @@ class BookGridService
             $c('isbn', 'text', ['width' => 150, 'required' => true]),
             $c('base_price', 'number', ['width' => 100, 'required' => true]),
             $c('status', 'select', ['width' => 100, 'options' => ['active', 'inactive']]),
-            $c('quantity', 'int', ['width' => 100, 'group' => 'stock']),
+            $c('quantity', 'int', ['width' => 150, 'group' => 'stock']),
             $c('qty_total', 'readonly', ['width' => 100, 'readonly' => true, 'group' => 'stock']),
             $c('authors', 'text', ['width' => 220]),
             $c('contractor', 'combo', ['width' => 220, 'group' => 'contract', 'list' => 'contractors']),
