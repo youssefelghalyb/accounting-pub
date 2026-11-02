@@ -426,6 +426,11 @@ class BookGridService
                 }
             }
 
+            $restore = (! $ex && isset($r['restore']['book_id'], $r['restore']['product_id'])) ? ['book_id' => (int) $r['restore']['book_id'], 'product_id' => (int) $r['restore']['product_id']] : null;
+            if ($restore && (DB::table('books')->where('id', $restore['book_id'])->exists() || DB::table('products')->where('id', $restore['product_id'])->exists())) {
+                $err($key, null, 'restore_id_taken', ['name' => $f['name']]);
+            }
+
             // diff / add
             if ($ex) {
                 $diff = [];
@@ -444,7 +449,7 @@ class BookGridService
                 }
             } else {
                 $added[] = ['key' => $key, 'name' => $f['name'], 'isbn' => $f['isbn'], 'quantity' => $f['quantity'], 'contractor' => $f['contractor'], 'category' => $f['category']];
-                $ops[] = ['type' => 'add', 'key' => $key, 'f' => $f, 'cat' => [$catId, $subId]];
+                $ops[] = ['type' => 'add', 'key' => $key, 'f' => $f, 'cat' => [$catId, $subId], 'restore' => $restore];
             }
         }
 
@@ -532,12 +537,12 @@ class BookGridService
     /**
      * @throws \RuntimeException  with ->plan available via BookGridException when validation fails
      */
-    public function apply(array $payload, ?int $userId, bool $ackStock = false, ?int $confirmDeleteCount = null): array
+    public function apply(array $payload, ?int $userId, bool $ackStock = false, ?int $confirmDeleteCount = null, ?string $restoreOf = null): array
     {
         $uuid = (string) Str::uuid();
         $before = $this->names->fingerprint();
 
-        $result = DB::transaction(function () use ($payload, $userId, $ackStock, $confirmDeleteCount, $uuid, $before) {
+        $result = DB::transaction(function () use ($payload, $userId, $ackStock, $confirmDeleteCount, $uuid, $before, $restoreOf) {
             $plan = $this->plan($payload, true);
             if ($plan['errors']) {
                 throw new BookGridException($this->publicPlan($plan));
@@ -619,15 +624,22 @@ class BookGridService
                 } elseif ($op['type'] === 'add') {
                     $f = $op['f'];
                     [$cid, $sid] = $this->resolveCats($f, $catId, $subId);
-                    $productId = DB::table('products')->insertGetId([
+                    $productRow = [
                         'name' => $f['name'], 'type' => 'book', 'sku' => $f['sku'], 'description' => $f['description'],
                         'base_price' => $f['base_price'], 'status' => $f['status'], 'created_by' => $userId, 'created_at' => $now, 'updated_at' => $now,
-                    ]);
+                    ];
+                    if ($op['restore']) { // restoring a deleted book keeps its original ids
+                        $productRow['id'] = $op['restore']['product_id'];
+                    }
+                    $productId = DB::table('products')->insertGetId($productRow);
                     $bookRow = ['product_id' => $productId, 'category_id' => $cid, 'sub_category_id' => $sid, 'created_by' => $userId, 'created_at' => $now, 'updated_at' => $now];
                     foreach (self::BOOK_COLS as $col) {
                         $bookRow[$col] = $f[$col];
                     }
                     $bookRow['is_translated'] = $f['is_translated'] ? 1 : 0;
+                    if ($op['restore']) {
+                        $bookRow['id'] = $op['restore']['book_id'];
+                    }
                     $bookId = DB::table('books')->insertGetId($bookRow);
                     $this->writeContract(['book_id' => $bookId, '_cb_id' => null, '_contractor_id' => null, 'contractor' => null] + array_fill_keys(array_keys(self::FIELDS), null), $f, $contractorId, $now, $log, true);
                     if ((int) $f['quantity'] > 0) {
@@ -649,10 +661,135 @@ class BookGridService
                 DB::table('book_grid_audits')->insert($chunk);
             }
 
+            DB::table('book_grid_batches')->insert([
+                'batch_uuid' => $uuid, 'user_id' => $userId, 'warehouse_id' => $warehouseId ?: null,
+                'added' => count($plan['added']), 'changed' => count($plan['changed']), 'deleted' => count($plan['deleted']),
+                'stock_changes' => count($plan['stock']), 'restore_of' => $restoreOf, 'created_at' => $now,
+            ]);
+            if ($restoreOf) {
+                DB::table('book_grid_batches')->where('batch_uuid', $restoreOf)->whereNull('reverted_by')->update(['reverted_by' => $uuid]);
+            }
+
             return $this->publicPlan($plan) + ['batch' => $uuid];
         });
 
         return $result;
+    }
+
+    // ─── Restore (revert a saved batch) ────────────────────────────────────────────────────────
+
+    /**
+     * Builds the payload that undoes a saved batch, to be run through the normal plan()/apply() pipeline:
+     *   - changed cells go back to their old value — only if the cell STILL holds what the batch wrote
+     *     (otherwise somebody changed it later → reported as a conflict, never overwritten silently);
+     *   - books the batch added are deleted again (the usual delete rules apply: used books are refused);
+     *   - books the batch deleted are re-created with their ORIGINAL ids from the stored snapshot;
+     *   - stock edits are reverted in the warehouse the batch used (if still equal to what it set).
+     * Created categories / contractors are not removed (harmless, and may be in use now).
+     *
+     * @param  bool  $skipConflicts  true → leave conflicting items alone and restore the rest; false → all-or-nothing
+     * @return array{payload:array, conflicts:array, notes:array, plan:array, batch:object}
+     */
+    public function restoreBuild(string $uuid, bool $skipConflicts): array
+    {
+        $batch = DB::table('book_grid_batches')->where('batch_uuid', $uuid)->first();
+        if (! $batch) {
+            throw new \RuntimeException(__('product::book_grid.history.not_found'));
+        }
+        if ($batch->reverted_by) {
+            throw new \RuntimeException(__('product::book_grid.history.already_restored'));
+        }
+        $audits = DB::table('book_grid_audits')->where('batch_uuid', $uuid)->orderBy('id')->get();
+        $warehouseId = (int) ($batch->warehouse_id ?? 0);
+
+        $changes = $addedIds = $deletedSnaps = $notes = [];
+        foreach ($audits as $a) {
+            if ($a->action === 'change' && isset(self::FIELDS[$a->field])) {
+                $changes[(int) $a->book_id][$a->field] = [$a->old_value, $a->new_value];
+            } elseif ($a->action === 'change') {
+                $notes[] = __('product::book_grid.history.note_not_restorable', ['what' => $a->field]);
+            } elseif ($a->action === 'add') {
+                $addedIds[] = (int) $a->book_id;
+            } elseif ($a->action === 'delete') {
+                $deletedSnaps[(int) $a->book_id] = ['product_id' => (int) $a->product_id, 'snap' => json_decode((string) $a->snapshot, true) ?: []];
+            } elseif (in_array($a->action, ['category_create', 'contractor_create', 'contractor_update'], true)) {
+                $notes[$a->action . $a->new_value] = __('product::book_grid.history.note_kept', ['what' => $a->new_value ?? $a->field]);
+            }
+        }
+        $notes = array_values(array_unique($notes));
+
+        $ids = array_values(array_unique(array_merge(array_keys($changes), $addedIds)));
+        $current = $ids ? $this->loadBooks($ids, $warehouseId) : [];
+
+        $rows = $conflicts = [];
+        $conflict = function (int $bookId, ?string $name, ?string $field, string $code, array $p = []) use (&$conflicts) {
+            $conflicts[] = ['book_id' => $bookId, 'name' => $name, 'field' => $field, 'message' => __('product::book_grid.history.conflict.' . $code, $p)];
+        };
+
+        foreach ($changes as $bookId => $fields) {
+            $cur = $current[$bookId] ?? null;
+            if (! $cur) {
+                $conflict($bookId, null, null, 'book_gone');
+                continue;
+            }
+            $revert = [];
+            foreach ($fields as $field => [$old, $new]) {
+                if ($field === 'quantity' && ! $warehouseId) {
+                    $conflict($bookId, $cur['name'], $field, 'no_warehouse');
+                    continue;
+                }
+                $now = $cur[$field] ?? null;
+                if (! $this->same($this->norm($field, $now), $this->norm($field, $new))) {
+                    $conflict($bookId, $cur['name'], $field, 'changed_later', ['now' => $this->flat($now) ?? '—', 'expected' => $new ?? '—']);
+                    continue;
+                }
+                $revert[$field] = $old;
+            }
+            if ($revert) {
+                $rows['b' . $bookId] = ['key' => 'b' . $bookId, 'book_id' => $bookId, 'v' => $cur['v'], 'q0' => $cur['quantity'], 'fields' => $revert];
+            }
+        }
+        $deleted = [];
+        foreach ($addedIds as $bookId) {
+            if (isset($current[$bookId])) {
+                $deleted['b' . $bookId] = $bookId;
+            } else {
+                $notes[] = __('product::book_grid.history.note_already_gone', ['id' => $bookId]);
+            }
+        }
+        foreach ($deletedSnaps as $bookId => $d) {
+            $fields = array_intersect_key($d['snap'], self::FIELDS);
+            $rows['r' . $bookId] = ['key' => 'r' . $bookId, 'book_id' => null, 'fields' => $fields,
+                'restore' => ['book_id' => $bookId, 'product_id' => $d['product_id']]];
+        }
+
+        // plan; with $skipConflicts drop rows the rules refuse (locks, used books, taken ISBN…) and re-plan
+        $plan = null;
+        for ($pass = 0; $pass < 4; $pass++) {
+            $payload = ['warehouse_id' => $warehouseId, 'rows' => array_values($rows), 'deleted' => array_values($deleted)];
+            $plan = $this->plan($payload);
+            if (! $plan['errors'] || ! $skipConflicts) {
+                break;
+            }
+            $dropped = false;
+            foreach ($plan['errors'] as $e) {
+                $k = $e['row'];
+                if ($k !== null && isset($rows[$k])) {
+                    $conflict((int) ltrim($k, 'br'), $rows[$k]['fields']['name'] ?? null, $e['field'], 'refused', ['why' => $e['message']]);
+                    unset($rows[$k]);
+                    $dropped = true;
+                } elseif ($k !== null && isset($deleted[$k])) {
+                    $conflict($deleted[$k], null, null, 'refused', ['why' => $e['message']]);
+                    unset($deleted[$k]);
+                    $dropped = true;
+                }
+            }
+            if (! $dropped) {
+                break;
+            }
+        }
+
+        return ['payload' => $payload, 'conflicts' => $conflicts, 'notes' => $notes, 'plan' => $plan, 'batch' => $batch];
     }
 
     public function publicPlan(array $plan): array
